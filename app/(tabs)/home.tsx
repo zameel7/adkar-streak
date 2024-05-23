@@ -24,7 +24,7 @@ const Home = () => {
 
   function getDayNightIcon() {
     const hours = new Date().getHours();
-    return hours >= 6 && hours < 18
+    return hours >= 6 && hours < 16
       ? hours >= 8
         ? "sunny"
         : "partly-sunny"

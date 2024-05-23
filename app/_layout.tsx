@@ -10,6 +10,8 @@ const RootLayout = () => {
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="morning-adkar" options={{ title: "Morning Adkar" }} />
+        <Stack.Screen name="evening-adkar" options={{ title: "Evening Adkar" }} />
       </Stack>
     </ThemeProvider>
   );

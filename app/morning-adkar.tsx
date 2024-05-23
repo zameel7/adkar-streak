@@ -124,7 +124,6 @@ const MorningAdkar = () => {
             <View style={{ flex: 2 }}>
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                     <ThemedView style={styles.titleContainer}>
-                        <ThemedText type="title">Morning Adkar</ThemedText>
                         {loading ? (
                             <ActivityIndicator
                                 size="large"

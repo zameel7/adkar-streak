@@ -8,6 +8,7 @@ import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { Button, Input } from "@rneui/themed";
+import LinearGradient from "react-native-linear-gradient";
 
 const Settings = () => {
     const [name, setName] = useState<string>("");
@@ -66,6 +67,12 @@ const Settings = () => {
                 inputStyle={dynamicStyles.input}
             />
             <Button
+                ViewComponent={LinearGradient}
+                linearGradientProps={{
+                    colors: ["#FF9800", "#F44336"],
+                    start: { x: 0, y: 0.5 },
+                    end: { x: 1, y: 0.5 },
+                }}
                 title="Submit"
                 onPress={handleSubmit}
                 buttonStyle={dynamicStyles.button}

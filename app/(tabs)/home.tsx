@@ -33,6 +33,11 @@ const Home = () => {
           <ThemedText type="title">
             Hey there {name}!
           </ThemedText>
+
+          {/* Remind that it's time for morning/evenign adkar */}
+          {(getDayNightIcon() !== 'sunny') && <ThemedText type="subtitle">
+            It's time for your {getDayNightIcon() === 'partly-sunny' ? 'morning' : 'evening'} adkar!
+          </ThemedText>}
         </ThemedView>
       </ParallaxScrollView>
     </SafeAreaProvider>

@@ -6,7 +6,7 @@ import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 
-const Home = () => {
+const Index = () => {
   function getDayNightIcon() {
     const hours = new Date().getHours();
     return hours >= 6 && hours < 18 ? hours >= 8 ? 'sunny' : 'partly-sunny' : 'moon';
@@ -46,4 +46,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Home;
+export default Index;

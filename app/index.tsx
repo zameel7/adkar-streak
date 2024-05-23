@@ -4,9 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/ThemedView';
 import { router } from 'expo-router';
-import { Button, Input, Text } from '@rneui/themed';
+import { Button, Input } from '@rneui/themed';
 import { useColorScheme } from 'react-native';
 import { ThemedText } from '@/components/ThemedText';
+import { Colors } from '@/constants/Colors';
 
 const Index: React.FC = () => {
     const [name, setName] = useState<string>('');
@@ -43,7 +44,7 @@ const Index: React.FC = () => {
         return (
             <SafeAreaProvider>
                 <ThemedView style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
+                    <ActivityIndicator size="large" color={colorScheme === 'dark' ? Colors.light.tint : Colors.dark.tint} />
                 </ThemedView>
             </SafeAreaProvider>
         );

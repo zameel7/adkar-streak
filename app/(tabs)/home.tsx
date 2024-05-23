@@ -1,12 +1,24 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { StyleSheet } from 'react-native';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 
-const Index = () => {
+const Home = () => {
+  const [name, setName] = useState('Hero' as string);
+
+  useEffect(() => {
+    AsyncStorage.getItem('name').then(name => {
+      if (name) {
+        setName(name);
+      }
+    });
+  }, []);
+
   function getDayNightIcon() {
     const hours = new Date().getHours();
     return hours >= 6 && hours < 18 ? hours >= 8 ? 'sunny' : 'partly-sunny' : 'moon';
@@ -19,7 +31,7 @@ const Index = () => {
       headerImage={<Ionicons size={200} name={getDayNightIcon()} style={styles.dayNightIcon} />}>
         <ThemedView style={styles.titleContainer}>
           <ThemedText type="title">
-            Home
+            Hey there {name}!
           </ThemedText>
         </ThemedView>
       </ParallaxScrollView>
@@ -46,4 +58,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Index;
+export default Home;

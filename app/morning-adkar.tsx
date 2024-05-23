@@ -1,14 +1,16 @@
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, useColorScheme } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Carousel from "react-native-reanimated-carousel";
-import { Card } from "@rneui/themed";
 import MorningAdkarData from "@/assets/adkars/morning.json";
 import { Colors } from "@/constants/Colors";
+
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Card } from "@rneui/themed";
+
+import { useEffect, useState } from "react";
+import { ActivityIndicator, ScrollView, StyleSheet, useColorScheme } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import Carousel from "react-native-reanimated-carousel";
 
 const MorningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
@@ -37,18 +39,19 @@ const MorningAdkar = () => {
 
         setAdkars(adkarsArray);
         setLoading(false);
-        console.log(adkars);
-    }, [MorningAdkarData]);
+    }, []);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
         return (
-            <ThemedView>
-                <Card>
-                    <Card.Title>{adkars.indexOf(item)+1}) {item.title}</Card.Title>
+            <ThemedView style={styles.cardContainer}>
+                <Card containerStyle={styles.card}>
+                    <Card.Title style={styles.cardTitle}>{adkars.indexOf(item) + 1}) {item.title}</Card.Title>
                     <Card.Divider />
-                    <ThemedText style={styles.adkarText}>{item.adkar}</ThemedText>
-                    <ThemedText style={styles.adkarText}>{item.translation}</ThemedText>
-                    <ThemedText style={styles.adkarText}>{item.repeat}</ThemedText>
+                    <ScrollView style={styles.scrollViewContent}>
+                        <ThemedText style={styles.adkarText}>{item.adkar}</ThemedText>
+                        <ThemedText style={styles.translationText}>{item.translation}</ThemedText>
+                        <ThemedText style={styles.repeatText}>Repeat: {item.repeat}</ThemedText>
+                    </ScrollView>
                 </Card>
             </ThemedView>
         );
@@ -60,13 +63,47 @@ const MorningAdkar = () => {
             bottom: 0,
             left: 10,
             position: "absolute",
-          },
+        },
         titleContainer: {
             padding: 16,
+        },
+        cardContainer: {
+            padding: 10,
+        },
+        card: {
+            borderRadius: 10,
+            padding: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 5,
+            elevation: 5,
+            backgroundColor: isDarkMode ? "#424242" : "#FFFFFF",
+            height: 400, // Adjust the height as needed
+        },
+        cardTitle: {
+            fontSize: 20,
+            fontWeight: "bold",
+            color: isDarkMode ? "#FF9800" : "#F44336",
+            textAlign: "center",
+            marginBottom: 10,
+        },
+        scrollViewContent: {
+            maxHeight: 300, // Adjust the height as needed
         },
         adkarText: {
             fontSize: 18,
             marginBottom: 8,
+            color: isDarkMode ? "#FFFFFF" : "#000000",
+        },
+        translationText: {
+            fontSize: 16,
+            marginBottom: 8,
+            color: isDarkMode ? "#BDBDBD" : "#757575",
+        },
+        repeatText: {
+            fontSize: 16,
+            fontWeight: "bold",
             color: isDarkMode ? "#FF9800" : "#F44336",
         },
     });
@@ -89,8 +126,8 @@ const MorningAdkar = () => {
                         <ActivityIndicator size="large" color={colorScheme === 'dark' ? Colors.light.tint : Colors.dark.tint} />
                     ) : (
                         <Carousel
-                            width={300}
-                            height={400}
+                            width={320}
+                            height={450}
                             loop
                             data={adkars}
                             renderItem={renderAdkarCard}

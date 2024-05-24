@@ -10,6 +10,7 @@ import { router } from "expo-router";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
+import { HelloWave } from "@/components/HelloWave";
 
 const Home = () => {
     const [name, setName] = useState("Hero" as string);
@@ -31,6 +32,11 @@ const Home = () => {
             : "moon";
     }
 
+    function adkarTime() {
+        const hours = new Date().getHours();
+        return hours >= 5 && hours < 7 ? "morning" : hours >= 4 && hours < 7 ? "evening" : "night";
+    }
+
     return (
         <SafeAreaProvider>
             <ParallaxScrollView
@@ -44,8 +50,8 @@ const Home = () => {
                 }
             >
                 <ThemedView style={styles.titleContainer}>
-                    <ThemedText type="title">Hey there {name}!</ThemedText>
-                    {getDayNightIcon() !== "sunny" && (
+                    <ThemedText type="title">Hey there {name}! <HelloWave /></ThemedText>
+                    {(adkarTime() === "morning" || adkarTime() === "evening") && (
                         <ThemedText type="subtitle">
                             It's time for your{" "}
                             {getDayNightIcon() === "partly-sunny"

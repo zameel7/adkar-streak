@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
+import { ThemedText } from './ThemedText';
 
 const HEADER_HEIGHT = 250;
 
@@ -24,6 +25,9 @@ export default function ParallaxScrollView({
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
+  const currentDate = new Date();
+  const currentTimestamp = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const date = currentDate.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
     return {
@@ -50,8 +54,12 @@ export default function ParallaxScrollView({
             styles.header,
             { backgroundColor: headerBackgroundColor[colorScheme] },
             headerAnimatedStyle,
-          ]}>
+          ]}
+        >
           {headerImage}
+          <ThemedText type="defaultSemiBold" style={styles.time}>
+            {currentTimestamp} | {date}
+          </ThemedText>
         </Animated.View>
         <ThemedView style={styles.content}>{children}</ThemedView>
       </Animated.ScrollView>
@@ -72,5 +80,11 @@ const styles = StyleSheet.create({
     padding: 32,
     gap: 16,
     overflow: 'hidden',
+  },
+  time: {
+    position: 'absolute',
+    bottom: 16,
+    right: 16,
+    color: '#FF9800',
   },
 });

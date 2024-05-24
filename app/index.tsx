@@ -69,7 +69,7 @@ const Index: React.FC = () => {
             marginVertical: 20,
         },
         inputContainer: {
-            width: "40%",
+            width: "60%",
         },
         input: {
             paddingHorizontal: 10,

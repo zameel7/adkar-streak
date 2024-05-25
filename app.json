@@ -16,7 +16,6 @@
       "supportsTablet": true
     },
     "android": {
-      "googleServicesFile": "./virtual-plating-334413-firebase-adminsdk-gnsl8-d36d5bdd75.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

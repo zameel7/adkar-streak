@@ -6,10 +6,7 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal",
-      "android": {
-        "serviceAccountKeyPath": "./virtual-plating-334413-53ce85a58454.json"
-      }
+      "distribution": "internal"
     },
     "preview": {
       "distribution": "internal"

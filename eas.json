@@ -14,7 +14,8 @@
     "production": {
       "autoIncrement": true,
       "android": {
-        "image": "latest"
+        "image": "latest",
+        "serviceAccountKeyPath": "./virtual-plating-334413-53ce85a58454.json"
       }
     }
   },

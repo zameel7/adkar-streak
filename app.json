@@ -20,8 +20,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.zameel7.adkarstreak",
-      "versionCode": 2
+      "package": "com.zameel7.adkarstreak"
     },
     "web": {
       "bundler": "metro",

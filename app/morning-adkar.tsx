@@ -18,6 +18,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
 import { useSQLiteContext } from "expo-sqlite";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AdkarCard from "@/components/AdkarCard";
 
 const MorningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
@@ -66,7 +67,7 @@ const MorningAdkar = () => {
 
     useEffect(() => {
         const count = adkars.filter((adkar) => adkar.read).length;
-        if (count === adkars.length) {
+        if (count === adkars.length && !morningStreak) {
             const currentDate = new Date().toISOString().split('T')[0];
             db.execSync(`UPDATE adkarStreaks SET morning = TRUE WHERE date = '${currentDate}'`);
         }
@@ -74,43 +75,7 @@ const MorningAdkar = () => {
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
         return (
-            <ThemedView style={styles.cardContainer}>
-                <Card containerStyle={styles.card}>
-                    <Card.Title style={styles.cardTitle}>
-                        {adkars.indexOf(item) + 1}) {item.title}
-                        <Button
-                            icon={
-                                <Ionicons
-                                    name="checkmark"
-                                    size={24}
-                                    color={
-                                        item.read
-                                            ? Colors.light.tint
-                                            : Colors.dark.tint
-                                    }
-                                />
-                            }
-                            onPress={() => {
-                                item.read = !item.read;
-                            }}
-                        />
-                    </Card.Title>
-                    <Card.Divider />
-                    {item.adkar.map((adkar, index) => (
-                        <View key={index}>
-                            <ThemedText style={styles.adkarText}>
-                                {adkar}
-                            </ThemedText>
-                            <ThemedText style={styles.translationText}>
-                                {item.translation[index]}
-                            </ThemedText>
-                            <ThemedText style={styles.repeatText}>
-                                Repeat: {item.repeat}
-                            </ThemedText>
-                        </View>
-                    ))}
-                </Card>
-            </ThemedView>
+            <AdkarCard item={item} index={adkars.indexOf(item)} />
         );
     };
 

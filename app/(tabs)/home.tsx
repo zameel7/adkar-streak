@@ -30,7 +30,6 @@ const Home = () => {
             const result = await db.getFirstAsync<{ morning: boolean, evening: boolean }>(
                 "SELECT morning, evening FROM adkarStreaks ORDER BY date DESC LIMIT 1"
             );
-            console.log('Streak data: ', result);
 
             if (result) {
                 setMorningStreak(result.morning);
@@ -52,7 +51,7 @@ const Home = () => {
 
     function adkarTime() {
         const hours = new Date().getHours();
-        return hours >= 5 && hours < 7 ? "morning" : hours >= 4 && hours < 7 ? "evening" : "night";
+        return hours >= 5 && hours < 7 ? "morning" : hours >= 16 && hours < 19 ? "evening" : "night";
     }
 
     return (

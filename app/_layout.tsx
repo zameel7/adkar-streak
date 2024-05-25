@@ -53,7 +53,6 @@ const RootLayout = () => {
                 "SELECT * FROM adkarStreaks ORDER BY date DESC LIMIT 1"
             );
 
-
             if (result.length === 0) {
                 await db.execAsync(`
                     INSERT INTO adkarStreaks (date) VALUES (date('now'))
@@ -89,28 +88,36 @@ const RootLayout = () => {
 
     useEffect(() => {
         const updateStreakData = async () => {
-            const streakData = await AsyncStorage.getItem('streakData');
-            if (streakData && JSON.parse(streakData).date !== today || !streakData) {
-                AsyncStorage.setItem('streakData', JSON.stringify({ date: today, morning: {}, evening: {} }));
+            const streakData = await AsyncStorage.getItem("streakData");
+            if (
+                (streakData && JSON.parse(streakData).date !== today) ||
+                !streakData
+            ) {
+                AsyncStorage.setItem(
+                    "streakData",
+                    JSON.stringify({ date: today, morning: {}, evening: {} })
+                );
             }
         };
 
         updateStreakData();
-    }, [])
+    }, []);
 
     return (
-        <Suspense fallback={
-          <ThemedView>
-            <ActivityIndicator
-                size="large"
-                color={
-                    colorScheme === "dark"
-                        ? Colors.light.tint
-                        : Colors.dark.tint
-                }
-            />
-          </ThemedView>
-        }>
+        <Suspense
+            fallback={
+                <ThemedView>
+                    <ActivityIndicator
+                        size="large"
+                        color={
+                            colorScheme === "dark"
+                                ? Colors.light.tint
+                                : Colors.dark.tint
+                        }
+                    />
+                </ThemedView>
+            }
+        >
             <SQLiteProvider
                 databaseName="adkar.db"
                 onInit={insertMissingDays}

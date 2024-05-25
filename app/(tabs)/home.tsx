@@ -15,7 +15,11 @@ import { useSQLiteContext } from "expo-sqlite";
 
 function adkarTime() {
     const hours = new Date().getHours();
-    return hours >= 5 && hours < 7 ? "morning" : hours >= 16 && hours < 19 ? "evening" : "night";
+    return hours >= 5 && hours < 7
+        ? "morning"
+        : hours >= 16 && hours < 19
+        ? "evening"
+        : "night";
 }
 
 const Home = () => {
@@ -27,7 +31,7 @@ const Home = () => {
     const colorScheme = useColorScheme();
 
     const time = adkarTime();
-    const isDarkMode = colorScheme === 'dark';
+    const isDarkMode = colorScheme === "dark";
 
     useEffect(() => {
         AsyncStorage.getItem("name").then((name) => {
@@ -36,7 +40,10 @@ const Home = () => {
             }
         });
         async function getStreak() {
-            const result = await db.getFirstAsync<{ morning: boolean, evening: boolean }>(
+            const result = await db.getFirstAsync<{
+                morning: boolean;
+                evening: boolean;
+            }>(
                 "SELECT morning, evening FROM adkarStreaks ORDER BY date DESC LIMIT 1"
             );
 
@@ -93,7 +100,7 @@ const Home = () => {
         },
         streak: {
             color: isDarkMode ? "#FF9800" : "#F44336",
-        }
+        },
     });
 
     return (
@@ -109,7 +116,9 @@ const Home = () => {
                 }
             >
                 <ThemedView style={styles.titleContainer}>
-                    <ThemedText type="title">Hey there {name}! <HelloWave /></ThemedText>
+                    <ThemedText type="title">
+                        Hey there {name}! <HelloWave />
+                    </ThemedText>
                     {(time === "morning" || time === "evening") && (
                         <ThemedText type="subtitle">
                             It's time for your{" "}
@@ -151,12 +160,23 @@ const Home = () => {
                     </Button>
                 </View>
                 <View style={styles.footer}>
-                    {time === 'morning' && <ThemedText type="defaultSemiBold">
-                        {morningStreak ? "You've completed your morning adkar today!" : "You haven't completed your morning adkar today."}
-                    </ThemedText>}
-                    {time === 'evening' && <ThemedText type="defaultSemiBold" style={styles.streak}>
-                        {eveningStreak ? "You've completed your evening adkar today!" : "You haven't completed your evening adkar today."}
-                    </ThemedText>}
+                    {time === "morning" && (
+                        <ThemedText type="defaultSemiBold">
+                            {morningStreak
+                                ? "You've completed your morning adkar today!"
+                                : "You haven't completed your morning adkar today."}
+                        </ThemedText>
+                    )}
+                    {time === "evening" && (
+                        <ThemedText
+                            type="defaultSemiBold"
+                            style={styles.streak}
+                        >
+                            {eveningStreak
+                                ? "You've completed your evening adkar today!"
+                                : "You haven't completed your evening adkar today."}
+                        </ThemedText>
+                    )}
                     <View
                         style={{
                             borderBottomColor: "#808080",

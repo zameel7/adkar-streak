@@ -51,7 +51,7 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
             marginBottom: 8,
             color: isDarkMode ? "#FFFFFF" : "#000000",
             backgroundColor: isDarkMode ? "#424242" : "#FFFFFF",
-            padding: 10
+            padding: 10,
         },
         translationText: {
             fontSize: 18,
@@ -71,32 +71,40 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
         <ThemedView style={styles.cardContainer}>
             <Card containerStyle={styles.card}>
                 <Card.Title style={styles.cardTitle}>
-                    {index+1}) {item.title}
-                <Button
-                    icon={
-                        <Ionicons
-                            name="checkmark"
-                            size={24}
-                            color={
-                                read
-                                    ? isDarkMode
-                                        ? "#FF9800"
-                                        : "#F44336"
-                                    : isDarkMode
+                    {index + 1}) {item.title}
+                    <Button
+                        icon={
+                            <Ionicons
+                                name="checkmark"
+                                size={24}
+                                color={
+                                    read
+                                        ? isDarkMode
+                                            ? "#FF9800"
+                                            : "#F44336"
+                                        : isDarkMode
                                         ? "#424242"
                                         : "#FFFFFF"
+                                }
+                            />
+                        }
+                        onPress={async () => {
+                            const streakData = await AsyncStorage.getItem(
+                                "streakData"
+                            );
+                            if (streakData) {
+                                const data = JSON.parse(streakData);
+                                data.morning = {
+                                    ...data.morning,
+                                    [item.title]: true,
+                                };
+                                await AsyncStorage.setItem(
+                                    "streakData",
+                                    JSON.stringify(data)
+                                );
                             }
-                        />
-                    }
-                    onPress={async () => {
-                        const streakData = await AsyncStorage.getItem("streakData");
-                        if (streakData) {
-                            const data = JSON.parse(streakData);
-                            data.morning = { ...data.morning, [item.title]: true };
-                            await AsyncStorage.setItem("streakData", JSON.stringify(data));
-                        };
-                    }}
-                />
+                        }}
+                    />
                 </Card.Title>
                 <Card.Divider />
                 {item.adkar.map((adkar, index) => (

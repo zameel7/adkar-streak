@@ -1,6 +1,6 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
@@ -13,12 +13,21 @@ import { ThemedText } from "@/components/ThemedText";
 import { HelloWave } from "@/components/HelloWave";
 import { useSQLiteContext } from "expo-sqlite";
 
+function adkarTime() {
+    const hours = new Date().getHours();
+    return hours >= 5 && hours < 7 ? "morning" : hours >= 16 && hours < 19 ? "evening" : "night";
+}
+
 const Home = () => {
     const [name, setName] = useState("Hero" as string);
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
 
     const db = useSQLiteContext();
+    const colorScheme = useColorScheme();
+
+    const time = adkarTime();
+    const isDarkMode = colorScheme === 'dark';
 
     useEffect(() => {
         AsyncStorage.getItem("name").then((name) => {
@@ -49,10 +58,43 @@ const Home = () => {
             : "moon";
     }
 
-    function adkarTime() {
-        const hours = new Date().getHours();
-        return hours >= 5 && hours < 7 ? "morning" : hours >= 16 && hours < 19 ? "evening" : "night";
-    }
+    const styles = StyleSheet.create({
+        headerImage: {
+            color: "#808080",
+            bottom: -90,
+            left: -35,
+            position: "absolute",
+        },
+        dayNightIcon: {
+            color: "#808080",
+            bottom: 0,
+            left: 10,
+            position: "absolute",
+        },
+        titleContainer: {
+            flexDirection: "column",
+            alignItems: "center",
+            padding: 16,
+            marginVertical: 24,
+        },
+        buttonContainer: {
+            flexDirection: "column",
+            paddingHorizontal: 16,
+            marginTop: 24,
+        },
+        button: {
+            marginVertical: 10,
+            borderRadius: 8,
+        },
+        footer: {
+            flex: 1,
+            alignItems: "center",
+            marginTop: 24,
+        },
+        streak: {
+            color: isDarkMode ? "#FF9800" : "#F44336",
+        }
+    });
 
     return (
         <SafeAreaProvider>
@@ -68,7 +110,7 @@ const Home = () => {
             >
                 <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">Hey there {name}! <HelloWave /></ThemedText>
-                    {(adkarTime() === "morning" || adkarTime() === "evening") && (
+                    {(time === "morning" || time === "evening") && (
                         <ThemedText type="subtitle">
                             It's time for your{" "}
                             {getDayNightIcon() === "partly-sunny"
@@ -109,6 +151,12 @@ const Home = () => {
                     </Button>
                 </View>
                 <View style={styles.footer}>
+                    {time === 'morning' && <ThemedText type="defaultSemiBold">
+                        {morningStreak ? "You've completed your morning adkar today!" : "You haven't completed your morning adkar today."}
+                    </ThemedText>}
+                    {time === 'evening' && <ThemedText type="defaultSemiBold" style={styles.streak}>
+                        {eveningStreak ? "You've completed your evening adkar today!" : "You haven't completed your evening adkar today."}
+                    </ThemedText>}
                     <View
                         style={{
                             borderBottomColor: "#808080",
@@ -117,13 +165,6 @@ const Home = () => {
                             marginVertical: 16,
                         }}
                     />
-                    {/* Show the streak data here */}
-                    {adkarTime() === 'morning' && <ThemedText type="default">
-                        {morningStreak ? "You've completed your morning adkar today!" : "You haven't completed your morning adkar today."}
-                    </ThemedText>}
-                    {adkarTime() === 'evening' && <ThemedText type="default">
-                        {eveningStreak ? "You've completed your evening adkar today!" : "You haven't completed your evening adkar today."}
-                    </ThemedText>}
                     <ThemedText type="default">
                         "Remember Allah in times of ease and He will remember
                         you in times of difficulty."
@@ -150,40 +191,5 @@ const Home = () => {
         </SafeAreaProvider>
     );
 };
-
-const styles = StyleSheet.create({
-    headerImage: {
-        color: "#808080",
-        bottom: -90,
-        left: -35,
-        position: "absolute",
-    },
-    dayNightIcon: {
-        color: "#808080",
-        bottom: 0,
-        left: 10,
-        position: "absolute",
-    },
-    titleContainer: {
-        flexDirection: "column",
-        alignItems: "center",
-        padding: 16,
-        marginVertical: 24,
-    },
-    buttonContainer: {
-        flexDirection: "column",
-        paddingHorizontal: 16,
-        marginTop: 24,
-    },
-    button: {
-        marginVertical: 10,
-        borderRadius: 8,
-    },
-    footer: {
-        flex: 1,
-        alignItems: "center",
-        marginTop: 24,
-    },
-});
 
 export default Home;

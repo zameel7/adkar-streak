@@ -2,20 +2,22 @@ import { StyleSheet, useColorScheme } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { Button, Card } from "@rneui/themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Colors } from "@/constants/Colors";
 import { ThemedText } from "./ThemedText";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
 
 type Adkar = {
     title: string;
     adkar: string[];
     translation: string[];
     repeat: string;
-    read: boolean;
 };
 
 const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
     const colourScheme = useColorScheme();
     const isDarkMode = colourScheme === "dark";
+
+    const [read, setRead] = useState(false);
 
     const styles = StyleSheet.create({
         titleContainer: {
@@ -76,12 +78,23 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
                             name="checkmark"
                             size={24}
                             color={
-                                item.read ? Colors.light.tint : Colors.dark.tint
+                                read
+                                    ? isDarkMode
+                                        ? "#FF9800"
+                                        : "#F44336"
+                                    : isDarkMode
+                                        ? "#424242"
+                                        : "#FFFFFF"
                             }
                         />
                     }
-                    onPress={() => {
-                        item.read = !item.read;
+                    onPress={async () => {
+                        const streakData = await AsyncStorage.getItem("streakData");
+                        if (streakData) {
+                            const data = JSON.parse(streakData);
+                            data.morning = { ...data.morning, [item.title]: true };
+                            await AsyncStorage.setItem("streakData", JSON.stringify(data));
+                        };
                     }}
                 />
                 </Card.Title>

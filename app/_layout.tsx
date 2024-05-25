@@ -7,13 +7,15 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { ActivityIndicator, Alert } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const RootLayout = () => {
     const colorScheme = useColorScheme();
+    const today = new Date().toISOString().split("T")[0];
 
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
@@ -84,6 +86,17 @@ const RootLayout = () => {
             console.error("Error inserting missing days:", error);
         }
     }
+
+    useEffect(() => {
+        const updateStreakData = async () => {
+            const streakData = await AsyncStorage.getItem('streakData');
+            if (streakData && JSON.parse(streakData).date !== today || !streakData) {
+                AsyncStorage.setItem('streakData', JSON.stringify({ date: today, morning: {}, evening: {} }));
+            }
+        };
+
+        updateStreakData();
+    }, [])
 
     return (
         <Suspense fallback={

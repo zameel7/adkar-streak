@@ -1,9 +1,6 @@
-import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import MorningAdkarData from "@/assets/adkars/morning.json";
 import { Colors } from "@/constants/Colors";
-
-import { Card, Button } from "@rneui/themed";
 
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +14,6 @@ import {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
 import { useSQLiteContext } from "expo-sqlite";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import AdkarCard from "@/components/AdkarCard";
 
 const MorningAdkar = () => {
@@ -35,7 +31,6 @@ const MorningAdkar = () => {
         adkar: string[];
         translation: string[];
         repeat: string;
-        read: boolean;
     };
 
     useEffect(() => {
@@ -48,7 +43,6 @@ const MorningAdkar = () => {
                     adkar: adkarData.adkar,
                     translation: adkarData.translation,
                     repeat: adkarData.repeat,
-                    read: false,
                 };
             }
         );
@@ -64,14 +58,6 @@ const MorningAdkar = () => {
         setAdkars(adkarsArray);
         setLoading(false);
     }, []);
-
-    useEffect(() => {
-        const count = adkars.filter((adkar) => adkar.read).length;
-        if (count === adkars.length && !morningStreak) {
-            const currentDate = new Date().toISOString().split('T')[0];
-            db.execSync(`UPDATE adkarStreaks SET morning = TRUE WHERE date = '${currentDate}'`);
-        }
-    }, [adkars]);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
         return (

@@ -5,6 +5,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { ThemedText } from "./ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
+import { useSQLiteContext } from "expo-sqlite";
 
 type Adkar = {
     title: string;
@@ -16,6 +17,7 @@ type Adkar = {
 const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
     const colourScheme = useColorScheme();
     const isDarkMode = colourScheme === "dark";
+    const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);
 
@@ -82,6 +84,23 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
             color: read ? "#FFFFFF" : isDarkMode ? "#FF9800" : "#F44336",
         }
     });
+
+    const checkAndMarkStreak = async () => {
+        const streakData = await AsyncStorage.getItem("streakData");
+        if (streakData) {
+            const data = JSON.parse(streakData);
+            
+            if (Object.keys(data.morning).length === 24) {
+                await db.execAsync(`
+                    UPDATE adkarStreaks SET morning = true WHERE date = date('now')
+                `);
+            } else if (Object.keys(data.evening).length === 23) {
+                await db.execAsync(`
+                    UPDATE adkarStreaks SET evening = true WHERE date = date('now')
+                `);
+            }
+        }
+    }
 
     return (
         <ThemedView style={styles.cardContainer}>

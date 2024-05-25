@@ -1,6 +1,6 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Linking, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
@@ -11,9 +11,14 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { HelloWave } from "@/components/HelloWave";
+import { useSQLiteContext } from "expo-sqlite";
 
 const Home = () => {
     const [name, setName] = useState("Hero" as string);
+    const [morningStreak, setMorningStreak] = useState(false);
+    const [eveningStreak, setEveningStreak] = useState(false);
+
+    const db = useSQLiteContext();
 
     useEffect(() => {
         AsyncStorage.getItem("name").then((name) => {
@@ -21,6 +26,19 @@ const Home = () => {
                 setName(name);
             }
         });
+        async function getStreak() {
+            const result = await db.getFirstAsync<{ morning: boolean, evening: boolean }>(
+                "SELECT morning, evening FROM adkarStreaks ORDER BY date DESC LIMIT 1"
+            );
+            console.log('Streak data: ', result);
+
+            if (result) {
+                setMorningStreak(result.morning);
+                setEveningStreak(result.evening);
+            }
+        }
+
+        getStreak();
     }, []);
 
     function getDayNightIcon() {
@@ -100,6 +118,13 @@ const Home = () => {
                             marginVertical: 16,
                         }}
                     />
+                    {/* Show the streak data here */}
+                    {adkarTime() === 'morning' && <ThemedText type="default">
+                        {morningStreak ? "You've completed your morning adkar today!" : "You haven't completed your morning adkar today."}
+                    </ThemedText>}
+                    {adkarTime() === 'evening' && <ThemedText type="default">
+                        {eveningStreak ? "You've completed your evening adkar today!" : "You haven't completed your evening adkar today."}
+                    </ThemedText>}
                     <ThemedText type="default">
                         "Remember Allah in times of ease and He will remember
                         you in times of difficulty."

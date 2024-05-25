@@ -28,37 +28,17 @@ const Index: React.FC = () => {
         router.push("/home");
     };
 
-    useEffect(() => {
-        const fetchName = async () => {
-            const storedName = await AsyncStorage.getItem("name");
-            if (storedName) {
-                router.push("/home");
-            }
-            setLoading(false);
-        };
-
-        fetchName();
-    }, []);
-
-    if (loading) {
-        return (
-            <SafeAreaProvider>
-                <ThemedView style={styles.loadingContainer}>
-                    <ActivityIndicator
-                        size="large"
-                        color={
-                            colorScheme === "dark"
-                                ? Colors.light.tint
-                                : Colors.dark.tint
-                        }
-                    />
-                </ThemedView>
-            </SafeAreaProvider>
-        );
-    }
-
     const isDarkMode = colorScheme === "dark";
     const dynamicStyles = StyleSheet.create({
+        titleContainer: {
+            flexDirection: "row",
+            gap: 8,
+        },
+        loadingContainer: {
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+        },
         container: {
             flex: 1,
             justifyContent: "center",
@@ -92,6 +72,35 @@ const Index: React.FC = () => {
         },
     });
 
+    useEffect(() => {
+        const fetchName = async () => {
+            const storedName = await AsyncStorage.getItem("name");
+            if (storedName) {
+                router.push("/home");
+            }
+            setLoading(false);
+        };
+
+        fetchName();
+    }, []);
+
+    if (loading) {
+        return (
+            <SafeAreaProvider>
+                <ThemedView style={dynamicStyles.loadingContainer}>
+                    <ActivityIndicator
+                        size="large"
+                        color={
+                            colorScheme === "dark"
+                                ? Colors.light.tint
+                                : Colors.dark.tint
+                        }
+                    />
+                </ThemedView>
+            </SafeAreaProvider>
+        );
+    }
+
     return (
         <SafeAreaProvider>
             <ThemedView style={dynamicStyles.container}>
@@ -121,17 +130,5 @@ const Index: React.FC = () => {
         </SafeAreaProvider>
     );
 };
-
-const styles = StyleSheet.create({
-    titleContainer: {
-        flexDirection: "row",
-        gap: 8,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-});
 
 export default Index;

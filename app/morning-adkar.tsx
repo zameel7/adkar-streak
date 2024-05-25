@@ -1,10 +1,9 @@
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import MorningAdkarData from "@/assets/adkars/morning.json";
 import { Colors } from "@/constants/Colors";
 
-import { Card } from "@rneui/themed";
+import { Card, Button } from "@rneui/themed";
 
 import { useEffect, useState } from "react";
 import {
@@ -17,11 +16,15 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
+import { useSQLiteContext } from "expo-sqlite";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const MorningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const [loading, setLoading] = useState(true);
+    const [morningStreak, setMorningStreak] = useState(false);
     const colorScheme = useColorScheme();
+    const db = useSQLiteContext();
 
     const isDarkMode = colorScheme === "dark";
     const width = Dimensions.get("window").width;
@@ -31,6 +34,7 @@ const MorningAdkar = () => {
         adkar: string[];
         translation: string[];
         repeat: string;
+        read: boolean;
     };
 
     useEffect(() => {
@@ -43,13 +47,30 @@ const MorningAdkar = () => {
                     adkar: adkarData.adkar,
                     translation: adkarData.translation,
                     repeat: adkarData.repeat,
+                    read: false,
                 };
             }
         );
 
+        async function getMorningStreakBool() {
+            const result = await db.getFirstAsync<{ morning: boolean }>(
+                "SELECT morning FROM adkarStreaks ORDER BY date DESC LIMIT 1"
+            );
+            result && setMorningStreak(result.morning);
+        }
+
+        getMorningStreakBool();
         setAdkars(adkarsArray);
         setLoading(false);
     }, []);
+
+    useEffect(() => {
+        const count = adkars.filter((adkar) => adkar.read).length;
+        if (count === adkars.length) {
+            const currentDate = new Date().toISOString().split('T')[0];
+            db.execSync(`UPDATE adkarStreaks SET morning = TRUE WHERE date = '${currentDate}'`);
+        }
+    }, [adkars]);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
         return (
@@ -57,6 +78,22 @@ const MorningAdkar = () => {
                 <Card containerStyle={styles.card}>
                     <Card.Title style={styles.cardTitle}>
                         {adkars.indexOf(item) + 1}) {item.title}
+                        <Button
+                            icon={
+                                <Ionicons
+                                    name="checkmark"
+                                    size={24}
+                                    color={
+                                        item.read
+                                            ? Colors.light.tint
+                                            : Colors.dark.tint
+                                    }
+                                />
+                            }
+                            onPress={() => {
+                                item.read = !item.read;
+                            }}
+                        />
                     </Card.Title>
                     <Card.Divider />
                     {item.adkar.map((adkar, index) => (

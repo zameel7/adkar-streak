@@ -2,7 +2,7 @@
   "expo": {
     "name": "adkar-streak",
     "slug": "adkar-streak",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -10,7 +10,12 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F5FEFF"
+      "backgroundColor": "#FFFFFF",
+      "dark": {
+        "image": "./assets/images/splash-dark.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#242424"
+      }
     },
     "ios": {
       "supportsTablet": true

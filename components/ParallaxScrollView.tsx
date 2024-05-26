@@ -65,6 +65,28 @@ export default function ParallaxScrollView({
     };
   });
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    header: {
+      height: 250,
+      overflow: 'hidden',
+    },
+    content: {
+      flex: 1,
+      padding: 32,
+      gap: 16,
+      overflow: 'hidden',
+    },
+    time: {
+      position: 'absolute',
+      bottom: 16,
+      right: 16,
+      color: colorScheme === 'dark' ? '#fff' : '#000',
+    },
+  });
+
   return (
     <ThemedView style={styles.container}>
       <Animated.ScrollView 
@@ -91,25 +113,3 @@ export default function ParallaxScrollView({
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    height: 250,
-    overflow: 'hidden',
-  },
-  content: {
-    flex: 1,
-    padding: 32,
-    gap: 16,
-    overflow: 'hidden',
-  },
-  time: {
-    position: 'absolute',
-    bottom: 16,
-    right: 16,
-    color: '#FF9800',
-  },
-});

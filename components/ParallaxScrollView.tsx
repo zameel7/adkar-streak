@@ -43,6 +43,7 @@ export default function ParallaxScrollView({
     setTimeout(() => {
       // Reset state or perform actions to simulate a reload
       setRefreshing(false);
+      setRefreshingAPI(false);
     }, 1000); // Adjust the delay as needed
   }, []);
   

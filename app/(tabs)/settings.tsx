@@ -26,6 +26,7 @@ const Settings = () => {
 
     const handleSubmit = async () => {
         await storeData(name);
+        Alert.alert("Success", "Name has been saved! Pull down to refresh.");
         router.push("/home");
     };
 

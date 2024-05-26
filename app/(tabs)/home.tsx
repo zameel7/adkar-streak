@@ -22,10 +22,20 @@ function adkarTime() {
         : "night";
 }
 
+type Row = {
+    id: number;
+    morning: boolean;
+    evening: boolean;
+    date: string;
+};
+
 const Home = () => {
     const [name, setName] = useState("Hero" as string);
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
+    const [streak, setStreak] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     const db = useSQLiteContext();
     const colorScheme = useColorScheme();
@@ -39,12 +49,65 @@ const Home = () => {
                 setName(name);
             }
         });
+
+        async function insertMissingDays() {
+            const result = await db.getAllAsync(
+                "SELECT * FROM adkarStreaks WHERE date = CURRENT_DATE"
+            );
+
+            if (result.length === 0) {
+                await db.execAsync(`
+                    INSERT INTO adkarStreaks (date) VALUES (date('now'))
+                `);
+                return;
+            }
+
+            const lastRow = result[0] as Row;
+            if (!lastRow || !lastRow.date) {
+                console.error("Invalid data format in adkarStreaks table.");
+                return;
+            }
+
+            const lastDate = new Date(lastRow.date);
+            const today = new Date();
+
+            const statement = await db.prepareAsync(
+                "INSERT INTO adkarStreaks (date) VALUES ($value)"
+            );
+
+            let startDate, endDate;
+            if (lastDate < today) {
+                startDate = lastDate;
+                endDate = today;
+            } else {
+                startDate = today;
+                endDate = lastDate;
+            }
+
+            const diff = Math.abs(endDate.getDate() - startDate.getDate());
+            for (let i = 1; i < diff; i++) {
+                const dateToInsert = new Date(startDate);
+                dateToInsert.setDate(startDate.getDate() - i);
+
+                await statement.executeAsync({
+                    $value: dateToInsert.toISOString().slice(0, 10),
+                });
+                console.log(
+                    `Inserted missing day: ${dateToInsert
+                        .toISOString()
+                        .slice(0, 10)}`
+                );
+            }
+        }
+
         async function getStreak() {
+            await insertMissingDays();
+
             const result = await db.getFirstAsync<{
                 morning: boolean;
                 evening: boolean;
             }>(
-                "SELECT morning, evening FROM adkarStreaks ORDER BY date DESC LIMIT 1"
+                "SELECT morning, evening FROM adkarStreaks WHERE date = CURRENT_DATE"
             );
 
             if (result) {
@@ -53,8 +116,38 @@ const Home = () => {
             }
         }
 
+        async function calculateStreak() {
+            const records = await db.getAllAsync(
+                "SELECT id, date, morning, evening FROM adkarStreaks ORDER BY date ASC"
+            );
+
+            let currentStreak = 0;
+            let longestStreak = 0;
+
+            for (let i = 0; i < records.length; i++) {
+                const { date, morning, evening } = records[i] as Row;
+
+                if (morning && evening) {
+                    currentStreak++;
+                } else {
+                    if (currentStreak > longestStreak) {
+                        longestStreak = currentStreak;
+                    }
+                    currentStreak = 0; // Reset streak if activities are not completed for the day
+                }
+            }
+
+            // Check if the last streak is longer than the longest streak encountered
+            if (currentStreak > longestStreak) {
+                longestStreak = currentStreak;
+            }
+
+            setStreak(longestStreak);
+        }
+
         getStreak();
-    }, []);
+        setLoading(false);
+    }, [refreshing]);
 
     function getDayNightIcon() {
         const hours = new Date().getHours();
@@ -82,7 +175,7 @@ const Home = () => {
             flexDirection: "column",
             alignItems: "center",
             padding: 16,
-            marginVertical: 24,
+            marginVertical: 18,
         },
         buttonContainer: {
             flexDirection: "column",
@@ -100,6 +193,39 @@ const Home = () => {
         },
         streak: {
             color: isDarkMode ? "#FF9800" : "#F44336",
+            fontSize: 18,
+            fontWeight: "bold",
+        },
+        streakContainer: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
+            padding: 16,
+            borderRadius: 8,
+            shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.25,
+            shadowRadius: 3.84,
+            elevation: 5,
+            marginTop: 16,
+        },
+        streakLabel: {
+            fontSize: 20,
+            fontWeight: "bold",
+            color: isDarkMode ? "#FFF" : "#000",
+        },
+        streakValue: {
+            fontSize: 22,
+            fontWeight: "bold",
+            color: isDarkMode ? "#FF9800" : "#F44336",
+            marginRight: 8,
+        },
+        streakIcon: {
+            color: isDarkMode ? "#FF9800" : "#F44336",
         },
     });
 
@@ -114,22 +240,62 @@ const Home = () => {
                         style={styles.dayNightIcon}
                     />
                 }
+                setRefreshingAPI={setRefreshing}
             >
                 <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">
                         Hey there {name}! <HelloWave />
                     </ThemedText>
-                    {(time === "morning" || time === "evening") && (
-                        <ThemedText type="subtitle">
-                            It's time for your{" "}
-                            {getDayNightIcon() === "partly-sunny"
-                                ? "morning"
-                                : "evening"}{" "}
-                            adkar!
+
+                    {time == "morning" && !morningStreak ? (
+                        <ThemedText style={styles.streak}>
+                            Complete your morning adkar
+                        </ThemedText>
+                    ) : time === "evening" && !eveningStreak ? (
+                        <ThemedText style={styles.streak}>
+                            Complete your evening adkar
+                        </ThemedText>
+                    ) : time === "morning" ? (
+                        <ThemedText style={styles.streak}>
+                            You have completed your morning adkar!
+                        </ThemedText>
+                    ) : time === "evening" ? (
+                        <ThemedText style={styles.streak}>
+                            You have completed your evening adkar!
+                        </ThemedText>
+                    ) : null}
+                </ThemedView>
+                <ThemedView style={styles.streakContainer}>
+                    {streak > 0 ? (
+                        <View
+                            style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Ionicons
+                                name="flame"
+                                size={24}
+                                style={styles.streakIcon}
+                            />
+                            <ThemedText style={styles.streakValue}>
+                                {streak}
+                            </ThemedText>
+                            <ThemedText style={styles.streakLabel}>
+                                day streak
+                            </ThemedText>
+                        </View>
+                    ) : (
+                        <ThemedText style={styles.streakLabel}>
+                            No current streak <Ionicons
+                                name="sad"
+                                size={18}
+                                style={styles.streakIcon}
+                            />
                         </ThemedText>
                     )}
                 </ThemedView>
-                <View style={styles.buttonContainer}>
+                <ThemedView style={styles.buttonContainer}>
                     <Button
                         ViewComponent={LinearGradient}
                         linearGradientProps={{
@@ -158,28 +324,11 @@ const Home = () => {
                     >
                         Evening Adkar
                     </Button>
-                </View>
-                <View style={styles.footer}>
-                    {time === "morning" && (
-                        <ThemedText type="defaultSemiBold">
-                            {morningStreak
-                                ? "You've completed your morning adkar today!"
-                                : "You haven't completed your morning adkar today."}
-                        </ThemedText>
-                    )}
-                    {time === "evening" && (
-                        <ThemedText
-                            type="defaultSemiBold"
-                            style={styles.streak}
-                        >
-                            {eveningStreak
-                                ? "You've completed your evening adkar today!"
-                                : "You haven't completed your evening adkar today."}
-                        </ThemedText>
-                    )}
+                </ThemedView>
+                <ThemedView style={styles.footer}>
                     <View
                         style={{
-                            borderBottomColor: "#808080",
+                            borderBottomColor: { isDarkMode } ? "#FFF" : "#000",
                             borderBottomWidth: 1,
                             width: "100%",
                             marginVertical: 16,
@@ -197,16 +346,15 @@ const Home = () => {
                     >
                         - Prophet Muhammed ﷺ
                     </ThemedText>
-                    {/* add a horizontal line */}
                     <View
                         style={{
-                            borderBottomColor: "#808080",
+                            borderBottomColor: { isDarkMode } ? "#FFF" : "#000",
                             borderBottomWidth: 1,
                             width: "100%",
                             marginVertical: 16,
                         }}
                     />
-                </View>
+                </ThemedView>
             </ParallaxScrollView>
         </SafeAreaProvider>
     );

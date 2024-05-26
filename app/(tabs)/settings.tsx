@@ -54,6 +54,8 @@ const Settings = () => {
                     style={styles.headerImage}
                 />
             }
+            showTime={false}
+            setRefreshingAPI={() => {}}
         >
             <ThemedView style={styles.titleContainer}>
                 <ThemedText type="title">Settings</ThemedText>

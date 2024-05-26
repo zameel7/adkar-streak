@@ -41,46 +41,6 @@ const RootLayout = () => {
                 // Update the user_version
                 await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
             }
-
-            type Row = {
-                id: number;
-                morning: boolean;
-                evening: boolean;
-                date: string;
-            };
-
-            const result = await db.getAllAsync(
-                "SELECT * FROM adkarStreaks ORDER BY date DESC LIMIT 1"
-            );
-
-            if (result.length === 0) {
-                await db.execAsync(`
-                    INSERT INTO adkarStreaks (date) VALUES (date('now'))
-                `);
-                return;
-            }
-
-            const lastRow = result[0] as Row;
-            if (!lastRow || !lastRow.date) {
-                console.error("Invalid data format in adkarStreaks table.");
-                return;
-            }
-
-            const lastDate = new Date(lastRow.date);
-            const today = new Date();
-
-            const statement = await db.prepareAsync(
-                "INSERT INTO adkarStreaks (date) VALUES ($value)"
-            );
-            if (lastDate.getDate() !== today.getDate()) {
-                const diff = Math.abs(today.getDate() - lastDate.getDate());
-
-                for (let i = 1; i < diff; i++) {
-                    await statement.executeAsync({
-                        $value: `date('now', '-${i} day')`,
-                    });
-                }
-            }
         } catch (error) {
             console.error("Error inserting missing days:", error);
         }

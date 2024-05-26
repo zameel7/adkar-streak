@@ -122,7 +122,6 @@ const Home = () => {
             );
 
             let currentStreak = 0;
-            let longestStreak = 0;
 
             for (let i = 0; i < records.length; i++) {
                 const { date, morning, evening } = records[i] as Row;
@@ -130,22 +129,15 @@ const Home = () => {
                 if (morning && evening) {
                     currentStreak++;
                 } else {
-                    if (currentStreak > longestStreak) {
-                        longestStreak = currentStreak;
-                    }
                     currentStreak = 0; // Reset streak if activities are not completed for the day
                 }
             }
 
-            // Check if the last streak is longer than the longest streak encountered
-            if (currentStreak > longestStreak) {
-                longestStreak = currentStreak;
-            }
-
-            setStreak(longestStreak);
+            setStreak(currentStreak);
         }
 
         getStreak();
+        calculateStreak();
         setLoading(false);
     }, [refreshing]);
 
@@ -175,7 +167,7 @@ const Home = () => {
             flexDirection: "column",
             alignItems: "center",
             padding: 16,
-            marginVertical: 18,
+            marginVertical: 12,
         },
         buttonContainer: {
             flexDirection: "column",
@@ -189,7 +181,6 @@ const Home = () => {
         footer: {
             flex: 1,
             alignItems: "center",
-            marginTop: 24,
         },
         streak: {
             color: isDarkMode ? "#FF9800" : "#F44336",
@@ -225,7 +216,7 @@ const Home = () => {
             marginRight: 8,
         },
         streakIcon: {
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: "#FF9800",
         },
     });
 

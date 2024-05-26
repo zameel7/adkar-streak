@@ -49,7 +49,8 @@ const Index: React.FC = () => {
             marginVertical: 20,
         },
         inputContainer: {
-            width: "60%",
+            width: "80%",
+            justifyContent: "center",
         },
         input: {
             paddingHorizontal: 10,
@@ -60,8 +61,8 @@ const Index: React.FC = () => {
             color: isDarkMode ? "#ffffff" : "#000000",
         },
         button: {
-            backgroundColor: isDarkMode ? "#841584" : "#6200ea",
-            marginTop: 10,
+            width: "80%",
+            marginHorizontal: "auto",
         },
         link: {
             marginTop: 15,
@@ -118,13 +119,14 @@ const Index: React.FC = () => {
                 <Button
                     ViewComponent={LinearGradient}
                     linearGradientProps={{
-                        colors: ["#3389FF", "#74AFFF"],
+                        colors: ["#FF9800", "#F44336"],
                         start: { x: 0, y: 0.5 },
                         end: { x: 1, y: 0.5 },
                     }}
                     title="Submit"
                     onPress={handleSubmit}
                     buttonStyle={dynamicStyles.button}
+                    containerStyle={dynamicStyles.inputContainer}
                 />
             </ThemedView>
         </SafeAreaProvider>

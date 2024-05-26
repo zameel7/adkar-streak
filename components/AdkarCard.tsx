@@ -4,7 +4,7 @@ import { Button, Card } from "@rneui/themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ThemedText } from "./ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 
 type Adkar = {
@@ -14,12 +14,35 @@ type Adkar = {
     repeat: string;
 };
 
-const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
+const AdkarCard = ({
+    item,
+    index,
+    type,
+}: {
+    item: Adkar;
+    index: number;
+    type: string;
+}) => {
     const colourScheme = useColorScheme();
     const isDarkMode = colourScheme === "dark";
     const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);
+
+    useEffect(() => {
+        const checkRead = async () => {
+            const streakData = await AsyncStorage.getItem("streakData");
+            if (streakData) {
+                const data = JSON.parse(streakData);
+                if (data.morning[index] && type === "morning") {
+                    setRead(true);
+                } else if (data.evening[index] && type === "evening") {
+                    setRead(true);
+                }
+            }
+        };
+        checkRead();
+    }, []);
 
     const styles = StyleSheet.create({
         titleContainer: {
@@ -73,8 +96,8 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
                     ? "#FF9800"
                     : "#F44336"
                 : isDarkMode
-                    ? "#757575"
-                    : "#E0E0E0",
+                ? "#757575"
+                : "#E0E0E0",
             borderRadius: 10,
             padding: 10,
             margin: 10,
@@ -82,25 +105,26 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
         },
         buttonIcon: {
             color: read ? "#FFFFFF" : isDarkMode ? "#FF9800" : "#F44336",
-        }
+        },
     });
 
     const checkAndMarkStreak = async () => {
         const streakData = await AsyncStorage.getItem("streakData");
         if (streakData) {
             const data = JSON.parse(streakData);
-            
+
             if (Object.keys(data.morning).length === 24) {
                 await db.execAsync(`
-                    UPDATE adkarStreaks SET morning = true WHERE date = date('now')
+                    UPDATE adkarStreaks SET morning = true WHERE date = CURRENT_DATE
                 `);
-            } else if (Object.keys(data.evening).length === 23) {
+            }
+            if (Object.keys(data.evening).length === 23 && type) {
                 await db.execAsync(`
-                    UPDATE adkarStreaks SET evening = true WHERE date = date('now')
+                    UPDATE adkarStreaks SET evening = true WHERE date = CURRENT_DATE
                 `);
             }
         }
-    }
+    };
 
     return (
         <ThemedView style={styles.cardContainer}>
@@ -123,16 +147,25 @@ const AdkarCard = ({ item, index }: { item: Adkar; index: number }) => {
                         );
                         if (streakData) {
                             const data = JSON.parse(streakData);
-                            data.morning = {
-                                ...data.morning,
-                                [index]: true,
-                            };
+                            if (type === "evening") {
+                                data.evening = {
+                                    ...data.evening,
+                                    [index]: true,
+                                };
+                            } else if (type === "morning") {
+                                data.morning = {
+                                    ...data.morning,
+                                    [index]: true,
+                                };
+                            }
                             await AsyncStorage.setItem(
                                 "streakData",
                                 JSON.stringify(data)
                             );
                             setRead(true);
                         }
+                        
+                        await checkAndMarkStreak();
                     }}
                 />
                 <Card.Divider />

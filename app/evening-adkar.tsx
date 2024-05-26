@@ -59,7 +59,7 @@ const EveningAdkar = () => {
     }, []);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
-        return <AdkarCard item={item} index={adkars.indexOf(item)} />;
+        return <AdkarCard item={item} index={adkars.indexOf(item)} type="evening" />;
     };
 
     const styles = StyleSheet.create({

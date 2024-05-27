@@ -6,6 +6,7 @@ import { ThemedText } from "./ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
+import { Colors } from "@/constants/Colors";
 
 type Adkar = {
     title: string;
@@ -24,6 +25,7 @@ const AdkarCard = ({
     type: string;
 }) => {
     const colourScheme = useColorScheme();
+    const colors = Colors[colourScheme ?? "light"];
     const isDarkMode = colourScheme === "dark";
     const db = useSQLiteContext();
 
@@ -65,7 +67,7 @@ const AdkarCard = ({
         cardTitle: {
             fontSize: 20,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.primary,
             textAlign: "center",
             marginBottom: 10,
         },
@@ -86,15 +88,13 @@ const AdkarCard = ({
         repeatText: {
             fontSize: 16,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.primary,
             marginLeft: 15,
             marginBottom: 15,
         },
         readButton: {
             backgroundColor: read
-                ? isDarkMode
-                    ? "#FF9800"
-                    : "#F44336"
+                ? colors.primary
                 : isDarkMode
                 ? "#757575"
                 : "#E0E0E0",
@@ -104,7 +104,7 @@ const AdkarCard = ({
             alignSelf: "center",
         },
         buttonIcon: {
-            color: read ? "#FFFFFF" : isDarkMode ? "#FF9800" : "#F44336",
+            color: read ? "#FFFFFF" : colors.primary
         },
     });
 

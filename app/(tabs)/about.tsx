@@ -89,7 +89,7 @@ const About = () => {
                     <ThemedText style={styles.title}>About Us</ThemedText>
                     <ThemedText style={styles.description}>
                         Welcome to Adkar Champ! This app is designed to help you
-                        remember Allah and keep track of your daily adhkar. We
+                        remember Allah and keep track of your daily adkar. We
                         also have streaks to keep you motivated. If you like our
                         app, please consider supporting me by buying us a
                         coffee. Jazakallah Khair!

@@ -14,6 +14,7 @@ const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
     const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? "light"];
 
     const storeData = async (value: string) => {
         try {
@@ -91,11 +92,7 @@ const Index: React.FC = () => {
                 <ThemedView style={dynamicStyles.loadingContainer}>
                     <ActivityIndicator
                         size="large"
-                        color={
-                            colorScheme === "dark"
-                                ? Colors.light.tint
-                                : Colors.dark.tint
-                        }
+                        color={colors.tint}
                     />
                 </ThemedView>
             </SafeAreaProvider>
@@ -119,7 +116,7 @@ const Index: React.FC = () => {
                 <Button
                     ViewComponent={LinearGradient}
                     linearGradientProps={{
-                        colors: ["#FF9800", "#F44336"],
+                        colors: [colors.primary, colors.secondary],
                         start: { x: 0, y: 0.5 },
                         end: { x: 1, y: 0.5 },
                     }}

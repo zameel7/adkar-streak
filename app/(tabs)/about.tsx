@@ -1,7 +1,7 @@
 // About.js
 import React from "react";
 import { Linking, StyleSheet, useColorScheme } from "react-native";
-import { Button, Icon } from "@rneui/themed";
+import { Button } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -9,13 +9,13 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import LinearGradient from "react-native-linear-gradient";
-import Constants from "expo-constants";
+import * as Application from 'expo-application';
 import { ExternalLink } from "@/components/ExternalLink";
 
 const About = () => {
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? "light"];
-    const appVersion = Constants.expoConfig?.version;
+    const appVersion = Application.nativeApplicationVersion;
 
     const handleBuyMeACoffee = () => {
         Linking.openURL("https://www.buymeacoffee.com/zameel7");
@@ -23,10 +23,6 @@ const About = () => {
 
     const handleVisitWebsite = () => {
         Linking.openURL("https://zameel7.me");
-    };
-
-    const handlePrivacyPolicy = () => {
-        Linking.openURL("https://your-privacy-policy-url.com");
     };
 
     const styles = StyleSheet.create({
@@ -110,9 +106,8 @@ const About = () => {
                             }}
                             onPress={handleBuyMeACoffee}
                             icon={
-                                <Icon
-                                    name="coffee"
-                                    type="font-awesome"
+                                <Ionicons
+                                    name="cafe-outline"
                                     color="white"
                                     size={20}
                                     style={{ marginRight: 10 }}
@@ -129,9 +124,8 @@ const About = () => {
                             }}
                             onPress={handleVisitWebsite}
                             icon={
-                                <Icon
-                                    name="external-link"
-                                    type="font-awesome"
+                                <Ionicons
+                                    name="laptop-outline"
                                     color="white"
                                     size={20}
                                     style={{ marginRight: 10 }}

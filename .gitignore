@@ -19,9 +19,6 @@ web-build/
 expo-env.d.ts
 # @end expo-cli
 
-android/
-ios/
-
 # service account file
 virtual-plating-334413-53ce85a58454.json
 virtual-plating-334413-firebase-adminsdk-gnsl8-d36d5bdd75.json

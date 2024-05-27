@@ -13,15 +13,13 @@ import {
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
-import { useSQLiteContext } from "expo-sqlite";
 import AdkarCard from "@/components/AdkarCard";
 
 const EveningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const [loading, setLoading] = useState(true);
-    const [eveningStreak, setEveningStreak] = useState(false);
     const colorScheme = useColorScheme();
-    const db = useSQLiteContext();
+    const colors = Colors[colorScheme ?? "light"];
 
     const isDarkMode = colorScheme === "dark";
     const width = Dimensions.get("window").width;
@@ -46,20 +44,19 @@ const EveningAdkar = () => {
                 };
             }
         );
-        async function getEveningStreakBool() {
-            const result = await db.getFirstAsync<{ evening: boolean }>(
-                "SELECT evening FROM adkarStreaks ORDER BY date DESC LIMIT 1"
-            );
-            result && setEveningStreak(result.evening);
-        }
 
-        getEveningStreakBool();
         setAdkars(adkarsArray);
         setLoading(false);
     }, []);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
-        return <AdkarCard item={item} index={adkars.indexOf(item)} type="evening" />;
+        return (
+            <AdkarCard
+                item={item}
+                index={adkars.indexOf(item)}
+                type="evening"
+            />
+        );
     };
 
     const styles = StyleSheet.create({
@@ -83,24 +80,24 @@ const EveningAdkar = () => {
         cardTitle: {
             fontSize: 20,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.tint,
             textAlign: "center",
             marginBottom: 10,
         },
         adkarText: {
             fontSize: 18,
             marginBottom: 8,
-            color: isDarkMode ? "#FFFFFF" : "#000000",
+            color: colors.text,
         },
         translationText: {
             fontSize: 16,
             marginBottom: 8,
-            color: isDarkMode ? "#BDBDBD" : "#757575",
+            color: colors.tint,
         },
         repeatText: {
             fontSize: 16,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.tint,
         },
     });
 

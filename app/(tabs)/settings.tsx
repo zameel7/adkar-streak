@@ -9,11 +9,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useState } from "react";
 import { Button, Input } from "@rneui/themed";
 import LinearGradient from "react-native-linear-gradient";
+import { Colors } from "@/constants/Colors";
 
 const Settings = () => {
     const [name, setName] = useState<string>("");
 
     const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? "light"];
     const isDarkMode = colorScheme === "dark";
 
     const storeData = async (value: string) => {
@@ -41,8 +43,15 @@ const Settings = () => {
             borderRadius: 5,
             color: isDarkMode ? "#ffffff" : "#000000",
         },
-        button: {
-            backgroundColor: isDarkMode ? "#841584" : "#6200ea",
+        headerImage: {
+            color: "#808080",
+            bottom: -90,
+            left: -35,
+            position: "absolute",
+        },
+        titleContainer: {
+            flexDirection: "row",
+            gap: 8,
         },
     });
     return (
@@ -52,13 +61,13 @@ const Settings = () => {
                 <Ionicons
                     size={310}
                     name="code-slash"
-                    style={styles.headerImage}
+                    style={dynamicStyles.headerImage}
                 />
             }
             showTime={false}
             setRefreshingAPI={() => {}}
         >
-            <ThemedView style={styles.titleContainer}>
+            <ThemedView style={dynamicStyles.titleContainer}>
                 <ThemedText type="title">Settings</ThemedText>
             </ThemedView>
             <ThemedText>What should we call you?</ThemedText>
@@ -72,29 +81,15 @@ const Settings = () => {
             <Button
                 ViewComponent={LinearGradient}
                 linearGradientProps={{
-                    colors: ["#FF9800", "#F44336"],
+                    colors: [colors.primary, colors.secondary],
                     start: { x: 0, y: 0.5 },
                     end: { x: 1, y: 0.5 },
                 }}
                 title="Submit"
                 onPress={handleSubmit}
-                buttonStyle={dynamicStyles.button}
             />
         </ParallaxScrollView>
     );
 };
-
-const styles = StyleSheet.create({
-    headerImage: {
-        color: "#808080",
-        bottom: -90,
-        left: -35,
-        position: "absolute",
-    },
-    titleContainer: {
-        flexDirection: "row",
-        gap: 8,
-    },
-});
 
 export default Settings;

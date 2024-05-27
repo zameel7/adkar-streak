@@ -12,6 +12,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { HelloWave } from "@/components/HelloWave";
 import { useSQLiteContext } from "expo-sqlite";
+import { Colors } from "@/constants/Colors";
 
 function adkarTime() {
     const hours = new Date().getHours();
@@ -34,11 +35,11 @@ const Home = () => {
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
     const [streak, setStreak] = useState(0);
-    const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const db = useSQLiteContext();
     const colorScheme = useColorScheme();
+    const colors = Colors[colorScheme ?? "light"];
 
     const time = adkarTime();
     const isDarkMode = colorScheme === "dark";
@@ -120,6 +121,7 @@ const Home = () => {
             const records = await db.getAllAsync(
                 "SELECT id, date, morning, evening FROM adkarStreaks ORDER BY date ASC"
             );
+            const today = new Date().toISOString().slice(0, 10);
 
             let currentStreak = 0;
 
@@ -129,7 +131,9 @@ const Home = () => {
                 if (morning && evening) {
                     currentStreak++;
                 } else {
-                    currentStreak = 0; // Reset streak if activities are not completed for the day
+                    if (date !== today) {
+                        currentStreak = 0; // Reset streak if activities are not completed for the day
+                    }
                 }
             }
 
@@ -138,7 +142,6 @@ const Home = () => {
 
         getStreak();
         calculateStreak();
-        setLoading(false);
     }, [refreshing]);
 
     function getDayNightIcon() {
@@ -183,7 +186,6 @@ const Home = () => {
             alignItems: "center",
         },
         streak: {
-            color: isDarkMode ? "#FF9800" : "#F44336",
             fontSize: 18,
             fontWeight: "bold",
         },
@@ -278,7 +280,8 @@ const Home = () => {
                         </View>
                     ) : (
                         <ThemedText style={styles.streakLabel}>
-                            No current streak <Ionicons
+                            No current streak{" "}
+                            <Ionicons
                                 name="sad"
                                 size={18}
                                 style={styles.streakIcon}
@@ -290,7 +293,7 @@ const Home = () => {
                     <Button
                         ViewComponent={LinearGradient}
                         linearGradientProps={{
-                            colors: ["#FF9800", "#F44336"],
+                            colors: [colors.primary, colors.secondary],
                             start: { x: 0, y: 0.5 },
                             end: { x: 1, y: 0.5 },
                         }}
@@ -304,7 +307,7 @@ const Home = () => {
                     <Button
                         ViewComponent={LinearGradient}
                         linearGradientProps={{
-                            colors: ["#FF9800", "#F44336"],
+                            colors: [colors.primary, colors.secondary],
                             start: { x: 0, y: 0.5 },
                             end: { x: 1, y: 0.5 },
                         }}
@@ -319,7 +322,7 @@ const Home = () => {
                 <ThemedView style={styles.footer}>
                     <View
                         style={{
-                            borderBottomColor: { isDarkMode } ? "#FFF" : "#000",
+                            borderBottomColor: colors.tint,
                             borderBottomWidth: 1,
                             width: "100%",
                             marginVertical: 16,
@@ -339,7 +342,7 @@ const Home = () => {
                     </ThemedText>
                     <View
                         style={{
-                            borderBottomColor: { isDarkMode } ? "#FFF" : "#000",
+                            borderBottomColor: colors.tint,
                             borderBottomWidth: 1,
                             width: "100%",
                             marginVertical: 16,

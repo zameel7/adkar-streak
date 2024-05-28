@@ -1,5 +1,8 @@
 <div align="center">
-  <img src="./assets/images/adaptive-icon.png" alt="App Icon" width="50" style="border-radius: 10px;">
+  <picture>
+ <source media="(prefers-color-scheme: dark)" srcset="./Screenshots/light-logo.png" width="100px">
+ <img alt="Logo of Adkar Champ" src="./Screenshots/dark-logo.png">
+</picture>
   <h1>Adkar Champ</h1>
 </div>
 
@@ -24,16 +27,15 @@
   </a>
 </div>
 
-<div align="center">Welcome to Adkar Champ! This app is designed to help you remember Allah and keep track of your daily adkar. We also have streaks to keep you motivated. If you like our app, please consider supporting me by buying me a coffee. <br><b>Jazakallah Khair!</b></div>
+<div align="center">Welcome to Adkar Champ! This app is designed to help you remember Allah and keep track of your daily adkar. We also have streaks to keep you motivated. If you like our app, please consider supporting me by buying me a coffee. <br><br><b>Jazakallah Khair!</b></div>
 <br>
 
 ## Screenshots
 
 <div align="center">
-  <img src="./assets/images/screenshots/1.png" alt="Screenshot 1" width="200">
-  <img src="./assets/images/screenshots/2.png" alt="Screenshot 2" width="200">
-  <img src="./assets/images/screenshots/3.png" alt="Screenshot 3" width="200">
-  <img src="./assets/images/screenshots/4.png" alt="Screenshot 4" width="200">
+  <img src="./screenshots/1.png" alt="Screenshot 1" width="245">
+  <img src="./screenshots/2.png" alt="Screenshot 2" width="245">
+  <img src="./screenshots/3.png" alt="Screenshot 3" width="245">
 </div>
 
 ## Development
@@ -60,6 +62,6 @@ In the output, you'll find options to open the app in a
 
 Contributions are always welcome! Please read the [contribution guidelines](./CONTRIBUTING.md) first.
 
----
+<br>
 
 <span style="color: #9998;">Google Play and the Google Play logo are trademarks of Google LLC.</span>

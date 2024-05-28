@@ -129,6 +129,7 @@ const MorningAdkar = () => {
                                     loop
                                     data={adkars}
                                     renderItem={renderAdkarCard}
+                                    scrollAnimationDuration={100}
                                     style={{ alignSelf: "center" }}
                                 />
                             </View>

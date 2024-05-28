@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
+import { Collapsible } from "./Collapsible";
 
 type Adkar = {
     title: string;
@@ -104,7 +105,7 @@ const AdkarCard = ({
             alignSelf: "center",
         },
         buttonIcon: {
-            color: read ? "#FFFFFF" : colors.primary
+            color: read ? "#FFFFFF" : colors.primary,
         },
     });
 
@@ -164,7 +165,7 @@ const AdkarCard = ({
                             );
                             setRead(true);
                         }
-                        
+
                         await checkAndMarkStreak();
                     }}
                 />
@@ -174,9 +175,11 @@ const AdkarCard = ({
                         <ThemedText style={styles.adkarText}>
                             {adkar}
                         </ThemedText>
-                        <ThemedText style={styles.translationText}>
-                            {item.translation[index]}
-                        </ThemedText>
+                        <Collapsible title="Translation">
+                            <ThemedText style={styles.translationText}>
+                                {item.translation[index]}
+                            </ThemedText>
+                        </Collapsible>
                         <ThemedText style={styles.repeatText}>
                             Repeat: {item.repeat}
                         </ThemedText>

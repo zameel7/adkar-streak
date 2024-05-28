@@ -9,7 +9,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import LinearGradient from "react-native-linear-gradient";
-import * as Application from 'expo-application';
+import * as Application from "expo-application";
 import { ExternalLink } from "@/components/ExternalLink";
 
 const About = () => {
@@ -46,6 +46,12 @@ const About = () => {
             textAlign: "center",
             marginBottom: 20,
             color: colors.text,
+            paddingHorizontal: 15,
+        },
+        tyText: {
+            fontSize: 18,
+            textAlign: "center",
+            color: colors.primary,
             paddingHorizontal: 15,
         },
         headerImage: {
@@ -90,9 +96,16 @@ const About = () => {
                     <ThemedText style={styles.description}>
                         Welcome to Adkar Champ! This app is designed to help you
                         remember Allah and keep track of your daily adkar. We
-                        also have streaks to keep you motivated. If you like our
-                        app, please consider supporting me by buying us a
-                        coffee. Jazakallah Khair!
+                        also have streaks to keep you motivated.
+                        If you have any feedback or suggestions, please feel free
+                        to contact me.
+                    </ThemedText>
+                    <ThemedText style={styles.description}>
+                        If you like our app, please consider supporting me by
+                        buying me a coffee.
+                    </ThemedText>
+                    <ThemedText style={styles.tyText}>
+                        Jazakallah Khair!
                     </ThemedText>
                     <ThemedView style={styles.buttonContainer}>
                         <Button

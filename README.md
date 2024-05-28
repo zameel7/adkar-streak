@@ -1,7 +1,7 @@
 <div align="center">
   <picture>
  <source media="(prefers-color-scheme: dark)" srcset="./Screenshots/light-logo.png" width="100px">
- <img alt="Logo of Adkar Champ" src="./Screenshots/dark-logo.png">
+ <img alt="Logo of Adkar Champ" width="100px" src="./Screenshots/dark-logo.png">
 </picture>
   <h1>Adkar Champ</h1>
 </div>

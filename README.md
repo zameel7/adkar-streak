@@ -3,6 +3,8 @@
   <h1>Adkar Champ</h1>
 </div>
 
+<br>
+
 <div align="center">
 
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Me-green)](https://www.buymeacoffee.com/zameel7)
@@ -25,7 +27,14 @@
 <div align="center">Welcome to Adkar Champ! This app is designed to help you remember Allah and keep track of your daily adkar. We also have streaks to keep you motivated. If you like our app, please consider supporting me by buying me a coffee. <br><b>Jazakallah Khair!</b></div>
 <br>
 
-> Adkar Champ is a mobile app that helps you keep track of your daily adkar. This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Screenshots
+
+<div align="center">
+  <img src="./assets/images/screenshots/1.png" alt="Screenshot 1" width="200">
+  <img src="./assets/images/screenshots/2.png" alt="Screenshot 2" width="200">
+  <img src="./assets/images/screenshots/3.png" alt="Screenshot 3" width="200">
+  <img src="./assets/images/screenshots/4.png" alt="Screenshot 4" width="200">
+</div>
 
 ## Development
 
@@ -46,8 +55,6 @@ In the output, you'll find options to open the app in a
 -   [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 -   [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 -   [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-<!-- Add details regarding contributions -->
 
 ## Contributing
 

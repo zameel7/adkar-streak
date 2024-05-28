@@ -1,27 +1,26 @@
 import { ThemedView } from "@/components/ThemedView";
 import EveningAdkarData from "@/assets/adkars/evening.json";
 import { Colors } from "@/constants/Colors";
+import AdkarCard from "@/components/AdkarCard";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
-    ActivityIndicator,
     Dimensions,
     ScrollView,
     StyleSheet,
     useColorScheme,
     View,
+    TouchableOpacity,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
-import AdkarCard from "@/components/AdkarCard";
+import { Ionicons } from "@expo/vector-icons";
 
 const EveningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
-    const [loading, setLoading] = useState(true);
+    const carouselRef = useRef(null);
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? "light"];
-
-    const isDarkMode = colorScheme === "dark";
     const width = Dimensions.get("window").width;
 
     type Adkar = {
@@ -46,7 +45,6 @@ const EveningAdkar = () => {
         );
 
         setAdkars(adkarsArray);
-        setLoading(false);
     }, []);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
@@ -59,81 +57,86 @@ const EveningAdkar = () => {
         );
     };
 
+    const handleNext = () => {
+        if (carouselRef.current) {
+            // @ts-ignore
+            carouselRef.current.next();
+        }
+    };
+
+    const handlePrev = () => {
+        if (carouselRef.current) {
+            // @ts-ignore
+            carouselRef.current.prev();
+        }
+    };
+
     const styles = StyleSheet.create({
         titleContainer: {
             padding: 16,
             flex: 1,
         },
-        cardContainer: {
-            padding: 10,
+        arrow: {
+            position: "absolute",
+            top: "50%",
+            width: 40,
+            height: 40,
+            backgroundColor: colors.tabIconSelected,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1,
+            opacity: 0.4,
         },
-        card: {
-            borderRadius: 10,
-            padding: 20,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 5,
-            elevation: 5,
-            backgroundColor: isDarkMode ? "#424242" : "#FFFFFF",
+        leftArrow: {
+            left: 2,
         },
-        cardTitle: {
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.tint,
-            textAlign: "center",
-            marginBottom: 10,
+        rightArrow: {
+            right: 2,
         },
-        adkarText: {
-            fontSize: 18,
-            marginBottom: 8,
-            color: colors.text,
-        },
-        translationText: {
-            fontSize: 16,
-            marginBottom: 8,
-            color: colors.tint,
-        },
-        repeatText: {
-            fontSize: 16,
-            fontWeight: "bold",
-            color: colors.tint,
+        arrowText: {
+            fontSize: 24,
+            color: colors.background,
         },
     });
 
     return (
         <SafeAreaProvider>
             <View style={{ flex: 1 }}>
+                <TouchableOpacity
+                    style={[styles.arrow, styles.leftArrow]}
+                    onPress={handlePrev}
+                >
+                    <Ionicons name="chevron-back" style={styles.arrowText} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.arrow, styles.rightArrow]}
+                    onPress={handleNext}
+                >
+                    <Ionicons name="chevron-forward" style={styles.arrowText} />
+                </TouchableOpacity>
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
                     <ThemedView style={styles.titleContainer}>
-                        {loading ? (
-                            <ActivityIndicator
-                                size="large"
-                                color={
-                                    colorScheme === "dark"
-                                        ? Colors.light.tint
-                                        : Colors.dark.tint
-                                }
+                        <View
+                            style={{
+                                flex: 1,
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        >
+                            <Carousel
+                                ref={carouselRef}
+                                width={width}
+                                height={width * 3}
+                                loop
+                                data={adkars}
+                                renderItem={renderAdkarCard}
+                                scrollAnimationDuration={100}
+                                style={{ alignSelf: "center" }}
+                                panGestureHandlerProps={{
+                                    activeOffsetX: [-10, 10],
+                                  }}
                             />
-                        ) : (
-                            <View
-                                style={{
-                                    flex: 1,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                            >
-                                <Carousel
-                                    width={width}
-                                    height={width * 3}
-                                    loop
-                                    data={adkars}
-                                    renderItem={renderAdkarCard}
-                                    scrollAnimationDuration={100}
-                                    style={{ alignSelf: "center" }}
-                                />
-                            </View>
-                        )}
+                        </View>
                     </ThemedView>
                 </ScrollView>
             </View>

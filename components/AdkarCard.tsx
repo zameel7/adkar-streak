@@ -80,6 +80,7 @@ const AdkarCard = ({
             color: isDarkMode ? "#FFFFFF" : "#000000",
             backgroundColor: isDarkMode ? "#424242" : "#FFFFFF",
             padding: 10,
+            fontWeight: "bold",
         },
         translationText: {
             fontSize: 18,

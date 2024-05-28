@@ -55,8 +55,8 @@ Make sure you have Node.js and npm installed. You can install them from [nodejs.
 
 1. Fork and clone the repository.
     ```bash
-    git clone https://github.com/your-username/adkarstreak.git
-    cd adkarstreak
+    git clone https://github.com/zameel7/adkar-streak.git
+    cd adkar-streak
     ```
 2. Install the dependencies.
     ```bash
@@ -77,7 +77,7 @@ Make sure you have Node.js and npm installed. You can install them from [nodejs.
 
 ## Style Guide
 
-- Follow the JavaScript and React/React Native style guides.
+- Follow the TypeScript and React/React Native style guides.
 - Use meaningful variable and function names.
 - Keep functions and components small and focused.
 - Write comments to explain complex code.

@@ -1,4 +1,7 @@
-<div align="center"><img src="./assets/images/adaptive-icon.png" alt="App Icon" width="50" style="border-radius: 10px;"><h1>Adkar Champ</h1></div>
+<div align="center">
+  <img src="./assets/images/adaptive-icon.png" alt="App Icon" width="50" style="border-radius: 10px;">
+  <h1>Adkar Champ</h1>
+</div>
 
 <div align="center">
 

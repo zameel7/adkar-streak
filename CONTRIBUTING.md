@@ -4,7 +4,6 @@ Thank you for considering contributing to Adkar Champ! We appreciate your intere
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
 - [How to Contribute](#how-to-contribute)
   - [Reporting Bugs](#reporting-bugs)
   - [Suggesting Features](#suggesting-features)

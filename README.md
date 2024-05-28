@@ -33,9 +33,9 @@
 ## Screenshots
 
 <div align="center">
-  <img src="./screenshots/1.png" alt="Screenshot 1" width="245">
-  <img src="./screenshots/2.png" alt="Screenshot 2" width="245">
-  <img src="./screenshots/3.png" alt="Screenshot 3" width="245">
+  <img src="./Screenshots/1.png" alt="Screenshot 1" width="245">
+  <img src="./Screenshots/2.png" alt="Screenshot 2" width="245">
+  <img src="./Screenshots/3.png" alt="Screenshot 3" width="245">
 </div>
 
 ## Development

@@ -10,7 +10,7 @@
 
 <div align="center">
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Support%20Me-green)](https://www.buymeacoffee.com/zameel7)
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zameel7)
 
 ![GitHub](https://img.shields.io/badge/Version-1.3.2-blue)
 ![GitHub](https://img.shields.io/badge/Platform-Android-lightgrey)

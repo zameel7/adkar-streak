@@ -4,7 +4,6 @@ import { StyleSheet, View, useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
-import LinearGradient from "react-native-linear-gradient";
 import { router } from "expo-router";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";
@@ -180,6 +179,7 @@ const Home = () => {
         button: {
             marginVertical: 10,
             borderRadius: 8,
+            backgroundColor: colors.secondary,
         },
         footer: {
             flex: 1,
@@ -291,12 +291,6 @@ const Home = () => {
                 </ThemedView>
                 <ThemedView style={styles.buttonContainer}>
                     <Button
-                        ViewComponent={LinearGradient}
-                        linearGradientProps={{
-                            colors: [colors.primary, colors.secondary],
-                            start: { x: 0, y: 0.5 },
-                            end: { x: 1, y: 0.5 },
-                        }}
                         buttonStyle={styles.button}
                         onPress={() => {
                             router.push("/morning-adkar");
@@ -305,12 +299,6 @@ const Home = () => {
                         Morning Adkar
                     </Button>
                     <Button
-                        ViewComponent={LinearGradient}
-                        linearGradientProps={{
-                            colors: [colors.primary, colors.secondary],
-                            start: { x: 0, y: 0.5 },
-                            end: { x: 1, y: 0.5 },
-                        }}
                         buttonStyle={styles.button}
                         onPress={() => {
                             router.push("/evening-adkar");

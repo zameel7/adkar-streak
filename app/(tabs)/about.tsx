@@ -8,7 +8,6 @@ import { ThemedView } from "@/components/ThemedView";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import LinearGradient from "react-native-linear-gradient";
 import * as Application from "expo-application";
 import { ExternalLink } from "@/components/ExternalLink";
 
@@ -110,13 +109,7 @@ const About = () => {
                     <ThemedView style={styles.buttonContainer}>
                         <Button
                             title="Buy Me a Coffee"
-                            buttonStyle={{ marginBottom: 10 }}
-                            ViewComponent={LinearGradient}
-                            linearGradientProps={{
-                                colors: [colors.primary, colors.secondary],
-                                start: { x: 0, y: 0.5 },
-                                end: { x: 1, y: 0.5 },
-                            }}
+                            buttonStyle={{ marginBottom: 10, backgroundColor: colors.secondary }}
                             onPress={handleBuyMeACoffee}
                             icon={
                                 <Ionicons
@@ -129,12 +122,7 @@ const About = () => {
                         />
                         <Button
                             title="Visit My Website"
-                            ViewComponent={LinearGradient}
-                            linearGradientProps={{
-                                colors: [colors.primary, colors.secondary],
-                                start: { x: 0, y: 0.5 },
-                                end: { x: 1, y: 0.5 },
-                            }}
+                            buttonStyle={{ backgroundColor: colors.secondary }}
                             onPress={handleVisitWebsite}
                             icon={
                                 <Ionicons

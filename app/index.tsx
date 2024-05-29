@@ -8,7 +8,6 @@ import { Button, Input } from "@rneui/themed";
 import { useColorScheme } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
-import LinearGradient from "react-native-linear-gradient";
 
 const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
@@ -64,6 +63,7 @@ const Index: React.FC = () => {
         button: {
             width: "80%",
             marginHorizontal: "auto",
+            backgroundColor: colors.secondary,
         },
         link: {
             marginTop: 15,
@@ -114,12 +114,6 @@ const Index: React.FC = () => {
                     inputStyle={dynamicStyles.input}
                 />
                 <Button
-                    ViewComponent={LinearGradient}
-                    linearGradientProps={{
-                        colors: [colors.primary, colors.secondary],
-                        start: { x: 0, y: 0.5 },
-                        end: { x: 1, y: 0.5 },
-                    }}
                     title="Submit"
                     onPress={handleSubmit}
                     buttonStyle={dynamicStyles.button}

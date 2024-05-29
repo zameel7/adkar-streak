@@ -115,11 +115,11 @@ const RootLayout = () => {
                         />
                         <Stack.Screen
                             name="morning-adkar"
-                            options={{ title: "Morning Adkar" }}
+                            options={{ title: "Morning Adkar", headerBackTitle: "Back" }}
                         />
                         <Stack.Screen
                             name="evening-adkar"
-                            options={{ title: "Evening Adkar" }}
+                            options={{ title: "Evening Adkar", headerBackTitle: "Back"  }}
                         />
                     </Stack>
                 </ThemeProvider>

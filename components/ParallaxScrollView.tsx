@@ -75,7 +75,7 @@ export default function ParallaxScrollView({
     },
     content: {
       flex: 1,
-      padding: 32,
+      padding: 20,
       gap: 16,
       overflow: 'hidden',
     },

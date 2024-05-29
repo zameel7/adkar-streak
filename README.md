@@ -51,6 +51,8 @@
     npx expo start
     ```
 
+> For iOS development, please switch to the `ios` branch as LinearGradient is not supported in iOS.
+
 In the output, you'll find options to open the app in a
 
 -   [Development build](https://docs.expo.dev/develop/development-builds/introduction/)

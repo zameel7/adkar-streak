@@ -126,7 +126,7 @@ const MorningAdkar = () => {
                             <Carousel
                                 ref={carouselRef}
                                 width={width}
-                                height={width * 3}
+                                height={width * 4}
                                 loop
                                 data={adkars}
                                 renderItem={renderAdkarCard}

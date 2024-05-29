@@ -80,6 +80,7 @@ const Settings = () => {
             <Button
                 title="Submit"
                 onPress={handleSubmit}
+                buttonStyle={{backgroundColor: colors.secondary}}
             />
         </ParallaxScrollView>
     );

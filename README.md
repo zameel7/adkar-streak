@@ -10,14 +10,14 @@
 
 <div align="center">
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zameel7)
-
-![GitHub](https://img.shields.io/badge/Version-1.3.3-blue)
+![GitHub](https://img.shields.io/badge/Version-1.3.4-blue)
 ![GitHub](https://img.shields.io/badge/Platform-Android-lightgrey)
 ![GitHub](https://img.shields.io/badge/Status-Active-brightgreen)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/zameel7/adkar-streak/blob/main/LICENSE.md)
 ![GitHub issues](https://img.shields.io/github/issues/zameel7/adkar-streak)
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zameel7)
 
 </div>
 

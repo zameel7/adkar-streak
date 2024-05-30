@@ -60,6 +60,15 @@ In the output, you'll find options to open the app in a
 -   [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 -   [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
+## Todo
+
+- [ ] Add a feature to share the app
+- [ ] Add hijri calendar tab
+- [ ] Change the date in the header to hijri date
+- [ ] Add translation option in settings and Malayalam translation for adkar
+- [ ] Add a widget for the home screen
+- [ ] Better UI/UX for the entire app
+
 ## Contributing
 
 Contributions are always welcome! Please read the [contribution guidelines](./CONTRIBUTING.md) first.

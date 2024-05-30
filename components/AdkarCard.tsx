@@ -54,6 +54,7 @@ const AdkarCard = ({
         },
         cardContainer: {
             padding: 10,
+            minHeight: item.adkar.length * 200,
         },
         card: {
             borderRadius: 10,

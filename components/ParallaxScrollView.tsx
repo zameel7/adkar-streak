@@ -9,6 +9,8 @@ import Animated, {
 
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from './ThemedText';
+import HijriNow from 'hijri-now';
+
 
 const HEADER_HEIGHT = 250;
 
@@ -18,6 +20,22 @@ type Props = PropsWithChildren<{
   showTime?: boolean;
   setRefreshingAPI: (refreshing: boolean) => void;
 }>;
+
+
+const arabicMonthNames = [
+  'Muḥarram',
+  'Ṣafar',
+  'Rabīʿ al-Awwal',
+  'Rabīʿ al-Akhir',
+  'Jumādā al-Ūlā',
+  'Jumādā al-Ākhirah',
+  'Rajab',
+  'Shaʿbān',
+  'Ramaḍān',
+  'Shawwāl',
+  'Dhū al-Qaʿdah',
+  'Dhū al-Ḥijjah'
+];
 
 export default function ParallaxScrollView({
   children,
@@ -31,7 +49,8 @@ export default function ParallaxScrollView({
   const scrollOffset = useScrollViewOffset(scrollRef);
   const currentDate = new Date();
   const currentTimestamp = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const date = currentDate.toLocaleDateString([], { year: 'numeric', month: 'long', day: 'numeric' });
+  const date = `${arabicMonthNames[HijriNow.month() - 1]} ${HijriNow.day()}, ${HijriNow.year()}`;
+
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -79,12 +98,18 @@ export default function ParallaxScrollView({
       gap: 16,
       overflow: 'hidden',
     },
-    time: {
+    date: {
       position: 'absolute',
       bottom: 16,
       right: 16,
       color: colorScheme === 'dark' ? '#fff' : '#000',
     },
+    time: {
+      position: 'absolute',
+      bottom: 48,
+      right: 16,
+      color: colorScheme === 'dark' ? '#fff' : '#000',
+    }
   });
 
   return (
@@ -105,7 +130,10 @@ export default function ParallaxScrollView({
         >
           {headerImage}
           {showTime && <ThemedText type="defaultSemiBold" style={styles.time}>
-            {currentTimestamp} | {date}
+            {currentTimestamp}
+          </ThemedText>}
+          {showTime && <ThemedText type="defaultSemiBold" style={styles.date}>
+            {date}
           </ThemedText>}
         </Animated.View>
         <ThemedView style={styles.content}>{children}</ThemedView>

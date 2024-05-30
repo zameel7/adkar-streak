@@ -64,7 +64,7 @@ In the output, you'll find options to open the app in a
 
 - [ ] Add a feature to share the app
 - [ ] Add hijri calendar tab
-- [ ] Change the date in the header to hijri date
+- [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar
 - [ ] Add a widget for the home screen
 - [ ] Better UI/UX for the entire app

@@ -110,14 +110,36 @@ const RootLayout = () => {
                             name="morning-adkar"
                             options={{
                                 title: "Morning Adkar",
+                                headerTitleStyle: {
+                                    color: colorScheme === "dark"
+                                    ? Colors.light.text
+                                    : Colors.dark.text,
+                                },
                                 headerBackTitle: "Back",
+                                headerStyle: {
+                                    backgroundColor:
+                                        colorScheme === "dark"
+                                            ? Colors.light.background
+                                            : Colors.dark.background,
+                                },
                             }}
                         />
                         <Stack.Screen
                             name="evening-adkar"
                             options={{
                                 title: "Evening Adkar",
+                                headerTitleStyle: {
+                                    color: colorScheme === "dark"
+                                    ? Colors.light.text
+                                    : Colors.dark.text,
+                                },
                                 headerBackTitle: "Back",
+                                headerStyle: {
+                                    backgroundColor:
+                                        colorScheme === "dark"
+                                            ? Colors.light.background
+                                            : Colors.dark.background,
+                                },
                             }}
                         />
                     </Stack>

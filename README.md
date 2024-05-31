@@ -65,7 +65,7 @@ In the output, you'll find options to open the app in a
 - [ ] Reiterate on how the streak should be calculated?
 - [ ] Add a modal for the first time users to explain how streak works
 - [ ] Add a feature to share the app
-- [ ] Add a toggle to switch between light and dark mode
+- [x] Add a toggle to switch between light and dark mode
 - [ ] Add hijri calendar tab
 - [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar

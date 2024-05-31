@@ -5,7 +5,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
 import { Button, Input } from "@rneui/themed";
-import { useColorScheme } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import ThemeContext from "@/context/ThemeContext";
@@ -13,7 +12,7 @@ import ThemeContext from "@/context/ThemeContext";
 const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const {theme: colorScheme} = useContext(ThemeContext);
+    const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
 
     const storeData = async (value: string) => {
@@ -90,10 +89,7 @@ const Index: React.FC = () => {
         return (
             <SafeAreaProvider>
                 <ThemedView style={dynamicStyles.loadingContainer}>
-                    <ActivityIndicator
-                        size="large"
-                        color={colors.tint}
-                    />
+                    <ActivityIndicator size="large" color={colors.tint} />
                 </ThemedView>
             </SafeAreaProvider>
         );

@@ -1,5 +1,4 @@
 import { Stack, router } from "expo-router";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { Suspense, useContext, useEffect } from "react";
@@ -12,7 +11,7 @@ import * as Device from "expo-device";
 import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 
 const RootLayout = () => {
-    const {theme: colorScheme} = useContext(ThemeContext);
+    const { theme: colorScheme } = useContext(ThemeContext);
     const today = new Date().toISOString().split("T")[0];
 
     async function insertMissingDays(db: SQLiteDatabase) {
@@ -61,7 +60,7 @@ const RootLayout = () => {
         };
 
         registerForPushNotificationsAsync();
-        
+
         if (Platform.OS === "android") {
             Notifications.getNotificationChannelsAsync();
             Notifications.setNotificationHandler({
@@ -73,7 +72,7 @@ const RootLayout = () => {
             });
             schedulePushNotification();
         }
-        
+
         updateStreakData();
     }, []);
 
@@ -109,11 +108,17 @@ const RootLayout = () => {
                         />
                         <Stack.Screen
                             name="morning-adkar"
-                            options={{ title: "Morning Adkar", headerBackTitle: "Back" }}
+                            options={{
+                                title: "Morning Adkar",
+                                headerBackTitle: "Back",
+                            }}
                         />
                         <Stack.Screen
                             name="evening-adkar"
-                            options={{ title: "Evening Adkar", headerBackTitle: "Back"  }}
+                            options={{
+                                title: "Evening Adkar",
+                                headerBackTitle: "Back",
+                            }}
                         />
                     </Stack>
                 </ThemeProvider>
@@ -176,32 +181,34 @@ async function registerForPushNotificationsAsync() {
 
 function useNotificationObserver() {
     useEffect(() => {
-      let isMounted = true;
-  
-      function redirect(notification: Notifications.Notification) {
-        const url = notification.request.content.data?.url;
-        if (url) {
-          router.push(url);
+        let isMounted = true;
+
+        function redirect(notification: Notifications.Notification) {
+            const url = notification.request.content.data?.url;
+            if (url) {
+                router.push(url);
+            }
         }
-      }
-  
-      Notifications.getLastNotificationResponseAsync()
-        .then(response => {
-          if (!isMounted || !response?.notification) {
-            return;
-          }
-          redirect(response?.notification);
+
+        Notifications.getLastNotificationResponseAsync().then((response) => {
+            if (!isMounted || !response?.notification) {
+                return;
+            }
+            redirect(response?.notification);
         });
-  
-      const subscription = Notifications.addNotificationResponseReceivedListener(response => {
-        redirect(response.notification);
-      });
-  
-      return () => {
-        isMounted = false;
-        subscription.remove();
-      };
+
+        const subscription =
+            Notifications.addNotificationResponseReceivedListener(
+                (response) => {
+                    redirect(response.notification);
+                }
+            );
+
+        return () => {
+            isMounted = false;
+            subscription.remove();
+        };
     }, []);
-  }
+}
 
 export default RootLayout;

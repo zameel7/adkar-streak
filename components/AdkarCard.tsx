@@ -97,7 +97,7 @@ const AdkarCard = ({
         readButton: {
             backgroundColor: read
                 ? colors.primary
-                : colors.streakContainer,
+                : colors.border,
             borderRadius: 10,
             padding: 10,
             margin: 10,

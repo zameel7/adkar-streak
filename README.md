@@ -63,6 +63,7 @@ In the output, you'll find options to open the app in a
 ## Todo
 
 - [ ] Add a feature to share the app
+- [ ] Add a toggle to switch between light and dark mode
 - [ ] Add hijri calendar tab
 - [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar

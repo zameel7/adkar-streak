@@ -1,22 +1,18 @@
 import { Stack, router } from "expo-router";
-import {
-    DarkTheme,
-    DefaultTheme,
-    ThemeProvider,
-} from "@react-navigation/native";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useEffect } from "react";
+import { Suspense, useContext, useEffect } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 
 const RootLayout = () => {
-    const colorScheme = useColorScheme();
+    const {theme: colorScheme} = useContext(ThemeContext);
     const today = new Date().toISOString().split("T")[0];
 
     async function insertMissingDays(db: SQLiteDatabase) {
@@ -101,9 +97,7 @@ const RootLayout = () => {
                 onInit={insertMissingDays}
                 useSuspense
             >
-                <ThemeProvider
-                    value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-                >
+                <ThemeProvider>
                     <Stack>
                         <Stack.Screen
                             name="index"

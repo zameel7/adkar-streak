@@ -4,18 +4,19 @@ import { StyleSheet, Alert, useColorScheme } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import ThemeContext from "@/context/ThemeContext";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useState } from "react";
-import { Button, Input } from "@rneui/themed";
+import { useContext, useState } from "react";
+import { Button, Input, Switch } from "@rneui/themed";
 import LinearGradient from "react-native-linear-gradient";
 import { Colors } from "@/constants/Colors";
 
 const Settings = () => {
     const [name, setName] = useState<string>("");
+    const {theme, toggleTheme} = useContext(ThemeContext);
 
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const colors = Colors[theme as keyof typeof Colors];
 
     const storeData = async (value: string) => {
         try {
@@ -31,16 +32,14 @@ const Settings = () => {
         router.push("/home");
     };
 
+    const handleToggleTheme = () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        toggleTheme(newTheme);
+    };
+
     const dynamicStyles = StyleSheet.create({
-        inputContainer: {
-            width: "100%",
-        },
         input: {
-            paddingHorizontal: 10,
-            borderColor: "#ccc",
-            borderWidth: 1,
-            borderRadius: 5,
-            color: colors.input,
+            marginTop: 20,
         },
         headerImage: {
             color: "#808080",
@@ -74,7 +73,6 @@ const Settings = () => {
                 placeholder="Your name"
                 placeholderTextColor={colors.placeholder}
                 onChangeText={(name) => setName(name)}
-                containerStyle={dynamicStyles.inputContainer}
                 inputStyle={dynamicStyles.input}
             />
             <Button
@@ -86,6 +84,10 @@ const Settings = () => {
                 }}
                 title="Submit"
                 onPress={handleSubmit}
+            />
+            <Switch
+                value={theme === 'dark'}
+                onValueChange={handleToggleTheme}  
             />
         </ParallaxScrollView>
     );

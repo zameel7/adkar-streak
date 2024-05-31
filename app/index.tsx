@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -9,12 +9,13 @@ import { useColorScheme } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
 import LinearGradient from "react-native-linear-gradient";
+import ThemeContext from "@/context/ThemeContext";
 
 const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
 
     const storeData = async (value: string) => {
         try {

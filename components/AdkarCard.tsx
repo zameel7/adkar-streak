@@ -4,10 +4,11 @@ import { Button, Card } from "@rneui/themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { ThemedText } from "./ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
 import { Collapsible } from "./Collapsible";
+import ThemeContext from "@/context/ThemeContext";
 
 type Adkar = {
     title: string;
@@ -25,9 +26,8 @@ const AdkarCard = ({
     index: number;
     type: string;
 }) => {
-    const colourScheme = useColorScheme();
-    const colors = Colors[colourScheme ?? "light"];
-    const isDarkMode = colourScheme === "dark";
+    const {theme: colourScheme} = useContext(ThemeContext);
+    const colors = Colors[colourScheme as keyof typeof Colors];
     const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);

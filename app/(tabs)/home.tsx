@@ -2,7 +2,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View, useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
 import LinearGradient from "react-native-linear-gradient";
 import { router } from "expo-router";
@@ -13,6 +13,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { HelloWave } from "@/components/HelloWave";
 import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
+import ThemeContext from "@/context/ThemeContext";
 
 function adkarTime() {
     const hours = new Date().getHours();
@@ -38,8 +39,8 @@ const Home = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const db = useSQLiteContext();
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
 
     const time = adkarTime();
 
@@ -201,8 +202,8 @@ const Home = () => {
                 height: 2,
             },
             shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
+            shadowRadius: 1.84,
+            elevation: 3,
             marginTop: 16,
         },
         streakLabel: {

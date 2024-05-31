@@ -1,4 +1,4 @@
-import { PropsWithChildren, ReactElement, useCallback, useState } from 'react';
+import { PropsWithChildren, ReactElement, useCallback, useContext, useState } from 'react';
 import { RefreshControl, StyleSheet, useColorScheme } from 'react-native';
 import Animated, {
   interpolate,
@@ -10,6 +10,7 @@ import Animated, {
 import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from './ThemedText';
 import HijriNow from 'hijri-now';
+import ThemeContext from '@/context/ThemeContext';
 
 
 const HEADER_HEIGHT = 250;
@@ -44,7 +45,7 @@ export default function ParallaxScrollView({
   showTime = true,
   setRefreshingAPI,
 }: Props) {
-  const colorScheme = useColorScheme() ?? 'light';
+  const {theme: colorScheme} = useContext(ThemeContext);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
   const currentDate = new Date();
@@ -124,7 +125,7 @@ export default function ParallaxScrollView({
         <Animated.View
           style={[
             styles.header,
-            { backgroundColor: headerBackgroundColor[colorScheme] },
+            { backgroundColor: headerBackgroundColor[colorScheme as keyof typeof headerBackgroundColor] },
             headerAnimatedStyle,
           ]}
         >

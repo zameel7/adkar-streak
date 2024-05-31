@@ -1,5 +1,5 @@
 // About.js
-import React from "react";
+import React, { useContext } from "react";
 import { Linking, StyleSheet, useColorScheme } from "react-native";
 import { Button } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -11,10 +11,11 @@ import { Colors } from "@/constants/Colors";
 import LinearGradient from "react-native-linear-gradient";
 import * as Application from "expo-application";
 import { ExternalLink } from "@/components/ExternalLink";
+import ThemeContext from "@/context/ThemeContext";
 
 const About = () => {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const appVersion = Application.nativeApplicationVersion;
 
     const handleBuyMeACoffee = () => {

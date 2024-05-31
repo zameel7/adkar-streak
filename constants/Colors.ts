@@ -36,7 +36,7 @@ export const Colors = {
     input: '#FFF',
     linkText: '#841584',
     placeholder: '#9BA1A6',
-    streakContainer: "#EEEEEE",
+    streakContainer: "#353636",
     streakValue: "#FF9800",
   },
 };

@@ -193,7 +193,7 @@ const Home = () => {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: colors.streakContainer,
+            backgroundColor: colors.border,
             padding: 16,
             borderRadius: 8,
             shadowColor: colors.shadow,

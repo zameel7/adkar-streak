@@ -20,8 +20,8 @@ export const Colors = {
     input: '#000',
     linkText: '#6200EA',
     placeholder: '#687076',
-    streakContainer: "#F5F5F5",
     streakValue: "#FF9800",
+    border: 'rgb(245, 245, 245)',
   },
   dark: {
     text: '#ECEDEE',
@@ -32,11 +32,11 @@ export const Colors = {
     tabIconSelected: tintColorDark,
     primary: '#61B553',
     secondary: '#28A766',
-    shadow: '#FFF',
+    shadow: '#000',
     input: '#FFF',
     linkText: '#841584',
     placeholder: '#9BA1A6',
-    streakContainer: "#353636",
     streakValue: "#FF9800",
+    border: 'rgb(39, 39, 41)',
   },
 };

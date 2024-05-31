@@ -57,8 +57,8 @@ const About = () => {
         },
         headerImage: {
             color: "#808080",
-            bottom: -90,
-            left: -35,
+            bottom: 0,
+            left: 10,
             position: "absolute",
         },
         buttonContainer: {
@@ -84,7 +84,7 @@ const About = () => {
                 headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
                 headerImage={
                     <Ionicons
-                        size={310}
+                        size={200}
                         style={styles.headerImage}
                         name="person-circle-outline"
                     />

@@ -10,14 +10,14 @@
 
 <div align="center">
 
-[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zameel7)
-
-![GitHub](https://img.shields.io/badge/Version-1.3.3-blue)
+![GitHub](https://img.shields.io/badge/Version-1.3.4-blue)
 ![GitHub](https://img.shields.io/badge/Platform-Android-lightgrey)
 ![GitHub](https://img.shields.io/badge/Status-Active-brightgreen)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/zameel7/adkar-streak/blob/main/LICENSE.md)
 ![GitHub issues](https://img.shields.io/github/issues/zameel7/adkar-streak)
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/zameel7)
 
 </div>
 
@@ -51,12 +51,28 @@
     npx expo start
     ```
 
+> For iOS development, please switch to the `ios` branch as LinearGradient is not supported in iOS.
+
 In the output, you'll find options to open the app in a
 
 -   [Development build](https://docs.expo.dev/develop/development-builds/introduction/)
 -   [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
 -   [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 -   [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+
+## Todo
+
+- [ ] Reiterate on how the streak should be calculated?
+- [ ] Add a modal for the first time users to explain how streak works
+- [ ] Add a feature to share the app
+- [ ] Add a toggle to switch between light and dark mode
+- [ ] Add hijri calendar tab
+- [x] Change the date in the header to hijri date
+- [ ] Add translation option in settings and Malayalam translation for adkar
+  - [ ] Add Malayalam translation for adkar
+  - [ ] Add translation option in settings
+- [ ] Add a widget for the home screen
+- [ ] Better UI/UX for the entire app
 
 ## Contributing
 

@@ -3,7 +3,7 @@ import MorningAdkarData from "@/assets/adkars/morning.json";
 import { Colors } from "@/constants/Colors";
 import AdkarCard from "@/components/AdkarCard";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import {
     Dimensions,
     ScrollView,
@@ -15,12 +15,13 @@ import {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Carousel from "react-native-reanimated-carousel";
 import { Ionicons } from "@expo/vector-icons";
+import ThemeContext from "@/context/ThemeContext";
 
 const MorningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const carouselRef = useRef(null);
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext)
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const width = Dimensions.get("window").width;
 
     type Adkar = {

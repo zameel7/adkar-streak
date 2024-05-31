@@ -1,5 +1,5 @@
 // About.js
-import React from "react";
+import React, { useContext } from "react";
 import { Linking, StyleSheet, useColorScheme } from "react-native";
 import { Button } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -10,10 +10,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
 import * as Application from "expo-application";
 import { ExternalLink } from "@/components/ExternalLink";
+import ThemeContext from "@/context/ThemeContext";
 
 const About = () => {
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const appVersion = Application.nativeApplicationVersion;
 
     const handleBuyMeACoffee = () => {
@@ -55,8 +56,8 @@ const About = () => {
         },
         headerImage: {
             color: "#808080",
-            bottom: -90,
-            left: -35,
+            bottom: 0,
+            left: 10,
             position: "absolute",
         },
         buttonContainer: {
@@ -82,7 +83,7 @@ const About = () => {
                 headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
                 headerImage={
                     <Ionicons
-                        size={310}
+                        size={200}
                         style={styles.headerImage}
                         name="person-circle-outline"
                     />

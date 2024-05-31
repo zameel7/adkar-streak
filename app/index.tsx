@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Alert, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -8,12 +8,13 @@ import { Button, Input } from "@rneui/themed";
 import { useColorScheme } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { Colors } from "@/constants/Colors";
+import ThemeContext from "@/context/ThemeContext";
 
 const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
 
     const storeData = async (value: string) => {
         try {
@@ -28,7 +29,6 @@ const Index: React.FC = () => {
         router.push("/home");
     };
 
-    const isDarkMode = colorScheme === "dark";
     const dynamicStyles = StyleSheet.create({
         titleContainer: {
             flexDirection: "row",
@@ -58,7 +58,7 @@ const Index: React.FC = () => {
             borderColor: "#ccc",
             borderWidth: 1,
             borderRadius: 5,
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: colors.input,
         },
         button: {
             width: "80%",
@@ -70,7 +70,7 @@ const Index: React.FC = () => {
             paddingVertical: 15,
         },
         linkText: {
-            color: isDarkMode ? "#841584" : "#6200ea",
+            color: colors.linkText,
         },
     });
 
@@ -108,7 +108,7 @@ const Index: React.FC = () => {
                 </ThemedText>
                 <Input
                     placeholder="Your name"
-                    placeholderTextColor={isDarkMode ? "#888" : "#ccc"}
+                    placeholderTextColor={colors.placeholder}
                     onChangeText={(name) => setName(name)}
                     containerStyle={dynamicStyles.inputContainer}
                     inputStyle={dynamicStyles.input}

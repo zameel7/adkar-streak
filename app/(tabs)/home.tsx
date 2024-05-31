@@ -2,7 +2,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View, useColorScheme } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
 import { router } from "expo-router";
 
@@ -12,6 +12,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { HelloWave } from "@/components/HelloWave";
 import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
+import ThemeContext from "@/context/ThemeContext";
 
 function adkarTime() {
     const hours = new Date().getHours();
@@ -37,11 +38,10 @@ const Home = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const db = useSQLiteContext();
-    const colorScheme = useColorScheme();
-    const colors = Colors[colorScheme ?? "light"];
+    const {theme: colorScheme} = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
 
     const time = adkarTime();
-    const isDarkMode = colorScheme === "dark";
 
     useEffect(() => {
         AsyncStorage.getItem("name").then((name) => {
@@ -193,32 +193,32 @@ const Home = () => {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
+            backgroundColor: colors.border,
             padding: 16,
             borderRadius: 8,
-            shadowColor: "#000",
+            shadowColor: colors.shadow,
             shadowOffset: {
                 width: 0,
                 height: 2,
             },
             shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
+            shadowRadius: 1.84,
+            elevation: 3,
             marginTop: 16,
         },
         streakLabel: {
             fontSize: 20,
             fontWeight: "bold",
-            color: isDarkMode ? "#FFF" : "#000",
+            color: colors.text,
         },
         streakValue: {
             fontSize: 22,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.streakValue,
             marginRight: 8,
         },
         streakIcon: {
-            color: "#FF9800",
+            color: colors.streakValue,
         },
     });
 

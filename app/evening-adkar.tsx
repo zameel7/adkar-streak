@@ -8,7 +8,6 @@ import {
     Dimensions,
     ScrollView,
     StyleSheet,
-    useColorScheme,
     View,
     TouchableOpacity,
 } from "react-native";
@@ -20,8 +19,8 @@ import ThemeContext from "@/context/ThemeContext";
 const EveningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const carouselRef = useRef(null);
-    const {theme: colorScheme} = useContext(ThemeContext);
-    const colors = Colors[colorScheme as keyof typeof Colors]
+    const { theme: colorScheme } = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const width = Dimensions.get("window").width;
 
     type Adkar = {
@@ -135,7 +134,7 @@ const EveningAdkar = () => {
                                 style={{ alignSelf: "center" }}
                                 panGestureHandlerProps={{
                                     activeOffsetX: [-10, 10],
-                                  }}
+                                }}
                             />
                         </View>
                     </ThemedView>

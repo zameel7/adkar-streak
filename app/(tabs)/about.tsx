@@ -1,6 +1,6 @@
 // About.js
 import React, { useContext } from "react";
-import { Linking, StyleSheet, useColorScheme } from "react-native";
+import { Linking, StyleSheet } from "react-native";
 import { Button } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
@@ -14,7 +14,7 @@ import { ExternalLink } from "@/components/ExternalLink";
 import ThemeContext from "@/context/ThemeContext";
 
 const About = () => {
-    const {theme: colorScheme} = useContext(ThemeContext);
+    const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
     const appVersion = Application.nativeApplicationVersion;
 
@@ -97,9 +97,8 @@ const About = () => {
                     <ThemedText style={styles.description}>
                         Welcome to Adkar Champ! This app is designed to help you
                         remember Allah and keep track of your daily adkar. We
-                        also have streaks to keep you motivated.
-                        If you have any feedback or suggestions, please feel free
-                        to contact me.
+                        also have streaks to keep you motivated. If you have any
+                        feedback or suggestions, please feel free to contact me.
                     </ThemedText>
                     <ThemedText style={styles.description}>
                         If you like our app, please consider supporting me by

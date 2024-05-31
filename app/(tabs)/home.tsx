@@ -1,6 +1,6 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, useColorScheme } from "react-native";
+import { StyleSheet, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext, useEffect, useState } from "react";
 import { Button } from "@rneui/themed";
@@ -39,7 +39,7 @@ const Home = () => {
     const [refreshing, setRefreshing] = useState(false);
 
     const db = useSQLiteContext();
-    const {theme: colorScheme} = useContext(ThemeContext);
+    const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
 
     const time = adkarTime();

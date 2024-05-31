@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { StyleSheet, Alert, View, Switch } from "react-native";
+import { StyleSheet, Alert, Switch } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -87,7 +87,9 @@ const Settings = () => {
             <ThemedView style={dynamicStyles.titleContainer}>
                 <ThemedText type="title">Settings</ThemedText>
             </ThemedView>
-            <ThemedText style={dynamicStyles.text}>What should we call you?</ThemedText>
+            <ThemedText style={dynamicStyles.text}>
+                What should we call you?
+            </ThemedText>
             <Input
                 placeholder="Your name"
                 placeholderTextColor={colors.placeholder}
@@ -104,7 +106,9 @@ const Settings = () => {
                 title="Save"
                 onPress={handleSubmit}
             />
-            <ThemedText style={dynamicStyles.text}>Change Color Mode</ThemedText>
+            <ThemedText style={dynamicStyles.text}>
+                Change Color Mode
+            </ThemedText>
             <ThemedView style={dynamicStyles.switchContainer}>
                 <Ionicons name="sunny" size={24} style={dynamicStyles.icon} />
                 <Switch
@@ -112,7 +116,11 @@ const Settings = () => {
                     onValueChange={handleToggleTheme}
                     style={dynamicStyles.switch}
                     trackColor={{ false: colors.border, true: colors.border }}
-                    thumbColor={theme === "dark" ? colors.tabIconDefault : colors.tabIconSelected}
+                    thumbColor={
+                        theme === "dark"
+                            ? colors.tabIconDefault
+                            : colors.tabIconSelected
+                    }
                 />
                 <Ionicons name="moon" size={24} style={dynamicStyles.icon} />
             </ThemedView>

@@ -42,7 +42,6 @@ const Home = () => {
     const colors = Colors[colorScheme ?? "light"];
 
     const time = adkarTime();
-    const isDarkMode = colorScheme === "dark";
 
     useEffect(() => {
         AsyncStorage.getItem("name").then((name) => {
@@ -193,10 +192,10 @@ const Home = () => {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: isDarkMode ? "#333" : "#F5F5F5",
+            backgroundColor: colors.streakContainer,
             padding: 16,
             borderRadius: 8,
-            shadowColor: "#000",
+            shadowColor: colors.shadow,
             shadowOffset: {
                 width: 0,
                 height: 2,
@@ -209,16 +208,16 @@ const Home = () => {
         streakLabel: {
             fontSize: 20,
             fontWeight: "bold",
-            color: isDarkMode ? "#FFF" : "#000",
+            color: colors.text,
         },
         streakValue: {
             fontSize: 22,
             fontWeight: "bold",
-            color: isDarkMode ? "#FF9800" : "#F44336",
+            color: colors.streakValue,
             marginRight: 8,
         },
         streakIcon: {
-            color: "#FF9800",
+            color: colors.streakValue,
         },
     });
 

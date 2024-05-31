@@ -17,6 +17,11 @@ export const Colors = {
     primary: '#61B553',
     secondary: '#28A766',
     shadow: '#000',
+    input: '#000',
+    linkText: '#6200EA',
+    placeholder: '#687076',
+    streakContainer: "#F5F5F5",
+    streakValue: "#FF9800",
   },
   dark: {
     text: '#ECEDEE',
@@ -28,5 +33,10 @@ export const Colors = {
     primary: '#61B553',
     secondary: '#28A766',
     shadow: '#FFF',
+    input: '#FFF',
+    linkText: '#841584',
+    placeholder: '#9BA1A6',
+    streakContainer: "#EEEEEE",
+    streakValue: "#FF9800",
   },
 };

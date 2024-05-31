@@ -78,14 +78,14 @@ const AdkarCard = ({
             letterSpacing: 2,
             lineHeight: 35,
             marginBottom: 8,
-            color: isDarkMode ? "#FFFFFF" : "#000000",
+            color: colors.input,
             padding: 10,
             fontWeight: "bold",
         },
         translationText: {
             fontSize: 18,
             margin: 15,
-            color: isDarkMode ? "#BDBDBD" : "#757575",
+            color: colors.text,
         },
         repeatText: {
             fontSize: 16,
@@ -97,9 +97,7 @@ const AdkarCard = ({
         readButton: {
             backgroundColor: read
                 ? colors.primary
-                : isDarkMode
-                ? "#757575"
-                : "#E0E0E0",
+                : colors.streakContainer,
             borderRadius: 10,
             padding: 10,
             margin: 10,

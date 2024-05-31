@@ -29,7 +29,6 @@ const Index: React.FC = () => {
         router.push("/home");
     };
 
-    const isDarkMode = colorScheme === "dark";
     const dynamicStyles = StyleSheet.create({
         titleContainer: {
             flexDirection: "row",
@@ -59,7 +58,7 @@ const Index: React.FC = () => {
             borderColor: "#ccc",
             borderWidth: 1,
             borderRadius: 5,
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: colors.input,
         },
         button: {
             width: "80%",
@@ -70,7 +69,7 @@ const Index: React.FC = () => {
             paddingVertical: 15,
         },
         linkText: {
-            color: isDarkMode ? "#841584" : "#6200ea",
+            color: colors.linkText,
         },
     });
 
@@ -108,7 +107,7 @@ const Index: React.FC = () => {
                 </ThemedText>
                 <Input
                     placeholder="Your name"
-                    placeholderTextColor={isDarkMode ? "#888" : "#ccc"}
+                    placeholderTextColor={colors.placeholder}
                     onChangeText={(name) => setName(name)}
                     containerStyle={dynamicStyles.inputContainer}
                     inputStyle={dynamicStyles.input}

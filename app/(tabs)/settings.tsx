@@ -16,7 +16,6 @@ const Settings = () => {
 
     const colorScheme = useColorScheme();
     const colors = Colors[colorScheme ?? "light"];
-    const isDarkMode = colorScheme === "dark";
 
     const storeData = async (value: string) => {
         try {
@@ -41,7 +40,7 @@ const Settings = () => {
             borderColor: "#ccc",
             borderWidth: 1,
             borderRadius: 5,
-            color: isDarkMode ? "#ffffff" : "#000000",
+            color: colors.input,
         },
         headerImage: {
             color: "#808080",
@@ -73,7 +72,7 @@ const Settings = () => {
             <ThemedText>What should we call you?</ThemedText>
             <Input
                 placeholder="Your name"
-                placeholderTextColor={isDarkMode ? "#888" : "#ccc"}
+                placeholderTextColor={colors.placeholder}
                 onChangeText={(name) => setName(name)}
                 containerStyle={dynamicStyles.inputContainer}
                 inputStyle={dynamicStyles.input}

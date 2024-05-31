@@ -85,7 +85,7 @@ const AdkarCard = ({
         translationText: {
             fontSize: 18,
             margin: 15,
-            color: colors.text,
+            color: colors.placeholder,
         },
         repeatText: {
             fontSize: 16,

@@ -74,6 +74,7 @@ In the output, you'll find options to open the app in a
   - [ ] Add Malayalam translation for adkar
   - [ ] Add translation option in settings
 - [ ] Add a widget for the home screen
+- [ ] Adkar card header should have a progress for adkar completion
 - [ ] Better UI/UX for the entire app
 
 ## Contributing

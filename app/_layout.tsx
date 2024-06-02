@@ -150,6 +150,7 @@ const RootLayout = () => {
 };
 
 async function schedulePushNotification() {
+    await Notifications.cancelAllScheduledNotificationsAsync();
     await Notifications.scheduleNotificationAsync({
         content: {
             title: "Time for morning Adkar! 🌞",

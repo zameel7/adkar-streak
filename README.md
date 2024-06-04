@@ -66,7 +66,7 @@ In the output, you'll find options to open the app in a
 - [x] Update adkar list from current to those from Hisnul Muslim
 - [ ] Add transliteration and virtue for each adkar and turn off and on from settings
 - [ ] Add a modal or welcome screen for the first time users to explain how app works
-- [ ] Undo mark read for hadees
+- [x] Undo mark read for hadees
 - [ ] Adkar card swipe should auto scroll to top
 - [ ] Add a feature to share the app
 - [x] Add a toggle to switch between light and dark mode

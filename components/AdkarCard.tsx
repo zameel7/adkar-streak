@@ -38,9 +38,9 @@ const AdkarCard = ({
             if (streakData) {
                 const data = JSON.parse(streakData);
                 if (data.morning[index] && type === "morning") {
-                    setRead(true);
+                    setRead(!read);
                 } else if (data.evening[index] && type === "evening") {
-                    setRead(true);
+                    setRead(!read);
                 }
             }
         };
@@ -150,19 +150,19 @@ const AdkarCard = ({
                             if (type === "evening") {
                                 data.evening = {
                                     ...data.evening,
-                                    [index]: true,
+                                    [index]: !read,
                                 };
                             } else if (type === "morning") {
                                 data.morning = {
                                     ...data.morning,
-                                    [index]: true,
+                                    [index]: !read,
                                 };
                             }
                             await AsyncStorage.setItem(
                                 "streakData",
                                 JSON.stringify(data)
                             );
-                            setRead(true);
+                            setRead(!read);
                         }
 
                         await checkAndMarkStreak();

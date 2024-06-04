@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { StyleSheet, Alert, Switch } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { StyleSheet, Alert, Switch, Share } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -13,6 +13,7 @@ import { Colors } from "@/constants/Colors";
 
 const Settings = () => {
     const [name, setName] = useState<string>("");
+    const [translation, setTranslation] = useState<boolean>(true);
     const { theme, toggleTheme } = useContext(ThemeContext);
     const router = useRouter();
 
@@ -37,6 +38,13 @@ const Settings = () => {
         toggleTheme(newTheme);
     };
 
+    const onShare = () => {
+        Share.share({
+            message:
+                "Check out this awesome app! \nhttps://play.google.com/store/apps/details?id=com.zameel7.adkarstreak",
+        });
+    };
+
     const dynamicStyles = StyleSheet.create({
         input: {
             marginTop: 20,
@@ -53,9 +61,8 @@ const Settings = () => {
         },
         switchContainer: {
             flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
             marginTop: 20,
+            justifyContent: "space-between",
         },
         icon: {
             color: colors.text,
@@ -70,6 +77,20 @@ const Settings = () => {
             fontWeight: "bold",
         },
     });
+
+    useEffect(() => {
+        const getDetails = async () => {
+            const storedName = await AsyncStorage.getItem("name");
+            if (storedName) {
+                setName(storedName);
+            }
+            const translations = await AsyncStorage.getItem("translations");
+            if (translations) {
+                setTranslation(JSON.parse(translations));
+            }
+        };
+        getDetails();
+    }, []);
 
     return (
         <ParallaxScrollView
@@ -91,7 +112,7 @@ const Settings = () => {
                 What should we call you?
             </ThemedText>
             <Input
-                placeholder="Your name"
+                placeholder={name || "Your Name"}
                 placeholderTextColor={colors.placeholder}
                 onChangeText={(name) => setName(name)}
                 inputStyle={dynamicStyles.input}
@@ -101,24 +122,83 @@ const Settings = () => {
                 onPress={handleSubmit}
                 buttonStyle={{backgroundColor: colors.secondary}}
             />
-            <ThemedText style={dynamicStyles.text}>
-                Change Color Mode
-            </ThemedText>
+            <ThemedText style={dynamicStyles.text}>Appearance</ThemedText>
             <ThemedView style={dynamicStyles.switchContainer}>
-                <Ionicons name="sunny" size={24} style={dynamicStyles.icon} />
-                <Switch
-                    value={theme === "dark"}
-                    onValueChange={handleToggleTheme}
-                    style={dynamicStyles.switch}
-                    trackColor={{ false: colors.border, true: colors.border }}
-                    thumbColor={
-                        theme === "dark"
-                            ? colors.tabIconDefault
-                            : colors.tabIconSelected
-                    }
-                />
-                <Ionicons name="moon" size={24} style={dynamicStyles.icon} />
+                <ThemedText style={dynamicStyles.icon}>Theme: </ThemedText>
+                <ThemedView style={{flexDirection: "row"}}>
+                    <Ionicons
+                        name="sunny"
+                        size={24}
+                        style={dynamicStyles.icon}
+                    />
+                    <Switch
+                        value={theme === "dark"}
+                        onValueChange={handleToggleTheme}
+                        style={dynamicStyles.switch}
+                        trackColor={{
+                            false: colors.border,
+                            true: colors.border,
+                        }}
+                        thumbColor={colors.tabIconSelected}
+                    />
+                    <Ionicons
+                        name="moon"
+                        size={24}
+                        style={dynamicStyles.icon}
+                    />
+                </ThemedView>
             </ThemedView>
+            <ThemedView style={dynamicStyles.switchContainer}>
+                <ThemedText style={dynamicStyles.icon}>
+                    Translation:{" "}
+                </ThemedText>
+                <ThemedView style={{flexDirection: "row"}}>
+                    <Ionicons
+                        name="close-outline"
+                        size={24}
+                        style={dynamicStyles.icon}
+                    />
+                    <Switch
+                        value={translation}
+                        onValueChange={() => {
+                            AsyncStorage.setItem(
+                                "translations",
+                                JSON.stringify(!translation)
+                            );
+                            setTranslation(!translation);
+                        }}
+                        style={dynamicStyles.switch}
+                        trackColor={{
+                            false: colors.border,
+                            true: colors.border,
+                        }}
+                        thumbColor={colors.tabIconSelected}
+                    />
+                    <Ionicons
+                        name="checkmark-outline"
+                        size={24}
+                        style={dynamicStyles.icon}
+                    />
+                </ThemedView>
+            </ThemedView>
+            <Button
+                title="Share App"
+                onPress={onShare}
+                buttonStyle={{
+                    marginTop: 20,
+                    width: "50%",
+                    alignSelf: "center",
+                    backgroundColor: colors.background,
+                }}
+                titleStyle={{ color: colors.icon, fontWeight: "bold" }}
+                icon={
+                    <Ionicons
+                        name="share-social"
+                        size={24}
+                        style={{ marginRight: 10, color: colors.icon }}
+                    />
+                }
+            />
         </ParallaxScrollView>
     );
 };

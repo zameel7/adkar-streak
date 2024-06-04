@@ -10,7 +10,7 @@
 
 <div align="center">
 
-![GitHub](https://img.shields.io/badge/Version-1.3.4-blue)
+![GitHub](https://img.shields.io/badge/Version-1.3.6-blue)
 ![GitHub](https://img.shields.io/badge/Platform-Android-lightgrey)
 ![GitHub](https://img.shields.io/badge/Status-Active-brightgreen)
 
@@ -63,15 +63,21 @@ In the output, you'll find options to open the app in a
 ## Todo
 
 - [ ] Reiterate on how the streak should be calculated?
-- [ ] Add a modal for the first time users to explain how streak works
-- [ ] Add a feature to share the app
+- [x] Update adkar list from current to those from Hisnul Muslim
+- [ ] Add transliteration and virtue for each adkar and turn off and on from settings
+- [ ] Add a modal or welcome screen for the first time users to explain how app works
+- [x] Undo mark read for hadees
+- [x] Adkar card swipe should auto scroll to top
+- [x] Add a feature to share the app
 - [x] Add a toggle to switch between light and dark mode
+- [ ] Change font size from settings
+- [x] Turn off and on translations from settings
 - [ ] Add hijri calendar tab
 - [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar
-  - [ ] Add Malayalam translation for adkar
-  - [ ] Add translation option in settings
 - [ ] Add a widget for the home screen
+- [x] Adkar card header should have a progress for adkar completion
+- [x] Add a counter for the number of adkar read
 - [ ] Better UI/UX for the entire app
 
 ## Contributing

@@ -12,6 +12,7 @@ import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 
 const RootLayout = () => {
     const { theme: colorScheme } = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const today = new Date().toISOString().split("T")[0];
 
     async function insertMissingDays(db: SQLiteDatabase) {
@@ -59,6 +60,13 @@ const RootLayout = () => {
             }
         };
 
+        const setTranslation = async () => {
+            const translation = await AsyncStorage.getItem("translations");
+            if (!translation) {
+                AsyncStorage.setItem("translations", "true");
+            }
+        }
+
         registerForPushNotificationsAsync();
 
         if (Platform.OS === "android") {
@@ -73,6 +81,7 @@ const RootLayout = () => {
             schedulePushNotification();
         }
 
+        setTranslation();
         updateStreakData();
     }, []);
 
@@ -82,11 +91,7 @@ const RootLayout = () => {
                 <ThemedView>
                     <ActivityIndicator
                         size="large"
-                        color={
-                            colorScheme === "dark"
-                                ? Colors.light.tint
-                                : Colors.dark.tint
-                        }
+                        color={colors.tint}
                     />
                 </ThemedView>
             }
@@ -111,16 +116,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Morning Adkar",
                                 headerTitleStyle: {
-                                    color: colorScheme === "dark"
-                                    ? Colors.light.text
-                                    : Colors.dark.text,
+                                    color: colors.text
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor:
-                                        colorScheme === "dark"
-                                            ? Colors.light.background
-                                            : Colors.dark.background,
+                                    backgroundColor: colors.border,
                                 },
                             }}
                         />
@@ -129,16 +129,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Evening Adkar",
                                 headerTitleStyle: {
-                                    color: colorScheme === "dark"
-                                    ? Colors.light.text
-                                    : Colors.dark.text,
+                                    color: colors.text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor:
-                                        colorScheme === "dark"
-                                            ? Colors.light.background
-                                            : Colors.dark.background,
+                                    backgroundColor: "pink",
                                 },
                             }}
                         />
@@ -150,6 +145,7 @@ const RootLayout = () => {
 };
 
 async function schedulePushNotification() {
+    await Notifications.cancelAllScheduledNotificationsAsync();
     await Notifications.scheduleNotificationAsync({
         content: {
             title: "Time for morning Adkar! 🌞",

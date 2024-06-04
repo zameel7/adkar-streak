@@ -19,6 +19,7 @@ import ThemeContext from "@/context/ThemeContext";
 const MorningAdkar = () => {
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const carouselRef = useRef(null);
+    const scrollViewRef = useRef(null); // Add a ref for the ScrollView
     const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
     const width = Dimensions.get("window").width;
@@ -61,6 +62,11 @@ const MorningAdkar = () => {
         if (carouselRef.current) {
             // @ts-ignore
             carouselRef.current.next();
+            // Scroll to the top of the ScrollView
+            if (scrollViewRef.current) {
+                // @ts-ignore
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+            }
         }
     };
 
@@ -68,6 +74,11 @@ const MorningAdkar = () => {
         if (carouselRef.current) {
             // @ts-ignore
             carouselRef.current.prev();
+            // Scroll to the top of the ScrollView
+            if (scrollViewRef.current) {
+                // @ts-ignore
+                scrollViewRef.current.scrollTo({ x: 0, y: 0, animated: true });
+            }
         }
     };
 
@@ -114,7 +125,10 @@ const MorningAdkar = () => {
                 >
                     <Ionicons name="chevron-forward" style={styles.arrowText} />
                 </TouchableOpacity>
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+                <ScrollView
+                    contentContainerStyle={{ flexGrow: 1 }}
+                    ref={scrollViewRef} // Add the ref to the ScrollView
+                >
                     <ThemedView style={styles.titleContainer}>
                         <View
                             style={{

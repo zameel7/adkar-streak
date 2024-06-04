@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { StyleSheet, Alert, Switch } from "react-native";
+import { StyleSheet, Alert, Switch, Share } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -36,6 +36,12 @@ const Settings = () => {
         const newTheme = theme === "light" ? "dark" : "light";
         toggleTheme(newTheme);
     };
+
+    const onShare = () => {
+        Share.share({
+            message: "Check out this awesome app! \nhttps://play.google.com/store/apps/details?id=com.zameel7.adkarstreak",
+        });
+    }
 
     const dynamicStyles = StyleSheet.create({
         input: {
@@ -124,6 +130,24 @@ const Settings = () => {
                 />
                 <Ionicons name="moon" size={24} style={dynamicStyles.icon} />
             </ThemedView>
+            <Button
+                title="Share App"
+                onPress={onShare}
+                buttonStyle={{
+                    marginTop: 20,
+                    width: "50%",
+                    alignSelf: "center",
+                    backgroundColor: colors.background,
+                }}
+                titleStyle={{ color: colors.icon, fontWeight: "bold" }}
+                icon={
+                    <Ionicons
+                        name="share-social"
+                        size={24}
+                        style={{marginRight: 10, color: colors.icon}}
+                    />
+                }
+            />
         </ParallaxScrollView>
     );
 };

@@ -112,15 +112,15 @@ const RootLayout = () => {
                                 title: "Morning Adkar",
                                 headerTitleStyle: {
                                     color: colorScheme === "dark"
-                                    ? Colors.light.text
-                                    : Colors.dark.text,
+                                    ? Colors.dark.text
+                                    : Colors.light.text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
                                     backgroundColor:
                                         colorScheme === "dark"
-                                            ? Colors.light.background
-                                            : Colors.dark.background,
+                                            ? Colors.dark.background
+                                            : Colors.light.background,
                                 },
                             }}
                         />
@@ -130,15 +130,15 @@ const RootLayout = () => {
                                 title: "Evening Adkar",
                                 headerTitleStyle: {
                                     color: colorScheme === "dark"
-                                    ? Colors.light.text
-                                    : Colors.dark.text,
+                                    ? Colors.dark.text
+                                    : Colors.light.text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
                                     backgroundColor:
                                         colorScheme === "dark"
-                                            ? Colors.light.background
-                                            : Colors.dark.background,
+                                            ? Colors.dark.background
+                                            : Colors.light.background,
                                 },
                             }}
                         />

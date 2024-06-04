@@ -1,4 +1,4 @@
-import { StyleSheet, useColorScheme } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import { ThemedView } from "./ThemedView";
 import { Button, Card } from "@rneui/themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -15,18 +15,21 @@ type Adkar = {
     adkar: string[];
     translation: string[];
     repeat: string;
+    repeatCount: number;
 };
 
 const AdkarCard = ({
     item,
     index,
     type,
+    setIndex
 }: {
     item: Adkar;
     index: number;
     type: string;
+    setIndex: (index: number) => void;
 }) => {
-    const {theme: colourScheme} = useContext(ThemeContext);
+    const { theme: colourScheme } = useContext(ThemeContext);
     const colors = Colors[colourScheme as keyof typeof Colors];
     const db = useSQLiteContext();
 
@@ -45,43 +48,39 @@ const AdkarCard = ({
                 }
             }
         };
-        
+
         const showTranslation = async () => {
             const translation = await AsyncStorage.getItem("translations");
             if (translation) {
                 setTranslation(JSON.parse(translation));
             }
-        }
+        };
 
         showTranslation();
         checkRead();
     }, []);
 
     const styles = StyleSheet.create({
-        titleContainer: {
-            padding: 16,
-            flex: 1,
-        },
-        cardContainer: {
+        body: {
             padding: 10,
-            minHeight: item.adkar.length * 200,
-        },
-        card: {
-            borderRadius: 10,
-            padding: 20,
-            shadowColor: colors.shadow,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 5,
-            elevation: 4,
             backgroundColor: colors.background,
+            width: "90%",
+            justifyContent: "center",
+            alignSelf: "center",
+            paddingBottom: 70, // Add padding to avoid overlap with button
         },
-        cardTitle: {
+        header: {
+            justifyContent: "center",
+            padding: 16,
+            backgroundColor: colors.background,
+            zIndex: 1,
+            borderBottomColor: colors.border,
+            borderBottomWidth: 1,
+        },
+        title: {
             fontSize: 20,
             fontWeight: "bold",
             color: colors.primary,
-            textAlign: "center",
-            marginBottom: 10,
         },
         adkarText: {
             fontSize: 24,
@@ -105,16 +104,30 @@ const AdkarCard = ({
             marginBottom: 15,
         },
         readButton: {
-            backgroundColor: read
-                ? colors.primary
-                : colors.border,
+            backgroundColor: read ? colors.primary : colors.border,
             borderRadius: 10,
             padding: 10,
             margin: 10,
-            alignSelf: "center",
         },
         buttonIcon: {
             color: read ? "#FFFFFF" : colors.primary,
+        },
+        counter: {
+            paddingHorizontal: 8,
+            borderRadius: 20,
+            borderStyle: "solid",
+            borderWidth: 1,
+            borderColor: colors.primary,
+            alignItems: "center",
+            justifyContent: "center",
+            height: 30,
+            marginVertical: 10,
+        },
+        counterText: {
+            fontSize: 16,
+            fontWeight: "bold",
+            color: colors.primary,
+            lineHeight: 20,
         },
     });
 
@@ -128,7 +141,7 @@ const AdkarCard = ({
                     UPDATE adkarStreaks SET morning = true WHERE date = CURRENT_DATE
                 `);
             }
-            if (Object.keys(data.evening).length === 23 && type) {
+            if (Object.keys(data.evening).length === 24) {
                 await db.execAsync(`
                     UPDATE adkarStreaks SET evening = true WHERE date = CURRENT_DATE
                 `);
@@ -137,64 +150,77 @@ const AdkarCard = ({
     };
 
     return (
-        <ThemedView style={styles.cardContainer}>
-            <Card containerStyle={styles.card}>
-                <Card.Title style={styles.cardTitle}>
-                    {index + 1}) {item.title}
-                </Card.Title>
-                <Button
-                    icon={
-                        <Ionicons
-                            name="checkmark"
-                            size={24}
-                            style={styles.buttonIcon}
-                        />
-                    }
-                    buttonStyle={styles.readButton}
-                    onPress={async () => {
-                        const streakData = await AsyncStorage.getItem(
-                            "streakData"
-                        );
-                        if (streakData) {
-                            const data = JSON.parse(streakData);
-                            if (type === "evening") {
-                                data.evening = {
-                                    ...data.evening,
-                                    [index]: !read,
-                                };
-                            } else if (type === "morning") {
-                                data.morning = {
-                                    ...data.morning,
-                                    [index]: !read,
-                                };
-                            }
-                            await AsyncStorage.setItem(
-                                "streakData",
-                                JSON.stringify(data)
-                            );
-                            setRead(!read);
-                        }
-
-                        await checkAndMarkStreak();
+        <ThemedView style={styles.body}>
+            <ThemedView style={styles.header}>
+                <ThemedText style={styles.title}>{item.title}</ThemedText>
+                <ThemedView
+                    style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
                     }}
-                />
-                <Card.Divider />
+                >
+                    <View style={styles.counter}>
+                        <ThemedText style={styles.counterText}>
+                            {index + 1} / 24
+                        </ThemedText>
+                    </View>
+                    <Button
+                        icon={
+                            <Ionicons
+                                name="checkmark"
+                                size={24}
+                                style={styles.buttonIcon}
+                            />
+                        }
+                        buttonStyle={styles.readButton}
+                        onPress={async () => {
+                            const streakData = await AsyncStorage.getItem(
+                                "streakData"
+                            );
+                            if (streakData) {
+                                const data = JSON.parse(streakData);
+                                if (type === "evening") {
+                                    data.evening = {
+                                        ...data.evening,
+                                        [index]: !read,
+                                    };
+                                } else if (type === "morning") {
+                                    data.morning = {
+                                        ...data.morning,
+                                        [index]: !read,
+                                    };
+                                }
+                                await AsyncStorage.setItem(
+                                    "streakData",
+                                    JSON.stringify(data)
+                                );
+                                setRead(!read);
+                            }
+
+                            await checkAndMarkStreak();
+                        }}
+                    />
+                </ThemedView>
+            </ThemedView>
+            <ScrollView>
                 {item.adkar.map((adkar, index) => (
                     <ThemedView key={index}>
                         <ThemedText style={styles.adkarText}>
                             {adkar}
                         </ThemedText>
-                        {translation && <Collapsible title="Translation">
-                            <ThemedText style={styles.translationText}>
-                                {item.translation[index]}
-                            </ThemedText>
-                        </Collapsible>}
                         <ThemedText style={styles.repeatText}>
                             Repeat: {item.repeat}
                         </ThemedText>
+                        {translation && (
+                            <Collapsible title="Translation">
+                                <ThemedText style={styles.translationText}>
+                                    {item.translation[index]}
+                                </ThemedText>
+                            </Collapsible>
+                        )}
                     </ThemedView>
                 ))}
-            </Card>
+            </ScrollView>
         </ThemedView>
     );
 };

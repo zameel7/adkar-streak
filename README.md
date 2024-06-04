@@ -76,7 +76,8 @@ In the output, you'll find options to open the app in a
 - [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar
 - [ ] Add a widget for the home screen
-- [ ] Adkar card header should have a progress for adkar completion
+- [x] Adkar card header should have a progress for adkar completion
+- [x] Add a counter for the number of adkar read
 - [ ] Better UI/UX for the entire app
 
 ## Contributing

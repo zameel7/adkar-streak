@@ -12,6 +12,7 @@ import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 
 const RootLayout = () => {
     const { theme: colorScheme } = useContext(ThemeContext);
+    const colors = Colors[colorScheme as keyof typeof Colors];
     const today = new Date().toISOString().split("T")[0];
 
     async function insertMissingDays(db: SQLiteDatabase) {
@@ -90,11 +91,7 @@ const RootLayout = () => {
                 <ThemedView>
                     <ActivityIndicator
                         size="large"
-                        color={
-                            colorScheme === "dark"
-                                ? Colors.light.tint
-                                : Colors.dark.tint
-                        }
+                        color={colors.tint}
                     />
                 </ThemedView>
             }
@@ -119,16 +116,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Morning Adkar",
                                 headerTitleStyle: {
-                                    color: colorScheme === "dark"
-                                    ? Colors.dark.text
-                                    : Colors.light.text,
+                                    color: colors.text
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor:
-                                        colorScheme === "dark"
-                                            ? Colors.dark.background
-                                            : Colors.light.background,
+                                    backgroundColor: colors.border,
                                 },
                             }}
                         />
@@ -137,16 +129,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Evening Adkar",
                                 headerTitleStyle: {
-                                    color: colorScheme === "dark"
-                                    ? Colors.dark.text
-                                    : Colors.light.text,
+                                    color: colors.text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor:
-                                        colorScheme === "dark"
-                                            ? Colors.dark.background
-                                            : Colors.light.background,
+                                    backgroundColor: "pink",
                                 },
                             }}
                         />

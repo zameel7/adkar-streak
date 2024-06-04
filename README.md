@@ -63,7 +63,7 @@ In the output, you'll find options to open the app in a
 ## Todo
 
 - [ ] Reiterate on how the streak should be calculated?
-- [ ] Update adkar list from current to those from Hisnul Muslim
+- [x] Update adkar list from current to those from Hisnul Muslim
 - [ ] Add transliteration and virtue for each adkar and turn off and on from settings
 - [ ] Add a modal or welcome screen for the first time users to explain how app works
 - [ ] Undo mark read for hadees

@@ -59,6 +59,13 @@ const RootLayout = () => {
             }
         };
 
+        const setTranslation = async () => {
+            const translation = await AsyncStorage.getItem("translations");
+            if (!translation) {
+                AsyncStorage.setItem("translations", "true");
+            }
+        }
+
         registerForPushNotificationsAsync();
 
         if (Platform.OS === "android") {
@@ -73,6 +80,7 @@ const RootLayout = () => {
             schedulePushNotification();
         }
 
+        setTranslation();
         updateStreakData();
     }, []);
 

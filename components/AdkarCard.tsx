@@ -31,6 +31,7 @@ const AdkarCard = ({
     const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);
+    const [translation, setTranslation] = useState(false);
 
     useEffect(() => {
         const checkRead = async () => {
@@ -44,6 +45,15 @@ const AdkarCard = ({
                 }
             }
         };
+        
+        const showTranslation = async () => {
+            const translation = await AsyncStorage.getItem("translations");
+            if (translation) {
+                setTranslation(JSON.parse(translation));
+            }
+        }
+
+        showTranslation();
         checkRead();
     }, []);
 
@@ -174,11 +184,11 @@ const AdkarCard = ({
                         <ThemedText style={styles.adkarText}>
                             {adkar}
                         </ThemedText>
-                        <Collapsible title="Translation">
+                        {translation && <Collapsible title="Translation">
                             <ThemedText style={styles.translationText}>
                                 {item.translation[index]}
                             </ThemedText>
-                        </Collapsible>
+                        </Collapsible>}
                         <ThemedText style={styles.repeatText}>
                             Repeat: {item.repeat}
                         </ThemedText>

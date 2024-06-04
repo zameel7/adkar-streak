@@ -71,7 +71,7 @@ In the output, you'll find options to open the app in a
 - [x] Add a feature to share the app
 - [x] Add a toggle to switch between light and dark mode
 - [ ] Change font size from settings
-- [ ] Turn off and on translations from settings
+- [x] Turn off and on translations from settings
 - [ ] Add hijri calendar tab
 - [x] Change the date in the header to hijri date
 - [ ] Add translation option in settings and Malayalam translation for adkar

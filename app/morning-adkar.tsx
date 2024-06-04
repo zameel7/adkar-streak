@@ -8,7 +8,6 @@ import {
     Dimensions,
     ScrollView,
     StyleSheet,
-    View,
     TouchableOpacity,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -142,9 +141,9 @@ const MorningAdkar = () => {
 
     return (
         <SafeAreaProvider>
-            <View style={{ flex: 1 }}>
+            <ThemedView style={{ flex: 1 }}>
                 <ProgressBar
-                    progress={(index) / adkars.length || 0}
+                    progress={index / adkars.length || 0}
                     width={Dimensions.get("window").width}
                     color={colors.primary}
                     borderColor={colors.border}
@@ -167,7 +166,7 @@ const MorningAdkar = () => {
                     ref={scrollViewRef} // Add the ref to the ScrollView
                 >
                     <ThemedView style={styles.titleContainer}>
-                        <View
+                        <ThemedView
                             style={{
                                 flex: 1,
                                 justifyContent: "center",
@@ -190,28 +189,28 @@ const MorningAdkar = () => {
                                     activeOffsetX: [-10, 10],
                                 }}
                             />
-                        </View>
+                        </ThemedView>
                     </ThemedView>
                 </ScrollView>
-            </View>
-            <ThemedView style={styles.repeatCounter}>
-                <Button
-                    title={counter?.toString()}
-                    onPress={() => {
-                        if (counter === 1) {
-                            handleNext();
-                        } else {
-                            setCounter(counter - 1);
-                        }
-                    }}
-                    buttonStyle={{
-                        backgroundColor: "transparent",
-                        width: "100%",
-                        height: "100%",
-                        borderRadius: 25,
-                    }}
-                    titleStyle={styles.repeatCounterText}
-                />
+                <ThemedView style={styles.repeatCounter}>
+                    <Button
+                        title={counter?.toString()}
+                        onPress={() => {
+                            if (counter === 1) {
+                                handleNext();
+                            } else {
+                                setCounter(counter - 1);
+                            }
+                        }}
+                        buttonStyle={{
+                            backgroundColor: "transparent",
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 25,
+                        }}
+                        titleStyle={styles.repeatCounterText}
+                    />
+                </ThemedView>
             </ThemedView>
         </SafeAreaProvider>
     );

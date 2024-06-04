@@ -1,19 +1,18 @@
 import { Stack, router } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useContext, useEffect } from "react";
+import { Suspense, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, Platform } from "react-native";
-import { Colors } from "@/constants/Colors";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
+import { Colors } from "@/constants/Colors";
 
 const RootLayout = () => {
-    const { theme: colorScheme } = useContext(ThemeContext);
-    const colors = Colors[colorScheme as keyof typeof Colors];
     const today = new Date().toISOString().split("T")[0];
+    const { theme: colorScheme } = useContext(ThemeContext);
 
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
@@ -60,13 +59,6 @@ const RootLayout = () => {
             }
         };
 
-        const setTranslation = async () => {
-            const translation = await AsyncStorage.getItem("translations");
-            if (!translation) {
-                AsyncStorage.setItem("translations", "true");
-            }
-        }
-
         registerForPushNotificationsAsync();
 
         if (Platform.OS === "android") {
@@ -81,7 +73,6 @@ const RootLayout = () => {
             schedulePushNotification();
         }
 
-        setTranslation();
         updateStreakData();
     }, []);
 
@@ -91,7 +82,6 @@ const RootLayout = () => {
                 <ThemedView>
                     <ActivityIndicator
                         size="large"
-                        color={colors.tint}
                     />
                 </ThemedView>
             }
@@ -116,11 +106,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Morning Adkar",
                                 headerTitleStyle: {
-                                    color: colors.text
+                                    color: Colors[colorScheme as keyof typeof Colors].text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor: colors.border,
+                                    backgroundColor: Colors[colorScheme as keyof typeof Colors].border,
                                 },
                             }}
                         />
@@ -129,11 +119,11 @@ const RootLayout = () => {
                             options={{
                                 title: "Evening Adkar",
                                 headerTitleStyle: {
-                                    color: colors.text,
+                                    color: Colors[colorScheme as keyof typeof Colors].text,
                                 },
                                 headerBackTitle: "Back",
                                 headerStyle: {
-                                    backgroundColor: "pink",
+                                    backgroundColor: Colors[colorScheme as keyof typeof Colors].border,
                                 },
                             }}
                         />
@@ -145,7 +135,11 @@ const RootLayout = () => {
 };
 
 async function schedulePushNotification() {
-    await Notifications.cancelAllScheduledNotificationsAsync();
+    try {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+    } catch (error) {
+        console.error("Error cancelling scheduled notifications:", error);
+    }
     await Notifications.scheduleNotificationAsync({
         content: {
             title: "Time for morning Adkar! 🌞",

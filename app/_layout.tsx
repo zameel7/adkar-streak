@@ -9,6 +9,7 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 import { Colors } from "@/constants/Colors";
+import StackScreen from "./stack";
 
 const RootLayout = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -74,7 +75,7 @@ const RootLayout = () => {
         }
 
         updateStreakData();
-    }, []);
+    }, [colorScheme]);
 
     return (
         <Suspense
@@ -92,42 +93,7 @@ const RootLayout = () => {
                 useSuspense
             >
                 <ThemeProvider>
-                    <Stack>
-                        <Stack.Screen
-                            name="index"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="(tabs)"
-                            options={{ headerShown: false }}
-                        />
-                        <Stack.Screen
-                            name="morning-adkar"
-                            options={{
-                                title: "Morning Adkar",
-                                headerTitleStyle: {
-                                    color: Colors[colorScheme as keyof typeof Colors].text,
-                                },
-                                headerBackTitle: "Back",
-                                headerStyle: {
-                                    backgroundColor: Colors[colorScheme as keyof typeof Colors].border,
-                                },
-                            }}
-                        />
-                        <Stack.Screen
-                            name="evening-adkar"
-                            options={{
-                                title: "Evening Adkar",
-                                headerTitleStyle: {
-                                    color: Colors[colorScheme as keyof typeof Colors].text,
-                                },
-                                headerBackTitle: "Back",
-                                headerStyle: {
-                                    backgroundColor: Colors[colorScheme as keyof typeof Colors].border,
-                                },
-                            }}
-                        />
-                    </Stack>
+                    <StackScreen />
                 </ThemeProvider>
             </SQLiteProvider>
         </Suspense>

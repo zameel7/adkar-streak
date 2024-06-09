@@ -40,7 +40,8 @@
           "icon": "./assets/images/icon.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      "react-native-android-widget"
     ],
     "experiments": {
       "typedRoutes": true

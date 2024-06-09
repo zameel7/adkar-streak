@@ -1,6 +1,6 @@
 {
   "name": "adkar-streak",
-  "main": "expo-router/entry",
+  "main": "index.tsx",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -37,6 +37,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "0.74.1",
+    "react-native-android-widget": "^0.14.1",
     "react-native-elements": "^3.4.3",
     "react-native-event-listeners": "^1.0.7",
     "react-native-gesture-handler": "~2.16.1",

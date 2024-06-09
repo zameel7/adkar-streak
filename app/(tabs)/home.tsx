@@ -15,6 +15,9 @@ import { useSQLiteContext } from "expo-sqlite";
 import { Colors } from "@/constants/Colors";
 import ThemeContext from "@/context/ThemeContext";
 
+import { WidgetPreview } from "react-native-android-widget";
+import { HelloWidget } from "@/components/HelloWidget";
+
 function adkarTime() {
     const hours = new Date().getHours();
     return hours >= 5 && hours < 7
@@ -154,6 +157,11 @@ const Home = () => {
     }
 
     const styles = StyleSheet.create({
+        widgetContainer: {
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+        },
         headerImage: {
             color: "#808080",
             bottom: -90,
@@ -235,6 +243,13 @@ const Home = () => {
                 }
                 setRefreshingAPI={setRefreshing}
             >
+                <View style={styles.widgetContainer}>
+                    <WidgetPreview
+                        renderWidget={() => <HelloWidget />}
+                        width={320}
+                        height={200}
+                    />
+                </View>
                 <ThemedView style={styles.titleContainer}>
                     <ThemedText type="title">
                         Hey there {name}! <HelloWave />

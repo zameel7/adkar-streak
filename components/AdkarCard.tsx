@@ -22,11 +22,13 @@ const AdkarCard = ({
     item,
     index,
     type,
-    setIndex
+    height,
+    setIndex,
 }: {
     item: Adkar;
     index: number;
     type: string;
+    height: number;
     setIndex: (index: number) => void;
 }) => {
     const { theme: colourScheme } = useContext(ThemeContext);
@@ -67,13 +69,12 @@ const AdkarCard = ({
             width: "90%",
             justifyContent: "center",
             alignSelf: "center",
-            paddingBottom: 70, // Add padding to avoid overlap with button
         },
         header: {
+            marginTop: 20,
             justifyContent: "center",
             padding: 16,
             backgroundColor: colors.background,
-            zIndex: 1,
             borderBottomColor: colors.border,
             borderBottomWidth: 1,
         },
@@ -121,7 +122,7 @@ const AdkarCard = ({
             alignItems: "center",
             justifyContent: "center",
             height: 30,
-            marginVertical: 10,
+            marginVertical: 20,
         },
         counterText: {
             fontSize: 16,
@@ -202,7 +203,7 @@ const AdkarCard = ({
                     />
                 </ThemedView>
             </ThemedView>
-            <ScrollView>
+            <ThemedView style={{height: height}}>
                 {item.adkar.map((adkar, index) => (
                     <ThemedView key={index}>
                         <ThemedText style={styles.adkarText}>
@@ -212,15 +213,13 @@ const AdkarCard = ({
                             Repeat: {item.repeat}
                         </ThemedText>
                         {translation && (
-                            <Collapsible title="Translation">
-                                <ThemedText style={styles.translationText}>
-                                    {item.translation[index]}
-                                </ThemedText>
-                            </Collapsible>
+                            <ThemedText style={styles.translationText}>
+                                {item.translation[index]}
+                            </ThemedText>
                         )}
                     </ThemedView>
                 ))}
-            </ScrollView>
+            </ThemedView>
         </ThemedView>
     );
 };

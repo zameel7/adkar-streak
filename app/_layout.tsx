@@ -1,15 +1,17 @@
 import { Stack, router } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useContext, useEffect, useState } from "react";
+import { Suspense, useContext, useEffect } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
-import { Colors } from "@/constants/Colors";
 import StackScreen from "./stack";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync()
 
 const RootLayout = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -45,6 +47,14 @@ const RootLayout = () => {
     }
 
     useNotificationObserver();
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            SplashScreen.hideAsync();
+        }, 2000);
+
+        return () => clearTimeout(timeout);
+    }, []);
 
     useEffect(() => {
         const updateStreakData = async () => {

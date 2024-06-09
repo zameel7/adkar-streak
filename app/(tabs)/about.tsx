@@ -100,10 +100,6 @@ const About = () => {
                         also have streaks to keep you motivated. If you have any
                         feedback or suggestions, please feel free to contact me.
                     </ThemedText>
-                    <ThemedText style={styles.description}>
-                        If you like our app, please consider supporting me by
-                        buying me a coffee.
-                    </ThemedText>
                     <ThemedText style={styles.tyText}>
                         Jazakallah Khair!
                     </ThemedText>

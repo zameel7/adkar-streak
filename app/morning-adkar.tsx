@@ -18,14 +18,17 @@ import { Button } from "react-native-elements";
 import ProgressBar from "react-native-progress/Bar";
 
 const MorningAdkar = () => {
+    const width = Dimensions.get("window").width;
+
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const [counter, setCounter] = useState(1);
     const [index, setIndex] = useState<number>(0);
+    const [height, setHeight] = useState<number>(width * 3);
+
     const carouselRef = useRef(null);
     const scrollViewRef = useRef(null); // Add a ref for the ScrollView
     const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
-    const width = Dimensions.get("window").width;
 
     type Adkar = {
         title: string;
@@ -50,6 +53,17 @@ const MorningAdkar = () => {
             }
         );
 
+        let firstAdkarHeight = 0;
+        if (adkarsArray[0]) {
+            for (const adkar of adkarsArray[0].adkar) {
+                firstAdkarHeight += adkar.length;
+            }
+            for (const translation of adkarsArray[0].translation) {
+                firstAdkarHeight += translation.length;
+            }
+        }
+        setHeight(firstAdkarHeight + 250);
+
         setAdkars(adkarsArray);
     }, []);
 
@@ -57,6 +71,18 @@ const MorningAdkar = () => {
         if (adkars && index && adkars[index]) {
             setCounter(adkars[index].repeatCount);
         }
+
+        let height = 0;
+        if (adkars && index && adkars[index]) {
+            for (const adkar of adkars[index].adkar) {
+                height += adkar.length;
+            }
+            for (const translation of adkars[index].translation) {
+                height += translation.length;
+            }
+            setHeight(height + 250);
+        }
+        
     }, [index, adkars]);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
@@ -65,6 +91,7 @@ const MorningAdkar = () => {
                 item={item}
                 index={adkars.indexOf(item)}
                 type="morning"
+                height={height}
                 setIndex={setIndex}
             />
         );
@@ -176,7 +203,7 @@ const MorningAdkar = () => {
                             <Carousel
                                 ref={carouselRef}
                                 width={width}
-                                height={width * 4}
+                                height={height || width * 3}
                                 loop
                                 data={adkars}
                                 renderItem={renderAdkarCard}

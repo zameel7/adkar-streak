@@ -80,6 +80,24 @@ const TabLayout = () => {
                     ),
                 }}
             />
+            <Tabs.Screen
+                name="widget-preview"
+                options={{
+                    title: "Widget Preview",
+                    tabBarIcon: ({ focused }) => (
+                        <TabBarIcon
+                            name={focused ? "phone-portrait" : "phone-portrait"}
+                            color={
+                                focused
+                                    ? Colors[colorScheme as keyof typeof Colors]
+                                          .tabIconSelected
+                                    : Colors[colorScheme as keyof typeof Colors]
+                                          .tabIconDefault
+                            }
+                        />
+                    ),
+                }}
+            />
         </Tabs>
     );
 };

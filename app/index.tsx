@@ -10,7 +10,7 @@ import { Colors } from "@/constants/Colors";
 import LinearGradient from "react-native-linear-gradient";
 import ThemeContext from "@/context/ThemeContext";
 
-const Index: React.FC = () => {
+const Index = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
     const { theme: colorScheme } = useContext(ThemeContext);

@@ -11,7 +11,7 @@ import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 import StackScreen from "./stack";
 import * as SplashScreen from "expo-splash-screen";
 
-SplashScreen.preventAutoHideAsync()
+SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
     const today = new Date().toISOString().split("T")[0];
@@ -57,6 +57,7 @@ const RootLayout = () => {
     }, []);
 
     useEffect(() => {
+        
         const updateStreakData = async () => {
             const streakData = await AsyncStorage.getItem("streakData");
             if (
@@ -91,9 +92,7 @@ const RootLayout = () => {
         <Suspense
             fallback={
                 <ThemedView>
-                    <ActivityIndicator
-                        size="large"
-                    />
+                    <ActivityIndicator size="large" />
                 </ThemedView>
             }
         >
@@ -110,34 +109,75 @@ const RootLayout = () => {
     );
 };
 
-async function schedulePushNotification() {
+// Define a type for the time object
+interface TimeObject {
+    hour: number;
+    minute: number;
+}
+
+// Helper function to parse ISO date string
+const parseTime = (timeString: string | null): TimeObject => {
+    if (timeString) {
+        const date = new Date(timeString);
+        const hour = date.getHours();
+        const minute = date.getMinutes();
+        return { hour, minute };
+    }
+    return { hour: 5, minute: 30 }; // Default values
+};
+
+// Function to schedule notifications
+async function schedulePushNotification(): Promise<void> {
     try {
         await Notifications.cancelAllScheduledNotificationsAsync();
     } catch (error) {
         console.error("Error cancelling scheduled notifications:", error);
     }
-    await Notifications.scheduleNotificationAsync({
-        content: {
-            title: "Time for morning Adkar! 🌞",
-            body: "Jābir (raḍiy Allāhu ʿanhū) relates that after Allah’s Messenger ﷺ would perform Fajr, he used to remain seated in his place of prayer until the sun had fully risen (Muslim).",
-        },
-        trigger: {
-            hour: 5,
-            minute: 30,
-            repeats: true,
-        },
-    });
-    await Notifications.scheduleNotificationAsync({
-        content: {
-            title: "Time for evening Adkar! 🌙",
-            body: "'Believers, remember Allah often and glorify Him morning and evening' (33:41-42).",
-        },
-        trigger: {
-            hour: 16,
-            minute: 30,
-            repeats: true,
-        },
-    });
+
+    // Retrieve stored notification times
+    const morningTime = await AsyncStorage.getItem("morningTime");
+    const eveningTime = await AsyncStorage.getItem("eveningTime");
+
+    // Helper function to schedule a notification
+    const scheduleNotification = async (
+        title: string,
+        body: string,
+        time: string | null,
+        defaultHour: number,
+        defaultMinute: number
+    ): Promise<void> => {
+        const { hour, minute } = parseTime(time);
+
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title,
+                body,
+            },
+            trigger: {
+                hour,
+                minute,
+                repeats: true,
+            },
+        });
+    };
+
+    // Schedule morning notification
+    await scheduleNotification(
+        "Time for morning Adkar! 🌞",
+        "Jābir (raḍiy Allāhu ʿanhū) relates that after Allah’s Messenger ﷺ would perform Fajr, he used to remain seated in his place of prayer until the sun had fully risen (Muslim).",
+        morningTime,
+        5,
+        30
+    );
+
+    // Schedule evening notification
+    await scheduleNotification(
+        "Time for evening Adkar! 🌙",
+        "'Believers, remember Allah often and glorify Him morning and evening' (33:41-42).",
+        eveningTime,
+        16,
+        30
+    );
 }
 
 async function registerForPushNotificationsAsync() {

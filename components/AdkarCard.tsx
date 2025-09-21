@@ -1,13 +1,10 @@
-import { StyleSheet, ScrollView, View } from "react-native";
-import { ThemedView } from "./ThemedView";
-import { Button, Card } from "@rneui/themed";
+import React, { useContext, useEffect, useState } from "react";
+import { View, TouchableOpacity } from "react-native";
+import { GlassCard, GlassView, GlassButton, GlassText } from "./glass";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ThemedText } from "./ThemedText";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useContext, useEffect, useState } from "react";
 import { useSQLiteContext } from "expo-sqlite";
-import { Colors } from "@/constants/Colors";
-import { Collapsible } from "./Collapsible";
+import { LinearGradient } from "expo-linear-gradient";
 import ThemeContext from "@/context/ThemeContext";
 
 type Adkar = {
@@ -31,8 +28,7 @@ const AdkarCard = ({
     height: number;
     setIndex: (index: number) => void;
 }) => {
-    const { theme: colourScheme } = useContext(ThemeContext);
-    const colors = Colors[colourScheme as keyof typeof Colors];
+    const { theme } = useContext(ThemeContext);
     const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);
@@ -44,93 +40,23 @@ const AdkarCard = ({
             if (streakData) {
                 const data = JSON.parse(streakData);
                 if (data.morning[index] && type === "morning") {
-                    setRead(!read);
+                    setRead(true);
                 } else if (data.evening[index] && type === "evening") {
-                    setRead(!read);
+                    setRead(true);
                 }
             }
         };
 
         const showTranslation = async () => {
-            const translation = await AsyncStorage.getItem("translations");
-            if (translation) {
-                setTranslation(JSON.parse(translation));
+            const translationData = await AsyncStorage.getItem("translations");
+            if (translationData) {
+                setTranslation(JSON.parse(translationData));
             }
         };
 
         showTranslation();
         checkRead();
     }, []);
-
-    const styles = StyleSheet.create({
-        body: {
-            padding: 10,
-            backgroundColor: colors.background,
-            width: "90%",
-            justifyContent: "center",
-            alignSelf: "center",
-        },
-        header: {
-            marginTop: 20,
-            justifyContent: "center",
-            padding: 16,
-            backgroundColor: colors.background,
-            borderBottomColor: colors.border,
-            borderBottomWidth: 1,
-        },
-        title: {
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.primary,
-        },
-        adkarText: {
-            fontSize: 24,
-            letterSpacing: 2,
-            lineHeight: 35,
-            marginBottom: 8,
-            color: colors.input,
-            padding: 10,
-            fontWeight: "bold",
-        },
-        translationText: {
-            fontSize: 18,
-            margin: 15,
-            color: colors.placeholder,
-        },
-        repeatText: {
-            fontSize: 16,
-            fontWeight: "bold",
-            color: colors.primary,
-            marginLeft: 15,
-            marginBottom: 15,
-        },
-        readButton: {
-            backgroundColor: read ? colors.primary : colors.border,
-            borderRadius: 10,
-            padding: 10,
-            margin: 10,
-        },
-        buttonIcon: {
-            color: read ? "#FFFFFF" : colors.primary,
-        },
-        counter: {
-            paddingHorizontal: 8,
-            borderRadius: 20,
-            borderStyle: "solid",
-            borderWidth: 1,
-            borderColor: colors.primary,
-            alignItems: "center",
-            justifyContent: "center",
-            height: 30,
-            marginVertical: 20,
-        },
-        counterText: {
-            fontSize: 16,
-            fontWeight: "bold",
-            color: colors.primary,
-            lineHeight: 20,
-        },
-    });
 
     const checkAndMarkStreak = async () => {
         const streakData = await AsyncStorage.getItem("streakData");
@@ -150,77 +76,154 @@ const AdkarCard = ({
         }
     };
 
-    return (
-        <ThemedView style={styles.body}>
-            <ThemedView style={styles.header}>
-                <ThemedText style={styles.title}>{item.title}</ThemedText>
-                <ThemedView
-                    style={{
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                    }}
-                >
-                    <View style={styles.counter}>
-                        <ThemedText style={styles.counterText}>
-                            {index + 1} / 24
-                        </ThemedText>
-                    </View>
-                    <Button
-                        icon={
-                            <Ionicons
-                                name="checkmark"
-                                size={24}
-                                style={styles.buttonIcon}
-                            />
-                        }
-                        buttonStyle={styles.readButton}
-                        onPress={async () => {
-                            const streakData = await AsyncStorage.getItem(
-                                "streakData"
-                            );
-                            if (streakData) {
-                                const data = JSON.parse(streakData);
-                                if (type === "evening") {
-                                    data.evening = {
-                                        ...data.evening,
-                                        [index]: !read,
-                                    };
-                                } else if (type === "morning") {
-                                    data.morning = {
-                                        ...data.morning,
-                                        [index]: !read,
-                                    };
-                                }
-                                await AsyncStorage.setItem(
-                                    "streakData",
-                                    JSON.stringify(data)
-                                );
-                                setRead(!read);
-                            }
+    const handleMarkRead = async () => {
+        const streakData = await AsyncStorage.getItem("streakData");
+        if (streakData) {
+            const data = JSON.parse(streakData);
+            if (type === "evening") {
+                data.evening = {
+                    ...data.evening,
+                    [index]: !read,
+                };
+            } else if (type === "morning") {
+                data.morning = {
+                    ...data.morning,
+                    [index]: !read,
+                };
+            }
+            await AsyncStorage.setItem("streakData", JSON.stringify(data));
+            setRead(!read);
+        }
+        await checkAndMarkStreak();
+    };
 
-                            await checkAndMarkStreak();
-                        }}
-                    />
-                </ThemedView>
-            </ThemedView>
-            <ThemedView style={{height: height}}>
-                {item.adkar.map((adkar, index) => (
-                    <ThemedView key={index}>
-                        <ThemedText style={styles.adkarText}>
-                            {adkar}
-                        </ThemedText>
-                        <ThemedText style={styles.repeatText}>
-                            Repeat: {item.repeat}
-                        </ThemedText>
-                        {translation && (
-                            <ThemedText style={styles.translationText}>
-                                {item.translation[index]}
-                            </ThemedText>
-                        )}
-                    </ThemedView>
-                ))}
-            </ThemedView>
-        </ThemedView>
+    return (
+        <LinearGradient
+            colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#667eea', '#764ba2']}
+            style={{
+                margin: 16,
+                borderRadius: 20,
+                overflow: 'hidden'
+            }}
+        >
+            <GlassCard
+                intensity={20}
+                glassStyle="medium"
+                padding="large"
+                className="m-0"
+            >
+                {/* Header with glass effect */}
+                <GlassView
+                    intensity={10}
+                    glassStyle="light"
+                    className="mb-4 p-4 rounded-xl"
+                >
+                    <View className="flex-row justify-between items-center mb-3">
+                        <GlassText
+                            variant="subtitle"
+                            color="white"
+                            className="flex-1 pr-4 font-bold text-xl"
+                        >
+                            {item.title}
+                        </GlassText>
+
+                        {/* Progress Counter */}
+                        <GlassView
+                            intensity={15}
+                            glassStyle="strong"
+                            className="px-3 py-2 rounded-full"
+                        >
+                            <GlassText
+                                variant="caption"
+                                color="primary"
+                                className="font-semibold"
+                            >
+                                {index + 1} / 24
+                            </GlassText>
+                        </GlassView>
+                    </View>
+
+                    {/* Check Button */}
+                    <TouchableOpacity onPress={handleMarkRead}>
+                        <GlassView
+                            intensity={read ? 25 : 10}
+                            glassStyle={read ? "strong" : "light"}
+                            className={`flex-row items-center justify-center p-3 rounded-xl ${
+                                read ? 'bg-primary/30' : 'bg-white/10'
+                            }`}
+                        >
+                            <Ionicons
+                                name={read ? "checkmark-circle" : "checkmark-circle-outline"}
+                                size={24}
+                                color={read ? "#61B553" : "#ffffff"}
+                                style={{ marginRight: 8 }}
+                            />
+                            <GlassText
+                                color={read ? "primary" : "white"}
+                                className="font-semibold"
+                            >
+                                {read ? "Completed" : "Mark as Read"}
+                            </GlassText>
+                        </GlassView>
+                    </TouchableOpacity>
+                </GlassView>
+
+                {/* Content Area */}
+                <View style={{ maxHeight: height }} className="space-y-4">
+                    {item.adkar.map((adkar, adkarIndex) => (
+                        <GlassView
+                            key={adkarIndex}
+                            intensity={15}
+                            glassStyle="light"
+                            className="p-4 rounded-xl"
+                        >
+                            {/* Arabic Text */}
+                            <GlassText
+                                color="white"
+                                className="text-2xl leading-9 text-center mb-4 font-bold"
+                                style={{
+                                    letterSpacing: 2,
+                                    lineHeight: 35
+                                }}
+                            >
+                                {adkar}
+                            </GlassText>
+
+                            {/* Repeat Instructions */}
+                            <GlassView
+                                intensity={10}
+                                glassStyle="light"
+                                className="p-2 rounded-lg mb-3"
+                            >
+                                <GlassText
+                                    variant="caption"
+                                    color="primary"
+                                    className="text-center font-semibold"
+                                >
+                                    Repeat: {item.repeat}
+                                </GlassText>
+                            </GlassView>
+
+                            {/* Translation */}
+                            {translation && item.translation[adkarIndex] && (
+                                <GlassView
+                                    intensity={5}
+                                    glassStyle="light"
+                                    className="p-3 rounded-lg"
+                                >
+                                    <GlassText
+                                        color="muted"
+                                        className="text-lg leading-6 text-center italic"
+                                    >
+                                        {item.translation[adkarIndex]}
+                                    </GlassText>
+                                </GlassView>
+                            )}
+                        </GlassView>
+                    ))}
+                </View>
+            </GlassCard>
+        </LinearGradient>
     );
 };
 

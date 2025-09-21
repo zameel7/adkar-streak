@@ -1,20 +1,16 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, StyleSheet, ActivityIndicator } from "react-native";
+import { Alert, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ThemedView } from "@/components/ThemedView";
 import { router } from "expo-router";
-import { Button, Input } from "@rneui/themed";
-import { ThemedText } from "@/components/ThemedText";
-import { Colors } from "@/constants/Colors";
-import LinearGradient from "react-native-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
+import { GlassCard, GlassInput, GlassButton, GlassText } from "@/components/glass";
 import ThemeContext from "@/context/ThemeContext";
 
 const Index: React.FC = () => {
     const [name, setName] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(true);
-    const { theme: colorScheme } = useContext(ThemeContext);
-    const colors = Colors[colorScheme as keyof typeof Colors];
+    const { theme } = useContext(ThemeContext);
 
     const storeData = async (value: string) => {
         try {
@@ -25,103 +21,88 @@ const Index: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        await storeData(name);
-        router.push("/home");
+        if (name.trim()) {
+            await storeData(name.trim());
+            router.push("/home");
+        } else {
+            Alert.alert("Please enter your name");
+        }
     };
 
-    const dynamicStyles = StyleSheet.create({
-        titleContainer: {
-            flexDirection: "row",
-            gap: 8,
-        },
-        loadingContainer: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-        },
-        container: {
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 16,
-        },
-        subtitle: {
-            marginVertical: 20,
-        },
-        inputContainer: {
-            width: "80%",
-            justifyContent: "center",
-        },
-        input: {
-            paddingHorizontal: 10,
-            paddingVertical: 5,
-            borderColor: "#ccc",
-            borderWidth: 1,
-            borderRadius: 5,
-            color: colors.input,
-        },
-        button: {
-            width: "80%",
-            marginHorizontal: "auto",
-        },
-        link: {
-            marginTop: 15,
-            paddingVertical: 15,
-        },
-        linkText: {
-            color: colors.linkText,
-        },
-    });
-
     useEffect(() => {
-        const fetchName = async () => {
-            const storedName = await AsyncStorage.getItem("name");
-            if (storedName) {
+        const checkName = async () => {
+            const existingName = await AsyncStorage.getItem("name");
+            if (existingName) {
                 router.push("/home");
+            } else {
+                setLoading(false);
             }
-            setLoading(false);
         };
-
-        fetchName();
+        checkName();
     }, []);
 
     if (loading) {
         return (
-            <SafeAreaProvider>
-                <ThemedView style={dynamicStyles.loadingContainer}>
-                    <ActivityIndicator size="large" color={colors.tint} />
-                </ThemedView>
-            </SafeAreaProvider>
+            <LinearGradient
+                colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#667eea', '#764ba2']}
+                style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+            >
+                <GlassCard intensity={20} glassStyle="medium">
+                    <ActivityIndicator size="large" color="#ffffff" />
+                    <GlassText color="white" className="mt-4 text-center">
+                        Loading...
+                    </GlassText>
+                </GlassCard>
+            </LinearGradient>
         );
     }
 
     return (
         <SafeAreaProvider>
-            <ThemedView style={dynamicStyles.container}>
-                <ThemedText type="title">Hey there {name}!</ThemedText>
-                <ThemedText type="subtitle" style={dynamicStyles.subtitle}>
-                    What's your name?
-                </ThemedText>
-                <Input
-                    placeholder="Your name"
-                    placeholderTextColor={colors.placeholder}
-                    onChangeText={(name) => setName(name)}
-                    containerStyle={dynamicStyles.inputContainer}
-                    inputStyle={dynamicStyles.input}
-                />
-                <Button
-                    ViewComponent={LinearGradient}
-                    linearGradientProps={{
-                        colors: [colors.primary, colors.secondary],
-                        start: { x: 0, y: 0.5 },
-                        end: { x: 1, y: 0.5 },
-                    }}
-                    title="Submit"
-                    onPress={handleSubmit}
-                    buttonStyle={dynamicStyles.button}
-                    containerStyle={dynamicStyles.inputContainer}
-                />
-            </ThemedView>
+            <LinearGradient
+                colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#667eea', '#764ba2']}
+                style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 }}
+            >
+                <GlassCard
+                    intensity={20}
+                    glassStyle="medium"
+                    padding="large"
+                    className="w-full max-w-sm"
+                >
+                    <GlassText
+                        variant="title"
+                        color="white"
+                        className="text-center mb-4"
+                    >
+                        Welcome to Adkar Champ! 🤲
+                    </GlassText>
+
+                    <GlassText
+                        variant="subtitle"
+                        color="white"
+                        className="text-center mb-8 opacity-90"
+                    >
+                        What's your name?
+                    </GlassText>
+
+                    <GlassInput
+                        placeholder="Enter your name"
+                        value={name}
+                        onChangeText={setName}
+                        intensity={15}
+                        glassStyle="light"
+                        className="mb-6"
+                    />
+
+                    <GlassButton
+                        title="Let's Begin"
+                        onPress={handleSubmit}
+                        variant="primary"
+                        size="large"
+                        glassIntensity={15}
+                    />
+                </GlassCard>
+            </LinearGradient>
         </SafeAreaProvider>
     );
 };

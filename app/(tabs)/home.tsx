@@ -3,8 +3,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useContext, useEffect, useState } from "react";
-import { Button } from "@rneui/themed";
-import LinearGradient from "react-native-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 
 import ParallaxScrollView from "@/components/ParallaxScrollView";

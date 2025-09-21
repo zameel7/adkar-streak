@@ -1,14 +1,13 @@
 // About.js
 import React, { useContext } from "react";
 import { Linking, StyleSheet } from "react-native";
-import { Button } from "@rneui/themed";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/constants/Colors";
-import LinearGradient from "react-native-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import * as Application from "expo-application";
 import { ExternalLink } from "@/components/ExternalLink";
 import ThemeContext from "@/context/ThemeContext";

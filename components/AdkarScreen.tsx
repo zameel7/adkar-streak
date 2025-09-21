@@ -59,7 +59,7 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type }) => {
         );
     };
 
-    const buttonColor = type === 'morning' ? '#61B553' : '#28A766';
+    const buttonColor = type === 'morning' ? '#2196F3' : '#1976D2';
 
     const styles = StyleSheet.create({
         titleContainer: {

@@ -13,7 +13,7 @@ const TabLayout = () => {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#61B553",
+        tabBarActiveTintColor: "#2196F3",
         tabBarInactiveTintColor: theme === 'dark' ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.6)",
         headerShown: false,
         tabBarStyle: {

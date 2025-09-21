@@ -121,7 +121,7 @@ const Settings = () => {
           <Ionicons
             name="settings"
             size={40}
-            color="#61B553"
+            color="#2196F3"
             style={{ marginBottom: 12 }}
           />
           <ThemedText style={{
@@ -143,7 +143,7 @@ const Settings = () => {
           borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="person" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <Ionicons name="person" size={24} color="#2196F3" style={{ marginRight: 12 }} />
             <ThemedText style={{
               fontSize: 20,
               fontWeight: 'bold',
@@ -182,7 +182,7 @@ const Settings = () => {
           <TouchableOpacity
             onPress={handleSubmitName}
             style={{
-              backgroundColor: '#61B553',
+              backgroundColor: '#2196F3',
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center'
@@ -204,7 +204,7 @@ const Settings = () => {
           borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="color-palette" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <Ionicons name="color-palette" size={24} color="#2196F3" style={{ marginRight: 12 }} />
             <ThemedText style={{
               fontSize: 20,
               fontWeight: 'bold',
@@ -230,7 +230,7 @@ const Settings = () => {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name={theme === "dark" ? "moon" : "sunny"} size={24} color="#61B553" style={{ marginRight: 12 }} />
+              <Ionicons name={theme === "dark" ? "moon" : "sunny"} size={24} color="#2196F3" style={{ marginRight: 12 }} />
               <ThemedText style={{
                 fontSize: 16,
                 color: theme === 'dark' ? '#ffffff' : '#333',
@@ -260,7 +260,7 @@ const Settings = () => {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name={translation ? "checkmark-outline" : "close-outline"} size={24} color="#61B553" style={{ marginRight: 12 }} />
+              <Ionicons name={translation ? "checkmark-outline" : "close-outline"} size={24} color="#2196F3" style={{ marginRight: 12 }} />
               <ThemedText style={{
                 fontSize: 16,
                 color: theme === 'dark' ? '#ffffff' : '#333',
@@ -270,7 +270,7 @@ const Settings = () => {
               </ThemedText>
             </View>
             <View style={{
-              backgroundColor: translation ? '#61B553' : '#ccc',
+              backgroundColor: translation ? '#2196F3' : '#ccc',
               borderRadius: 12,
               width: 24,
               height: 24,
@@ -292,7 +292,7 @@ const Settings = () => {
           borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="notifications" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <Ionicons name="notifications" size={24} color="#2196F3" style={{ marginRight: 12 }} />
             <ThemedText style={{
               fontSize: 20,
               fontWeight: 'bold',
@@ -319,7 +319,7 @@ const Settings = () => {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="sunny" size={20} color="#61B553" style={{ marginRight: 12 }} />
+              <Ionicons name="sunny" size={20} color="#2196F3" style={{ marginRight: 12 }} />
               <ThemedText style={{
                 fontSize: 16,
                 color: theme === 'dark' ? '#ffffff' : '#333',
@@ -328,7 +328,7 @@ const Settings = () => {
                 Morning Time
               </ThemedText>
             </View>
-            <ThemedText style={{ fontSize: 16, color: '#61B553', fontWeight: 'bold' }}>
+            <ThemedText style={{ fontSize: 16, color: '#2196F3', fontWeight: 'bold' }}>
               {morningTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -353,7 +353,7 @@ const Settings = () => {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="moon" size={20} color="#61B553" style={{ marginRight: 12 }} />
+              <Ionicons name="moon" size={20} color="#2196F3" style={{ marginRight: 12 }} />
               <ThemedText style={{
                 fontSize: 16,
                 color: theme === 'dark' ? '#ffffff' : '#333',
@@ -362,7 +362,7 @@ const Settings = () => {
                 Evening Time
               </ThemedText>
             </View>
-            <ThemedText style={{ fontSize: 16, color: '#61B553', fontWeight: 'bold' }}>
+            <ThemedText style={{ fontSize: 16, color: '#2196F3', fontWeight: 'bold' }}>
               {eveningTime.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -373,7 +373,7 @@ const Settings = () => {
           <TouchableOpacity
             onPress={handleSubmitTime}
             style={{
-              backgroundColor: '#61B553',
+              backgroundColor: '#2196F3',
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center'
@@ -422,7 +422,7 @@ const Settings = () => {
           borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="share-social" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <Ionicons name="share-social" size={24} color="#2196F3" style={{ marginRight: 12 }} />
             <ThemedText style={{
               fontSize: 20,
               fontWeight: 'bold',
@@ -435,7 +435,7 @@ const Settings = () => {
           <TouchableOpacity
             onPress={onShare}
             style={{
-              backgroundColor: '#61B553',
+              backgroundColor: '#2196F3',
               borderRadius: 12,
               paddingVertical: 16,
               alignItems: 'center'

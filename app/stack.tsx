@@ -22,9 +22,9 @@ const StackScreen = () => {
                     headerBackTitle: "Home",
                     headerBackTitleStyle: {
                         fontSize: 16,
-                        color: '#61B553',
+                        color: '#2196F3',
                     },
-                    headerTintColor: '#61B553',
+                    headerTintColor: '#2196F3',
                     headerStyle: {
                         backgroundColor:
                             Colors[colorScheme as keyof typeof Colors].background,
@@ -46,9 +46,9 @@ const StackScreen = () => {
                     headerBackTitle: "Home",
                     headerBackTitleStyle: {
                         fontSize: 16,
-                        color: '#28A766',
+                        color: '#1976D2',
                     },
-                    headerTintColor: '#28A766',
+                    headerTintColor: '#1976D2',
                     headerStyle: {
                         backgroundColor:
                             Colors[colorScheme as keyof typeof Colors].background,

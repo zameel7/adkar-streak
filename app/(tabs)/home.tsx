@@ -7,7 +7,6 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 
-import { HelloWave } from "@/components/HelloWave";
 import { useSQLiteContext } from "expo-sqlite";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -272,6 +271,26 @@ const Home = () => {
                         />
                     }
                 >
+                    {/* Personalized Welcome Header */}
+                    <View style={{
+                        marginBottom: 24
+                    }}>
+                        <ThemedText style={{
+                            fontSize: 28,
+                            fontWeight: 'bold',
+                            color: theme === 'dark' ? '#ffffff' : '#333',
+                            marginBottom: 8
+                        }}>
+                            Hey there {name}!
+                        </ThemedText>
+                        <ThemedText style={{
+                            fontSize: 16,
+                            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
+                        }}>
+                            Ready for your spiritual journey today?
+                        </ThemedText>
+                    </View>
+
                     {/* Beautiful Time of Day Header */}
                     <ImageBackground
                         source={{ uri: timeInfo.imageUrl }}
@@ -312,30 +331,29 @@ const Home = () => {
                                 />
                             </View>
 
-                            {/* Bottom Section */}
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 }}>
-                                <View style={{ flex: 1 }}>
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 18, fontWeight: '600' }}>
-                                        Hey there {name}! <HelloWave />
+                            {/* Bottom Section - Status Message */}
+                            <View style={{ marginTop: 20 }}>
+                                {time === "morning" && !morningStreak ? (
+                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
+                                        🌅 Complete your morning adkar
                                     </ThemedText>
-                                    {time === "morning" && !morningStreak ? (
-                                        <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginTop: 4 }}>
-                                            Complete your morning adkar
-                                        </ThemedText>
-                                    ) : time === "evening" && !eveningStreak ? (
-                                        <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginTop: 4 }}>
-                                            Complete your evening adkar
-                                        </ThemedText>
-                                    ) : time === "morning" ? (
-                                        <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginTop: 4 }}>
-                                            You have completed your morning adkar! ✓
-                                        </ThemedText>
-                                    ) : time === "evening" ? (
-                                        <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14, marginTop: 4 }}>
-                                            You have completed your evening adkar! ✓
-                                        </ThemedText>
-                                    ) : null}
-                                </View>
+                                ) : time === "evening" && !eveningStreak ? (
+                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
+                                        🌙 Complete your evening adkar
+                                    </ThemedText>
+                                ) : time === "morning" ? (
+                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
+                                        ✅ Morning adkar completed!
+                                    </ThemedText>
+                                ) : time === "evening" ? (
+                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
+                                        ✅ Evening adkar completed!
+                                    </ThemedText>
+                                ) : (
+                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
+                                        ✨ السلام عليكم ورحمة الله
+                                    </ThemedText>
+                                )}
                             </View>
                         </LinearGradient>
                     </ImageBackground>
@@ -355,7 +373,7 @@ const Home = () => {
                             marginBottom: 24
                         }}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                                <Ionicons name="flame" size={28} color="#ff6b35" style={{ marginRight: 8 }} />
+                                <Ionicons name="flame" size={28} color="#2196F3" style={{ marginRight: 8 }} />
                                 <ThemedText style={{
                                     fontSize: 24,
                                     fontWeight: 'bold',
@@ -396,7 +414,7 @@ const Home = () => {
                                         {/* Day name */}
                                         <ThemedText style={{
                                             fontSize: 12,
-                                            color: day.isToday ? '#61B553' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'),
+                                            color: day.isToday ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'),
                                             fontWeight: day.isToday ? 'bold' : 'normal',
                                             marginBottom: 8
                                         }}>
@@ -409,8 +427,8 @@ const Home = () => {
                                             height: 36,
                                             borderRadius: 18,
                                             borderWidth: 2,
-                                            borderColor: day.isToday ? '#61B553' : (day.morning && day.evening ? '#61B553' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')),
-                                            backgroundColor: day.morning && day.evening ? '#61B553' : 'transparent',
+                                            borderColor: day.isToday ? '#2196F3' : (day.morning && day.evening ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')),
+                                            backgroundColor: day.morning && day.evening ? '#2196F3' : 'transparent',
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             marginBottom: 6
@@ -422,14 +440,14 @@ const Home = () => {
                                                     width: 8,
                                                     height: 8,
                                                     borderRadius: 4,
-                                                    backgroundColor: '#ff9800'
+                                                    backgroundColor: '#1976D2'
                                                 }} />
                                             ) : day.isToday ? (
                                                 <View style={{
                                                     width: 8,
                                                     height: 8,
                                                     borderRadius: 4,
-                                                    backgroundColor: '#61B553'
+                                                    backgroundColor: '#2196F3'
                                                 }} />
                                             ) : null}
                                         </View>
@@ -440,13 +458,13 @@ const Home = () => {
                                                 width: 6,
                                                 height: 6,
                                                 borderRadius: 3,
-                                                backgroundColor: day.morning ? '#61B553' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
+                                                backgroundColor: day.morning ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
                                             }} />
                                             <View style={{
                                                 width: 6,
                                                 height: 6,
                                                 borderRadius: 3,
-                                                backgroundColor: day.evening ? '#28A766' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
+                                                backgroundColor: day.evening ? '#1976D2' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
                                             }} />
                                         </View>
                                     </View>
@@ -456,14 +474,14 @@ const Home = () => {
                             {/* Legend */}
                             <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, gap: 16 }}>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#61B553', marginRight: 4 }} />
+                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#2196F3', marginRight: 4 }} />
                                     <ThemedText style={{
                                         fontSize: 12,
                                         color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
                                     }}>Morning</ThemedText>
                                 </View>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#28A766', marginRight: 4 }} />
+                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#1976D2', marginRight: 4 }} />
                                     <ThemedText style={{
                                         fontSize: 12,
                                         color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
@@ -473,31 +491,32 @@ const Home = () => {
                         </View>
                     </View>
 
-                    {/* Action Buttons */}
+                    {/* Enhanced Action Buttons */}
                     <View style={{ marginBottom: 32 }}>
-                        <View style={{ flexDirection: 'row', gap: 20, paddingHorizontal: 4 }}>
+                        <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 4 }}>
                             <TouchableOpacity
                                 onPress={() => router.push("/morning-adkar")}
                                 style={{
-                                    borderRadius: 20,
-                                    aspectRatio: 1,
+                                    borderRadius: 24,
                                     flex: 1,
+                                    height: 180,
                                     overflow: 'hidden',
-                                    shadowColor: '#61B553',
-                                    shadowOffset: { width: 0, height: 8 },
-                                    shadowOpacity: 0.3,
-                                    shadowRadius: 12,
-                                    elevation: 8
+                                    shadowColor: '#42A5F5',
+                                    shadowOffset: { width: 0, height: 12 },
+                                    shadowOpacity: 0.4,
+                                    shadowRadius: 16,
+                                    elevation: 12
                                 }}
                             >
                                 <LinearGradient
-                                    colors={['rgba(97, 181, 83, 0.9)', 'rgba(97, 181, 83, 1)']}
+                                    colors={['#E3F2FD', '#64B5F6', '#42A5F5']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
                                     style={{
                                         flex: 1,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: 24,
-                                        position: 'relative'
+                                        padding: 20,
+                                        position: 'relative',
+                                        justifyContent: 'space-between'
                                     }}
                                 >
                                     {/* Glassmorphism overlay */}
@@ -507,36 +526,89 @@ const Home = () => {
                                         left: 0,
                                         right: 0,
                                         bottom: 0,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)'
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        backdropFilter: 'blur(20px)'
                                     }} />
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, zIndex: 1 }}>
-                                        <Ionicons name="sunny" size={52} color="#ffffff" style={{ marginRight: 12 }} />
-                                        <Ionicons name="cloudy" size={28} color="#ffffff" />
+                                    {/* Top section with icon */}
+                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
+                                        <View style={{
+                                            backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                                            borderRadius: 16,
+                                            padding: 12,
+                                            marginBottom: 12
+                                        }}>
+                                            <Ionicons name="sunny" size={32} color="#ffffff" />
+                                        </View>
+                                        <ThemedText style={{
+                                            color: '#ffffff',
+                                            fontSize: 18,
+                                            fontWeight: 'bold',
+                                            textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                                            textShadowOffset: { width: 0, height: 1 },
+                                            textShadowRadius: 3
+                                        }}>
+                                            Morning{'\n'}Adkar
+                                        </ThemedText>
                                     </View>
-                                    <ThemedText style={{ color: '#ffffff', fontSize: 18, fontWeight: 'bold', textAlign: 'center', zIndex: 1 }}>
-                                        Morning{'\n'}Adkar
-                                    </ThemedText>
 
-                                    {/* Decorative elements */}
+                                    {/* Bottom section with status */}
+                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
+                                        {morningStreak ? (
+                                            <View style={{
+                                                backgroundColor: 'rgba(33, 150, 243, 0.9)',
+                                                paddingHorizontal: 12,
+                                                paddingVertical: 6,
+                                                borderRadius: 12,
+                                                flexDirection: 'row',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Ionicons name="checkmark-circle" size={16} color="#ffffff" style={{ marginRight: 4 }} />
+                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
+                                                    Completed
+                                                </ThemedText>
+                                            </View>
+                                        ) : (
+                                            <View style={{
+                                                backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                                                paddingHorizontal: 12,
+                                                paddingVertical: 6,
+                                                borderRadius: 12
+                                            }}>
+                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
+                                                    Start now
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Decorative floating elements */}
                                     <View style={{
                                         position: 'absolute',
-                                        top: 16,
-                                        right: 16,
-                                        width: 32,
-                                        height: 32,
-                                        borderRadius: 16,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.2)'
+                                        top: 20,
+                                        right: 20,
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: 4,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.4)'
                                     }} />
                                     <View style={{
                                         position: 'absolute',
-                                        bottom: 16,
-                                        left: 16,
-                                        width: 24,
-                                        height: 24,
-                                        borderRadius: 12,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)'
+                                        top: 40,
+                                        right: 35,
+                                        width: 4,
+                                        height: 4,
+                                        borderRadius: 2,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                                    }} />
+                                    <View style={{
+                                        position: 'absolute',
+                                        bottom: 20,
+                                        right: 20,
+                                        width: 12,
+                                        height: 12,
+                                        borderRadius: 6,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.3)'
                                     }} />
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -544,25 +616,26 @@ const Home = () => {
                             <TouchableOpacity
                                 onPress={() => router.push("/evening-adkar")}
                                 style={{
-                                    borderRadius: 20,
-                                    aspectRatio: 1,
+                                    borderRadius: 24,
                                     flex: 1,
+                                    height: 180,
                                     overflow: 'hidden',
-                                    shadowColor: '#28A766',
-                                    shadowOffset: { width: 0, height: 8 },
-                                    shadowOpacity: 0.3,
-                                    shadowRadius: 12,
-                                    elevation: 8
+                                    shadowColor: '#7B1FA2',
+                                    shadowOffset: { width: 0, height: 12 },
+                                    shadowOpacity: 0.4,
+                                    shadowRadius: 16,
+                                    elevation: 12
                                 }}
                             >
                                 <LinearGradient
-                                    colors={['rgba(40, 167, 102, 0.9)', 'rgba(40, 167, 102, 1)']}
+                                    colors={['#9C27B0', '#4A148C', '#1A1A1A']}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
                                     style={{
                                         flex: 1,
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        padding: 24,
-                                        position: 'relative'
+                                        padding: 20,
+                                        position: 'relative',
+                                        justifyContent: 'space-between'
                                     }}
                                 >
                                     {/* Glassmorphism overlay */}
@@ -572,36 +645,98 @@ const Home = () => {
                                         left: 0,
                                         right: 0,
                                         bottom: 0,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(255, 255, 255, 0.1)',
-                                        backdropFilter: 'blur(10px)'
+                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                                        backdropFilter: 'blur(20px)'
                                     }} />
 
-                                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16, zIndex: 1 }}>
-                                        <Ionicons name="moon" size={52} color="#ffffff" style={{ marginRight: 12 }} />
-                                        <Ionicons name="star" size={20} color="#ffffff" />
+                                    {/* Top section with icon */}
+                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
+                                        <View style={{
+                                            backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                                            borderRadius: 16,
+                                            padding: 12,
+                                            marginBottom: 12
+                                        }}>
+                                            <Ionicons name="moon" size={32} color="#ffffff" />
+                                        </View>
+                                        <ThemedText style={{
+                                            color: '#ffffff',
+                                            fontSize: 18,
+                                            fontWeight: 'bold',
+                                            textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                                            textShadowOffset: { width: 0, height: 1 },
+                                            textShadowRadius: 3
+                                        }}>
+                                            Evening{'\n'}Adkar
+                                        </ThemedText>
                                     </View>
-                                    <ThemedText style={{ color: '#ffffff', fontSize: 18, fontWeight: 'bold', textAlign: 'center', zIndex: 1 }}>
-                                        Evening{'\n'}Adkar
-                                    </ThemedText>
 
-                                    {/* Decorative elements */}
+                                    {/* Bottom section with status */}
+                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
+                                        {eveningStreak ? (
+                                            <View style={{
+                                                backgroundColor: 'rgba(33, 150, 243, 0.9)',
+                                                paddingHorizontal: 12,
+                                                paddingVertical: 6,
+                                                borderRadius: 12,
+                                                flexDirection: 'row',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Ionicons name="checkmark-circle" size={16} color="#ffffff" style={{ marginRight: 4 }} />
+                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
+                                                    Completed
+                                                </ThemedText>
+                                            </View>
+                                        ) : (
+                                            <View style={{
+                                                backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                                                paddingHorizontal: 12,
+                                                paddingVertical: 6,
+                                                borderRadius: 12
+                                            }}>
+                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
+                                                    Start now
+                                                </ThemedText>
+                                            </View>
+                                        )}
+                                    </View>
+
+                                    {/* Decorative floating elements */}
                                     <View style={{
                                         position: 'absolute',
-                                        top: 16,
-                                        right: 16,
-                                        width: 32,
-                                        height: 32,
-                                        borderRadius: 16,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.2)'
+                                        top: 20,
+                                        right: 20,
+                                        width: 6,
+                                        height: 6,
+                                        borderRadius: 3,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.5)'
                                     }} />
                                     <View style={{
                                         position: 'absolute',
-                                        bottom: 16,
-                                        left: 16,
-                                        width: 24,
-                                        height: 24,
-                                        borderRadius: 12,
-                                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.15)'
+                                        top: 35,
+                                        right: 30,
+                                        width: 3,
+                                        height: 3,
+                                        borderRadius: 1.5,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.7)'
+                                    }} />
+                                    <View style={{
+                                        position: 'absolute',
+                                        top: 50,
+                                        right: 40,
+                                        width: 2,
+                                        height: 2,
+                                        borderRadius: 1,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                                    }} />
+                                    <View style={{
+                                        position: 'absolute',
+                                        bottom: 20,
+                                        right: 25,
+                                        width: 10,
+                                        height: 10,
+                                        borderRadius: 5,
+                                        backgroundColor: 'rgba(255, 255, 255, 0.3)'
                                     }} />
                                 </LinearGradient>
                             </TouchableOpacity>
@@ -621,7 +756,7 @@ const Home = () => {
                             <View style={{
                                 width: 40,
                                 height: 2,
-                                backgroundColor: '#61B553',
+                                backgroundColor: '#2196F3',
                                 marginBottom: 20,
                                 borderRadius: 1
                             }} />
@@ -649,7 +784,7 @@ const Home = () => {
                             <View style={{
                                 width: 40,
                                 height: 2,
-                                backgroundColor: '#61B553',
+                                backgroundColor: '#2196F3',
                                 marginTop: 20,
                                 borderRadius: 1
                             }} />

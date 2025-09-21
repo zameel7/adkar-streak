@@ -139,12 +139,12 @@ const AdkarCard = ({
         }}>
             {/* Header */}
             <View style={{
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(97, 181, 83, 0.1)',
+                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(33, 150, 243, 0.1)',
                 borderRadius: 16,
                 padding: 20,
                 marginBottom: 20,
                 borderWidth: 1,
-                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(97, 181, 83, 0.3)'
+                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(33, 150, 243, 0.3)'
             }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                     <ThemedText style={{
@@ -160,7 +160,7 @@ const AdkarCard = ({
                     {/* Progress Counter and Check Icon in same row */}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                         <View style={{
-                            backgroundColor: '#61B553',
+                            backgroundColor: '#2196F3',
                             paddingHorizontal: 12,
                             paddingVertical: 6,
                             borderRadius: 20
@@ -180,9 +180,9 @@ const AdkarCard = ({
                                 width: 28,
                                 height: 28,
                                 borderRadius: 14,
-                                backgroundColor: read ? '#61B553' : 'transparent',
+                                backgroundColor: read ? '#2196F3' : 'transparent',
                                 borderWidth: 1.5,
-                                borderColor: read ? '#61B553' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(97, 181, 83, 0.6)'),
+                                borderColor: read ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(33, 150, 243, 0.6)'),
                                 alignItems: 'center',
                                 justifyContent: 'center'
                             }}>
@@ -228,18 +228,18 @@ const AdkarCard = ({
 
                         {/* Repeat Instructions */}
                         <View style={{
-                            backgroundColor: 'rgba(97, 181, 83, 0.1)',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
                             borderRadius: 8,
                             padding: 8,
                             marginBottom: 12,
                             borderWidth: 1,
-                            borderColor: 'rgba(97, 181, 83, 0.3)'
+                            borderColor: 'rgba(33, 150, 243, 0.3)'
                         }}>
                             <ThemedText style={{
                                 textAlign: 'center',
                                 fontWeight: '600',
                                 fontSize: 12,
-                                color: '#61B553'
+                                color: '#2196F3'
                             }}>
                                 Repeat: {item.repeat}
                             </ThemedText>

@@ -56,7 +56,7 @@ const Index: React.FC = () => {
                     borderWidth: 1,
                     borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
                 }}>
-                    <ActivityIndicator size="large" color="#61B553" />
+                    <ActivityIndicator size="large" color="#2196F3" />
                     <ThemedText style={{
                         marginTop: 16,
                         textAlign: 'center',
@@ -140,11 +140,11 @@ const Index: React.FC = () => {
                     <TouchableOpacity
                         onPress={handleSubmit}
                         style={{
-                            backgroundColor: '#61B553',
+                            backgroundColor: '#2196F3',
                             borderRadius: 16,
                             paddingVertical: 18,
                             alignItems: 'center',
-                            shadowColor: '#61B553',
+                            shadowColor: '#2196F3',
                             shadowOffset: { width: 0, height: 4 },
                             shadowOpacity: 0.3,
                             shadowRadius: 8,

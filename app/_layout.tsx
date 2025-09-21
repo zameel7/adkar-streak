@@ -1,21 +1,19 @@
 import { Stack, router } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useContext, useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
-import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
-import StackScreen from "./stack";
+import { ThemeProvider } from "@/context/ThemeContext";
 import * as SplashScreen from "expo-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
 
 const RootLayout = () => {
     const today = new Date().toISOString().split("T")[0];
-    const { theme: colorScheme } = useContext(ThemeContext);
 
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
@@ -86,7 +84,7 @@ const RootLayout = () => {
         }
 
         updateStreakData();
-    }, [colorScheme]);
+    }, []);
 
     return (
         <Suspense
@@ -102,7 +100,26 @@ const RootLayout = () => {
                 useSuspense
             >
                 <ThemeProvider>
-                    <StackScreen />
+                    <Stack>
+                        <Stack.Screen name="index" options={{ headerShown: false }} />
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen
+                            name="morning-adkar"
+                            options={{
+                                title: "Morning Adkar",
+                                headerBackTitle: "Home",
+                                headerTintColor: '#2196F3',
+                            }}
+                        />
+                        <Stack.Screen
+                            name="evening-adkar"
+                            options={{
+                                title: "Evening Adkar",
+                                headerBackTitle: "Home",
+                                headerTintColor: '#1976D2',
+                            }}
+                        />
+                    </Stack>
                 </ThemeProvider>
             </SQLiteProvider>
         </Suspense>

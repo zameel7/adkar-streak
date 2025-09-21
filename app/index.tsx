@@ -24,7 +24,7 @@ const Index: React.FC = () => {
     const handleSubmit = async () => {
         if (name.trim()) {
             await storeData(name.trim());
-            router.push("/home");
+            router.push("/(tabs)/home");
         } else {
             Alert.alert("Please enter your name");
         }
@@ -34,7 +34,7 @@ const Index: React.FC = () => {
         const checkName = async () => {
             const existingName = await AsyncStorage.getItem("name");
             if (existingName) {
-                router.push("/home");
+                router.push("/(tabs)/home");
             } else {
                 setLoading(false);
             }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, ViewProps } from 'react-native';
-import { BlurView } from '@react-native-community/blur';
+import { BlurView } from 'expo-blur';
 
 export interface GlassViewProps extends ViewProps {
   intensity?: number;
@@ -17,12 +17,38 @@ export const GlassView: React.FC<GlassViewProps> = ({
   style,
   ...props
 }) => {
-  const getGlassOpacity = () => {
+  const getGlassStyles = () => {
+    const baseStyle = {
+      borderRadius: 16,
+      borderWidth: 1,
+      overflow: 'hidden' as const,
+    };
+
     switch (glassStyle) {
-      case 'light': return 'bg-white/10 border-white/15';
-      case 'medium': return 'bg-white/20 border-white/25';
-      case 'strong': return 'bg-white/30 border-white/35';
-      default: return 'bg-white/20 border-white/25';
+      case 'light':
+        return {
+          ...baseStyle,
+          backgroundColor: 'rgba(255, 255, 255, 0.1)',
+          borderColor: 'rgba(255, 255, 255, 0.15)',
+        };
+      case 'medium':
+        return {
+          ...baseStyle,
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          borderColor: 'rgba(255, 255, 255, 0.25)',
+        };
+      case 'strong':
+        return {
+          ...baseStyle,
+          backgroundColor: 'rgba(255, 255, 255, 0.3)',
+          borderColor: 'rgba(255, 255, 255, 0.35)',
+        };
+      default:
+        return {
+          ...baseStyle,
+          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+          borderColor: 'rgba(255, 255, 255, 0.25)',
+        };
     }
   };
 
@@ -31,11 +57,9 @@ export const GlassView: React.FC<GlassViewProps> = ({
       intensity={intensity}
       tint={tint}
       style={[{ borderRadius: 16 }, style]}
+      {...props}
     >
-      <View
-        className={`${getGlassOpacity()} border rounded-2xl overflow-hidden`}
-        {...props}
-      >
+      <View style={getGlassStyles()}>
         {children}
       </View>
     </BlurView>

@@ -16,16 +16,15 @@ export const GlassInput: React.FC<GlassInputProps> = ({
   intensity = 10,
   glassStyle = 'light',
   style,
-  className,
   ...props
 }) => {
   return (
-    <View className="mb-4">
+    <View style={{ marginBottom: 16 }}>
       {label && (
         <GlassText
           variant="caption"
           color="white"
-          className="mb-2 font-semibold"
+          style={{ marginBottom: 8, fontWeight: '600' }}
         >
           {label}
         </GlassText>
@@ -34,12 +33,13 @@ export const GlassInput: React.FC<GlassInputProps> = ({
       <GlassView
         intensity={intensity}
         glassStyle={glassStyle}
-        className="rounded-xl overflow-hidden"
+        style={{ borderRadius: 12, overflow: 'hidden' }}
       >
         <TextInput
-          className={`px-4 py-3 text-white text-base ${className || ''}`}
           style={[
             {
+              paddingHorizontal: 16,
+              paddingVertical: 12,
               color: 'white',
               fontSize: 16,
             },
@@ -54,7 +54,7 @@ export const GlassInput: React.FC<GlassInputProps> = ({
         <GlassText
           variant="caption"
           color="secondary"
-          className="mt-1 ml-1"
+          style={{ marginTop: 4, marginLeft: 4 }}
         >
           {error}
         </GlassText>

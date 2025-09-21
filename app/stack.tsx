@@ -16,12 +16,22 @@ const StackScreen = () => {
                     title: "Morning Adkar",
                     headerTitleStyle: {
                         color: Colors[colorScheme as keyof typeof Colors].text,
+                        fontSize: 20,
+                        fontWeight: 'bold',
                     },
-                    headerBackTitle: "Back",
+                    headerBackTitle: "Home",
+                    headerBackTitleStyle: {
+                        fontSize: 16,
+                        color: '#61B553',
+                    },
+                    headerTintColor: '#61B553',
                     headerStyle: {
                         backgroundColor:
-                            Colors[colorScheme as keyof typeof Colors].border,
+                            Colors[colorScheme as keyof typeof Colors].background,
+                        shadowColor: 'transparent',
+                        elevation: 0,
                     },
+                    headerShadowVisible: false,
                 }}
             />
             <Stack.Screen
@@ -30,12 +40,22 @@ const StackScreen = () => {
                     title: "Evening Adkar",
                     headerTitleStyle: {
                         color: Colors[colorScheme as keyof typeof Colors].text,
+                        fontSize: 20,
+                        fontWeight: 'bold',
                     },
-                    headerBackTitle: "Back",
+                    headerBackTitle: "Home",
+                    headerBackTitleStyle: {
+                        fontSize: 16,
+                        color: '#28A766',
+                    },
+                    headerTintColor: '#28A766',
                     headerStyle: {
                         backgroundColor:
-                            Colors[colorScheme as keyof typeof Colors].border,
+                            Colors[colorScheme as keyof typeof Colors].background,
+                        shadowColor: 'transparent',
+                        elevation: 0,
                     },
+                    headerShadowVisible: false,
                 }}
             />
         </Stack>

@@ -11,45 +11,43 @@ export const GlassText: React.FC<GlassTextProps> = ({
   variant = 'default',
   color = 'white',
   style,
-  className,
   ...props
 }) => {
   const getVariantStyles = () => {
     switch (variant) {
       case 'title':
-        return 'text-3xl font-bold leading-tight';
+        return { fontSize: 30, fontWeight: 'bold', lineHeight: 36 };
       case 'subtitle':
-        return 'text-xl font-semibold';
+        return { fontSize: 20, fontWeight: '600' };
       case 'caption':
-        return 'text-sm font-medium';
+        return { fontSize: 14, fontWeight: '500' };
       case 'link':
-        return 'text-base font-medium underline';
+        return { fontSize: 16, fontWeight: '500', textDecorationLine: 'underline' as const };
       default:
-        return 'text-base font-normal';
+        return { fontSize: 16, fontWeight: 'normal' };
     }
   };
 
   const getColorStyles = () => {
     switch (color) {
       case 'primary':
-        return 'text-primary';
+        return { color: '#61B553' };
       case 'secondary':
-        return 'text-secondary';
+        return { color: '#28A766' };
       case 'black':
-        return 'text-black';
+        return { color: '#000000' };
       case 'muted':
-        return 'text-white/70';
+        return { color: 'rgba(255, 255, 255, 0.7)' };
       default:
-        return 'text-white';
+        return { color: '#ffffff' };
     }
   };
 
-  const combinedClassName = `${getVariantStyles()} ${getColorStyles()} ${className || ''}`.trim();
+  const combinedStyle = [getVariantStyles(), getColorStyles(), style];
 
   return (
     <Text
-      className={combinedClassName}
-      style={style}
+      style={combinedStyle}
       {...props}
     >
       {children}

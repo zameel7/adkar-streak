@@ -20,13 +20,13 @@ export const GlassCard: React.FC<GlassCardProps> = ({
   const getPaddingStyles = () => {
     switch (padding) {
       case 'none':
-        return '';
+        return { padding: 0 };
       case 'small':
-        return 'p-3';
+        return { padding: 12 };
       case 'large':
-        return 'p-6';
+        return { padding: 24 };
       default:
-        return 'p-4';
+        return { padding: 16 };
     }
   };
 
@@ -37,7 +37,7 @@ export const GlassCard: React.FC<GlassCardProps> = ({
       style={style}
       {...props}
     >
-      <View className={getPaddingStyles()}>
+      <View style={getPaddingStyles()}>
         {children}
       </View>
     </GlassView>

@@ -21,11 +21,11 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
   const getSizeStyles = () => {
     switch (size) {
       case 'small':
-        return 'px-4 py-2';
+        return { paddingHorizontal: 16, paddingVertical: 8 };
       case 'large':
-        return 'px-8 py-4';
+        return { paddingHorizontal: 32, paddingVertical: 16 };
       default:
-        return 'px-6 py-3';
+        return { paddingHorizontal: 24, paddingVertical: 12 };
     }
   };
 
@@ -64,12 +64,19 @@ export const GlassButton: React.FC<GlassButtonProps> = ({
       <GlassView
         intensity={glassIntensity}
         glassStyle={getVariantGlassStyle()}
-        className={`${getSizeStyles()} rounded-xl items-center justify-center`}
+        style={[
+          getSizeStyles(),
+          {
+            borderRadius: 12,
+            alignItems: 'center',
+            justifyContent: 'center'
+          }
+        ]}
       >
         <GlassText
           variant="default"
           color={getTextColor()}
-          className="font-semibold"
+          style={{ fontWeight: '600' }}
         >
           {title}
         </GlassText>

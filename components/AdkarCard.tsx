@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { View, TouchableOpacity } from "react-native";
-import { GlassCard, GlassView, GlassButton, GlassText } from "./glass";
+import { ThemedText } from "./ThemedText";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
@@ -21,12 +21,14 @@ const AdkarCard = ({
     type,
     height,
     setIndex,
+    onAdkarCompleted,
 }: {
     item: Adkar;
     index: number;
     type: string;
     height: number;
     setIndex: (index: number) => void;
+    onAdkarCompleted?: () => void;
 }) => {
     const { theme } = useContext(ThemeContext);
     const db = useSQLiteContext();
@@ -34,8 +36,8 @@ const AdkarCard = ({
     const [read, setRead] = useState(false);
     const [translation, setTranslation] = useState(false);
 
-    useEffect(() => {
-        const checkRead = async () => {
+    const checkRead = async () => {
+        try {
             const streakData = await AsyncStorage.getItem("streakData");
             if (streakData) {
                 const data = JSON.parse(streakData);
@@ -43,20 +45,38 @@ const AdkarCard = ({
                     setRead(true);
                 } else if (data.evening[index] && type === "evening") {
                     setRead(true);
+                } else {
+                    setRead(false);
                 }
+            } else {
+                setRead(false);
             }
-        };
+        } catch (error) {
+            console.error('Error checking read status', error);
+        }
+    };
 
+    useEffect(() => {
         const showTranslation = async () => {
-            const translationData = await AsyncStorage.getItem("translations");
-            if (translationData) {
-                setTranslation(JSON.parse(translationData));
+            try {
+                const translationData = await AsyncStorage.getItem("translations");
+                if (translationData) {
+                    const showTranslations = JSON.parse(translationData);
+                    setTranslation(showTranslations);
+                }
+            } catch (error) {
+                console.error('Error checking translation setting', error);
             }
         };
 
         showTranslation();
         checkRead();
     }, []);
+
+    // Add effect to re-check read status when index changes
+    useEffect(() => {
+        checkRead();
+    }, [index, type]);
 
     const checkAndMarkStreak = async () => {
         const streakData = await AsyncStorage.getItem("streakData");
@@ -77,153 +97,178 @@ const AdkarCard = ({
     };
 
     const handleMarkRead = async () => {
-        const streakData = await AsyncStorage.getItem("streakData");
-        if (streakData) {
-            const data = JSON.parse(streakData);
-            if (type === "evening") {
-                data.evening = {
-                    ...data.evening,
-                    [index]: !read,
-                };
-            } else if (type === "morning") {
-                data.morning = {
-                    ...data.morning,
-                    [index]: !read,
-                };
+        try {
+            const streakData = await AsyncStorage.getItem("streakData");
+            if (streakData) {
+                const data = JSON.parse(streakData);
+
+                if (type === "evening") {
+                    data.evening = {
+                        ...data.evening,
+                        [index]: !read,
+                    };
+                } else if (type === "morning") {
+                    data.morning = {
+                        ...data.morning,
+                        [index]: !read,
+                    };
+                }
+
+                await AsyncStorage.setItem("streakData", JSON.stringify(data));
+                setRead(!read);
+
+                // Call callback when marked as read
+                if (!read && onAdkarCompleted) {
+                    onAdkarCompleted();
+                }
             }
-            await AsyncStorage.setItem("streakData", JSON.stringify(data));
-            setRead(!read);
+            await checkAndMarkStreak();
+        } catch (error) {
+            console.error('Error in handleMarkRead', error);
         }
-        await checkAndMarkStreak();
     };
 
     return (
-        <LinearGradient
-            colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#667eea', '#764ba2']}
-            style={{
-                margin: 16,
-                borderRadius: 20,
-                overflow: 'hidden'
-            }}
-        >
-            <GlassCard
-                intensity={20}
-                glassStyle="medium"
-                padding="large"
-                className="m-0"
-            >
-                {/* Header with glass effect */}
-                <GlassView
-                    intensity={10}
-                    glassStyle="light"
-                    className="mb-4 p-4 rounded-xl"
-                >
-                    <View className="flex-row justify-between items-center mb-3">
-                        <GlassText
-                            variant="subtitle"
-                            color="white"
-                            className="flex-1 pr-4 font-bold text-xl"
-                        >
-                            {item.title}
-                        </GlassText>
+        <View style={{
+            margin: 16,
+            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.95)',
+            borderRadius: 20,
+            padding: 24,
+            borderWidth: 1,
+            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+            {/* Header */}
+            <View style={{
+                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(97, 181, 83, 0.1)',
+                borderRadius: 16,
+                padding: 20,
+                marginBottom: 20,
+                borderWidth: 1,
+                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(97, 181, 83, 0.3)'
+            }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                    <ThemedText style={{
+                        fontSize: 20,
+                        fontWeight: 'bold',
+                        flex: 1,
+                        paddingRight: 16,
+                        color: theme === 'dark' ? '#ffffff' : '#333'
+                    }}>
+                        {item.title}
+                    </ThemedText>
 
-                        {/* Progress Counter */}
-                        <GlassView
-                            intensity={15}
-                            glassStyle="strong"
-                            className="px-3 py-2 rounded-full"
-                        >
-                            <GlassText
-                                variant="caption"
-                                color="primary"
-                                className="font-semibold"
-                            >
+                    {/* Progress Counter and Check Icon in same row */}
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                        <View style={{
+                            backgroundColor: '#61B553',
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 20
+                        }}>
+                            <ThemedText style={{
+                                color: '#ffffff',
+                                fontSize: 12,
+                                fontWeight: '600'
+                            }}>
                                 {index + 1} / 24
-                            </GlassText>
-                        </GlassView>
+                            </ThemedText>
+                        </View>
+
+                        {/* Mini Check Button */}
+                        <TouchableOpacity onPress={handleMarkRead}>
+                            <View style={{
+                                width: 28,
+                                height: 28,
+                                borderRadius: 14,
+                                backgroundColor: read ? '#61B553' : 'transparent',
+                                borderWidth: 1.5,
+                                borderColor: read ? '#61B553' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(97, 181, 83, 0.6)'),
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                {read && (
+                                    <Ionicons
+                                        name="checkmark"
+                                        size={16}
+                                        color="#ffffff"
+                                    />
+                                )}
+                            </View>
+                        </TouchableOpacity>
                     </View>
-
-                    {/* Check Button */}
-                    <TouchableOpacity onPress={handleMarkRead}>
-                        <GlassView
-                            intensity={read ? 25 : 10}
-                            glassStyle={read ? "strong" : "light"}
-                            className={`flex-row items-center justify-center p-3 rounded-xl ${
-                                read ? 'bg-primary/30' : 'bg-white/10'
-                            }`}
-                        >
-                            <Ionicons
-                                name={read ? "checkmark-circle" : "checkmark-circle-outline"}
-                                size={24}
-                                color={read ? "#61B553" : "#ffffff"}
-                                style={{ marginRight: 8 }}
-                            />
-                            <GlassText
-                                color={read ? "primary" : "white"}
-                                className="font-semibold"
-                            >
-                                {read ? "Completed" : "Mark as Read"}
-                            </GlassText>
-                        </GlassView>
-                    </TouchableOpacity>
-                </GlassView>
-
-                {/* Content Area */}
-                <View style={{ maxHeight: height }} className="space-y-4">
-                    {item.adkar.map((adkar, adkarIndex) => (
-                        <GlassView
-                            key={adkarIndex}
-                            intensity={15}
-                            glassStyle="light"
-                            className="p-4 rounded-xl"
-                        >
-                            {/* Arabic Text */}
-                            <GlassText
-                                color="white"
-                                className="text-2xl leading-9 text-center mb-4 font-bold"
-                                style={{
-                                    letterSpacing: 2,
-                                    lineHeight: 35
-                                }}
-                            >
-                                {adkar}
-                            </GlassText>
-
-                            {/* Repeat Instructions */}
-                            <GlassView
-                                intensity={10}
-                                glassStyle="light"
-                                className="p-2 rounded-lg mb-3"
-                            >
-                                <GlassText
-                                    variant="caption"
-                                    color="primary"
-                                    className="text-center font-semibold"
-                                >
-                                    Repeat: {item.repeat}
-                                </GlassText>
-                            </GlassView>
-
-                            {/* Translation */}
-                            {translation && item.translation[adkarIndex] && (
-                                <GlassView
-                                    intensity={5}
-                                    glassStyle="light"
-                                    className="p-3 rounded-lg"
-                                >
-                                    <GlassText
-                                        color="muted"
-                                        className="text-lg leading-6 text-center italic"
-                                    >
-                                        {item.translation[adkarIndex]}
-                                    </GlassText>
-                                </GlassView>
-                            )}
-                        </GlassView>
-                    ))}
                 </View>
-            </GlassCard>
-        </LinearGradient>
+            </View>
+
+            {/* Content Area */}
+            <View style={{ maxHeight: height }}>
+                {item.adkar.map((adkar, adkarIndex) => (
+                    <View
+                        key={adkarIndex}
+                        style={{
+                            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
+                            borderRadius: 16,
+                            padding: 20,
+                            marginBottom: 16,
+                            borderWidth: 1,
+                            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#f0f0f0'
+                        }}
+                    >
+                        {/* Arabic Text */}
+                        <ThemedText style={{
+                            fontSize: 22,
+                            lineHeight: 35,
+                            textAlign: 'center',
+                            marginBottom: 16,
+                            fontWeight: '500',
+                            letterSpacing: 1,
+                            color: theme === 'dark' ? '#ffffff' : '#333'
+                        }}>
+                            {adkar}
+                        </ThemedText>
+
+                        {/* Repeat Instructions */}
+                        <View style={{
+                            backgroundColor: 'rgba(97, 181, 83, 0.1)',
+                            borderRadius: 8,
+                            padding: 8,
+                            marginBottom: 12,
+                            borderWidth: 1,
+                            borderColor: 'rgba(97, 181, 83, 0.3)'
+                        }}>
+                            <ThemedText style={{
+                                textAlign: 'center',
+                                fontWeight: '600',
+                                fontSize: 12,
+                                color: '#61B553'
+                            }}>
+                                Repeat: {item.repeat}
+                            </ThemedText>
+                        </View>
+
+                        {/* Translation */}
+                        {translation && item.translation[adkarIndex] && (
+                            <View style={{
+                                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
+                                borderRadius: 12,
+                                padding: 16,
+                                borderWidth: 1,
+                                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                            }}>
+                                <ThemedText style={{
+                                    fontSize: 16,
+                                    lineHeight: 24,
+                                    textAlign: 'center',
+                                    fontStyle: 'italic',
+                                    color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
+                                }}>
+                                    {item.translation[adkarIndex]}
+                                </ThemedText>
+                            </View>
+                        )}
+                    </View>
+                ))}
+            </View>
+        </View>
     );
 };
 

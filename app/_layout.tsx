@@ -1,6 +1,5 @@
 import { Stack, router } from "expo-router";
 import "react-native-reanimated";
-import "../global.css";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { Suspense, useContext, useEffect } from "react";
 import { ActivityIndicator, Platform } from "react-native";
@@ -173,7 +172,7 @@ async function schedulePushNotification(): Promise<void> {
 
     // Schedule evening notification
     await scheduleNotification(
-        "Time for evening Adkar! 🌙",
+        "Time for evening Adkar!",
         "'Believers, remember Allah often and glorify Him morning and evening' (33:41-42).",
         eveningTime,
         16,

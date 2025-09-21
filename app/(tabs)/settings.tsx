@@ -1,325 +1,454 @@
 import React, { useContext, useEffect, useState } from "react";
-import { StyleSheet, Alert, Switch, Share, View, Platform } from "react-native";
+import { Alert, Share, View, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import ThemeContext from "@/context/ThemeContext";
-import { Colors } from "@/constants/Colors";
 
 const Settings = () => {
-    const [name, setName] = useState<string>("");
-    const [translation, setTranslation] = useState<boolean>(true);
-    const [morningTime, setMorningTime] = useState<Date>(new Date());
-    const [eveningTime, setEveningTime] = useState<Date>(new Date());
-    const [showMorningPicker, setShowMorningPicker] = useState<boolean>(false);
-    const [showEveningPicker, setShowEveningPicker] = useState<boolean>(false);
-    const { theme, toggleTheme } = useContext(ThemeContext);
-    const router = useRouter();
+  const [name, setName] = useState<string>("");
+  const [translation, setTranslation] = useState<boolean>(true);
+  const [morningTime, setMorningTime] = useState<Date>(new Date());
+  const [eveningTime, setEveningTime] = useState<Date>(new Date());
+  const [showMorningPicker, setShowMorningPicker] = useState<boolean>(false);
+  const [showEveningPicker, setShowEveningPicker] = useState<boolean>(false);
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
 
-    const colors = Colors[theme as keyof typeof Colors];
+  const storeData = async (key: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
+    }
+  };
 
-    const storeData = async (key: string, value: string) => {
-        try {
-            await AsyncStorage.setItem(key, value);
-        } catch (e: any) {
-            Alert.alert("Error", e.message);
-        }
-    };
+  const handleSubmitName = async () => {
+    if (name.trim()) {
+      await storeData("name", name.trim());
+      Alert.alert("Success", "Name has been saved! Pull down to refresh.");
+      router.push("/home");
+    } else {
+      Alert.alert("Please enter your name");
+    }
+  };
 
-    const handleSubmitName = async () => {
-        await storeData("name", name);
-        Alert.alert("Success", "Name has been saved! Pull down to refresh.");
-        router.push("/home");
-    };
-
-    const handleSubmitTime = async () => {
-        await storeData("morningTime", morningTime.toISOString());
-        await storeData("eveningTime", eveningTime.toISOString());
-        Alert.alert(
-            "Success",
-            "Notification time has been saved! Pull down to refresh."
-        );
-        router.push("/home");
-    };
-
-    const handleToggleTheme = () => {
-        const newTheme = theme === "light" ? "dark" : "light";
-        toggleTheme(newTheme);
-    };
-
-    const onShare = () => {
-        Share.share({
-            message:
-                "Check out this awesome app! \nhttps://play.google.com/store/apps/details?id=com.zameel7.adkarstreak",
-        });
-    };
-
-    const dynamicStyles = StyleSheet.create({
-        input: {
-            marginTop: 20,
-        },
-        headerImage: {
-            color: "#808080",
-            bottom: 0,
-            left: 10,
-            position: "absolute",
-        },
-        titleContainer: {
-            flexDirection: "row",
-            gap: 8,
-        },
-        switchContainer: {
-            flexDirection: "row",
-            marginTop: 20,
-            justifyContent: "space-between",
-        },
-        switch: {
-            marginHorizontal: 10,
-        },
-        text: {
-            marginTop: 30,
-            fontSize: 20,
-            color: colors.text,
-            fontWeight: "bold",
-        },
-        icon: {
-            color: colors.text,
-        },
-        pickerContainer: {
-            marginTop: 20,
-            paddingHorizontal: 20,
-        },
-        timePicker: {
-            marginBottom: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-        },
-    });
-
-    useEffect(() => {
-        const getDetails = async () => {
-            try {
-                const storedName = await AsyncStorage.getItem('name');
-                if (storedName) setName(storedName);
-
-                const translations = await AsyncStorage.getItem('translations');
-                if (translations) setTranslation(JSON.parse(translations));
-
-                const storedMorningTime = await AsyncStorage.getItem('morningTime');
-                if (storedMorningTime) {
-                    setMorningTime(new Date(storedMorningTime));
-                } else {
-                    const defaultMorningTime = new Date();
-                    defaultMorningTime.setHours(5, 30, 0, 0);
-                    setMorningTime(defaultMorningTime);
-                }
-
-                const storedEveningTime = await AsyncStorage.getItem('eveningTime');
-                if (storedEveningTime) {
-                    setEveningTime(new Date(storedEveningTime));
-                } else {
-                    const defaultEveningTime = new Date();
-                    defaultEveningTime.setHours(16, 30, 0, 0);
-                    setEveningTime(defaultEveningTime);
-                }
-            } catch (error) {
-                console.error('Error fetching details from AsyncStorage:', error);
-            }
-        };
-        getDetails();
-    }, []);
-
-    return (
-        <ParallaxScrollView
-            headerBackgroundColor={{ light: "#D0D0D0", dark: "#353636" }}
-            headerImage={
-                <Ionicons
-                    size={200}
-                    name="code-slash"
-                    style={dynamicStyles.headerImage}
-                />
-            }
-            showTime={false}
-            setRefreshingAPI={() => {}}
-        >
-            <ThemedView style={dynamicStyles.titleContainer}>
-                <ThemedText type="title">Settings</ThemedText>
-            </ThemedView>
-            <ThemedText style={dynamicStyles.text}>
-                What should we call you?
-            </ThemedText>
-            <Input
-                placeholder={name || "Your Name"}
-                placeholderTextColor={colors.placeholder}
-                onChangeText={(name) => setName(name)}
-                inputStyle={dynamicStyles.input}
-            />
-            <Button
-                ViewComponent={LinearGradient}
-                linearGradientProps={{
-                    colors: [colors.primary, colors.secondary],
-                    start: { x: 0, y: 0.5 },
-                    end: { x: 1, y: 0.5 },
-                }}
-                title="Save"
-                onPress={handleSubmitName}
-            />
-            <ThemedText style={dynamicStyles.text}>Appearance</ThemedText>
-            <ThemedView style={dynamicStyles.switchContainer}>
-                <ThemedText style={dynamicStyles.icon}>Theme: </ThemedText>
-                <ThemedView style={{ flexDirection: "row" }}>
-                    <Ionicons
-                        name="sunny"
-                        size={24}
-                        style={dynamicStyles.icon}
-                    />
-                    <Switch
-                        value={theme === "dark"}
-                        onValueChange={handleToggleTheme}
-                        style={dynamicStyles.switch}
-                        trackColor={{
-                            false: colors.border,
-                            true: colors.border,
-                        }}
-                        thumbColor={colors.tabIconSelected}
-                    />
-                    <Ionicons
-                        name="moon"
-                        size={24}
-                        style={dynamicStyles.icon}
-                    />
-                </ThemedView>
-            </ThemedView>
-            <ThemedView style={dynamicStyles.switchContainer}>
-                <ThemedText style={dynamicStyles.icon}>
-                    Translation:{" "}
-                </ThemedText>
-                <ThemedView style={{ flexDirection: "row" }}>
-                    <Ionicons
-                        name="close-outline"
-                        size={24}
-                        style={dynamicStyles.icon}
-                    />
-                    <Switch
-                        value={translation}
-                        onValueChange={() => {
-                            AsyncStorage.setItem(
-                                "translations",
-                                JSON.stringify(!translation)
-                            );
-                            setTranslation(!translation);
-                        }}
-                        style={dynamicStyles.switch}
-                        trackColor={{
-                            false: colors.border,
-                            true: colors.border,
-                        }}
-                        thumbColor={colors.tabIconSelected}
-                    />
-                    <Ionicons
-                        name="checkmark-outline"
-                        size={24}
-                        style={dynamicStyles.icon}
-                    />
-                </ThemedView>
-            </ThemedView>
-            <ThemedText style={dynamicStyles.text}>
-                Notification Time
-            </ThemedText>
-            <ThemedView style={dynamicStyles.pickerContainer}>
-                <ThemedView style={dynamicStyles.timePicker}>
-                    <ThemedText style={dynamicStyles.icon}>
-                        Morning:{" "}
-                    </ThemedText>
-                    <Button
-                        title={morningTime.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                        onPress={() => setShowMorningPicker(true)}
-                        buttonStyle={{
-                            backgroundColor: colors.background,
-                        }}
-                        titleStyle={{ color: colors.text }}
-                    />
-                    {showMorningPicker && (
-                        <DateTimePicker
-                            value={morningTime}
-                            mode="time"
-                            is24Hour={true}
-                            display="default"
-                            onChange={(event, selectedDate) => {
-                                setShowMorningPicker(false);
-                                if (selectedDate) setMorningTime(selectedDate);
-                            }}
-                        />
-                    )}
-                </ThemedView>
-                <ThemedView style={dynamicStyles.timePicker}>
-                    <ThemedText style={dynamicStyles.icon}>
-                        Evening:{" "}
-                    </ThemedText>
-                    <Button
-                        title={eveningTime.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                        onPress={() => setShowEveningPicker(true)}
-                        buttonStyle={{
-                            backgroundColor: colors.background,
-                        }}
-                        titleStyle={{ color: colors.text }}
-                    />
-                    {showEveningPicker && (
-                        <DateTimePicker
-                            value={eveningTime}
-                            mode="time"
-                            is24Hour={true}
-                            display="default"
-                            onChange={(event, selectedDate) => {
-                                setShowEveningPicker(false);
-                                if (selectedDate) setEveningTime(selectedDate);
-                            }}
-                        />
-                    )}
-                </ThemedView>
-                <Button
-                    ViewComponent={LinearGradient}
-                    linearGradientProps={{
-                        colors: [colors.primary, colors.secondary],
-                        start: { x: 0, y: 0.5 },
-                        end: { x: 1, y: 0.5 },
-                    }}
-                    title="Save"
-                    onPress={handleSubmitTime}
-                />
-            </ThemedView>
-            <Button
-                title="Share App"
-                onPress={onShare}
-                buttonStyle={{
-                    marginTop: 20,
-                    width: "50%",
-                    alignSelf: "center",
-                    backgroundColor: colors.background,
-                }}
-                titleStyle={{ color: colors.icon, fontWeight: "bold" }}
-                icon={
-                    <Ionicons
-                        name="share-social"
-                        size={24}
-                        style={{ marginRight: 10, color: colors.icon }}
-                    />
-                }
-            />
-        </ParallaxScrollView>
+  const handleSubmitTime = async () => {
+    await storeData("morningTime", morningTime.toISOString());
+    await storeData("eveningTime", eveningTime.toISOString());
+    Alert.alert(
+      "Success",
+      "Notification time has been saved! Pull down to refresh."
     );
+    router.push("/home");
+  };
+
+  const handleToggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    toggleTheme(newTheme);
+  };
+
+  const onShare = () => {
+    Share.share({
+      message:
+        "Check out this awesome app! \nhttps://play.google.com/store/apps/details?id=com.zameel7.adkarstreak",
+    });
+  };
+
+  useEffect(() => {
+    const getDetails = async () => {
+      try {
+        const storedName = await AsyncStorage.getItem('name');
+        if (storedName) setName(storedName);
+
+        const translations = await AsyncStorage.getItem('translations');
+        if (translations) setTranslation(JSON.parse(translations));
+
+        const storedMorningTime = await AsyncStorage.getItem('morningTime');
+        if (storedMorningTime) {
+          setMorningTime(new Date(storedMorningTime));
+        } else {
+          const defaultMorningTime = new Date();
+          defaultMorningTime.setHours(5, 30, 0, 0);
+          setMorningTime(defaultMorningTime);
+        }
+
+        const storedEveningTime = await AsyncStorage.getItem('eveningTime');
+        if (storedEveningTime) {
+          setEveningTime(new Date(storedEveningTime));
+        } else {
+          const defaultEveningTime = new Date();
+          defaultEveningTime.setHours(16, 30, 0, 0);
+          setEveningTime(defaultEveningTime);
+        }
+      } catch (error) {
+        console.error('Error fetching details from AsyncStorage:', error);
+      }
+    };
+    getDetails();
+  }, []);
+
+  return (
+    <LinearGradient
+      colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#ffffff', '#f8f9fa']}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          padding: 16,
+          paddingTop: insets.top + 20,
+          paddingBottom: 100 + insets.bottom
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header */}
+        <View style={{
+          marginBottom: 32,
+          alignItems: 'center',
+          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 20,
+          padding: 24,
+          borderWidth: 1,
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+          <Ionicons
+            name="settings"
+            size={40}
+            color="#61B553"
+            style={{ marginBottom: 12 }}
+          />
+          <ThemedText style={{
+            fontSize: 28,
+            fontWeight: 'bold',
+            color: theme === 'dark' ? '#ffffff' : '#333'
+          }}>
+            Settings
+          </ThemedText>
+        </View>
+
+        {/* Profile Section */}
+        <View style={{
+          marginBottom: 32,
+          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 20,
+          padding: 24,
+          borderWidth: 1,
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <Ionicons name="person" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <ThemedText style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#ffffff' : '#333'
+            }}>
+              Profile
+            </ThemedText>
+          </View>
+
+          <View style={{ marginBottom: 16 }}>
+            <ThemedText style={{
+              fontSize: 16,
+              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : '#666',
+              marginBottom: 8
+            }}>
+              What should we call you?
+            </ThemedText>
+            <TextInput
+              style={{
+                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                fontSize: 16,
+                color: theme === 'dark' ? '#ffffff' : '#333'
+              }}
+              placeholder={name || "Your Name"}
+              placeholderTextColor={theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : '#999'}
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSubmitName}
+            style={{
+              backgroundColor: '#61B553',
+              borderRadius: 12,
+              paddingVertical: 16,
+              alignItems: 'center'
+            }}
+          >
+            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
+              Save Name
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+
+        {/* Appearance Section */}
+        <View style={{
+          marginBottom: 32,
+          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 20,
+          padding: 24,
+          borderWidth: 1,
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <Ionicons name="color-palette" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <ThemedText style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#ffffff' : '#333'
+            }}>
+              Appearance
+            </ThemedText>
+          </View>
+
+          <TouchableOpacity
+            onPress={handleToggleTheme}
+            style={{
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 12
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name={theme === "dark" ? "moon" : "sunny"} size={24} color="#61B553" style={{ marginRight: 12 }} />
+              <ThemedText style={{
+                fontSize: 16,
+                color: theme === 'dark' ? '#ffffff' : '#333',
+                fontWeight: '600'
+              }}>
+                {theme === "dark" ? "Dark Mode" : "Light Mode"}
+              </ThemedText>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color={theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : '#999'} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {
+              AsyncStorage.setItem("translations", JSON.stringify(!translation));
+              setTranslation(!translation);
+            }}
+            style={{
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name={translation ? "checkmark-outline" : "close-outline"} size={24} color="#61B553" style={{ marginRight: 12 }} />
+              <ThemedText style={{
+                fontSize: 16,
+                color: theme === 'dark' ? '#ffffff' : '#333',
+                fontWeight: '600'
+              }}>
+                Show Translations
+              </ThemedText>
+            </View>
+            <View style={{
+              backgroundColor: translation ? '#61B553' : '#ccc',
+              borderRadius: 12,
+              width: 24,
+              height: 24,
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}>
+              <Ionicons name={translation ? "checkmark" : "close"} size={16} color="#ffffff" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Notification Section */}
+        <View style={{
+          marginBottom: 32,
+          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 20,
+          padding: 24,
+          borderWidth: 1,
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <Ionicons name="notifications" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <ThemedText style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#ffffff' : '#333'
+            }}>
+              Notification Time
+            </ThemedText>
+          </View>
+
+          {/* Morning Time */}
+          <TouchableOpacity
+            onPress={() => setShowMorningPicker(true)}
+            style={{
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 12
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="sunny" size={20} color="#61B553" style={{ marginRight: 12 }} />
+              <ThemedText style={{
+                fontSize: 16,
+                color: theme === 'dark' ? '#ffffff' : '#333',
+                fontWeight: '600'
+              }}>
+                Morning Time
+              </ThemedText>
+            </View>
+            <ThemedText style={{ fontSize: 16, color: '#61B553', fontWeight: 'bold' }}>
+              {morningTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* Evening Time */}
+          <TouchableOpacity
+            onPress={() => setShowEveningPicker(true)}
+            style={{
+              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
+              paddingHorizontal: 16,
+              paddingVertical: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 16
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="moon" size={20} color="#61B553" style={{ marginRight: 12 }} />
+              <ThemedText style={{
+                fontSize: 16,
+                color: theme === 'dark' ? '#ffffff' : '#333',
+                fontWeight: '600'
+              }}>
+                Evening Time
+              </ThemedText>
+            </View>
+            <ThemedText style={{ fontSize: 16, color: '#61B553', fontWeight: 'bold' }}>
+              {eveningTime.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleSubmitTime}
+            style={{
+              backgroundColor: '#61B553',
+              borderRadius: 12,
+              paddingVertical: 16,
+              alignItems: 'center'
+            }}
+          >
+            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
+              Save Notification Times
+            </ThemedText>
+          </TouchableOpacity>
+
+          {/* Time Pickers */}
+          {showMorningPicker && (
+            <DateTimePicker
+              value={morningTime}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowMorningPicker(false);
+                if (selectedDate) setMorningTime(selectedDate);
+              }}
+            />
+          )}
+
+          {showEveningPicker && (
+            <DateTimePicker
+              value={eveningTime}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={(event, selectedDate) => {
+                setShowEveningPicker(false);
+                if (selectedDate) setEveningTime(selectedDate);
+              }}
+            />
+          )}
+        </View>
+
+        {/* Share Section */}
+        <View style={{
+          marginBottom: 32,
+          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
+          borderRadius: 20,
+          padding: 24,
+          borderWidth: 1,
+          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
+            <Ionicons name="share-social" size={24} color="#61B553" style={{ marginRight: 12 }} />
+            <ThemedText style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: theme === 'dark' ? '#ffffff' : '#333'
+            }}>
+              Share App
+            </ThemedText>
+          </View>
+
+          <TouchableOpacity
+            onPress={onShare}
+            style={{
+              backgroundColor: '#61B553',
+              borderRadius: 12,
+              paddingVertical: 16,
+              alignItems: 'center'
+            }}
+          >
+            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
+              Share Adkar Champ
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </LinearGradient>
+  );
 };
 
 export default Settings;

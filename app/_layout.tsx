@@ -1,4 +1,4 @@
-import { Stack, router } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import { Suspense, useEffect } from "react";
@@ -8,54 +8,74 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import * as SplashScreen from "expo-splash-screen";
 
 SplashScreen.preventAutoHideAsync();
 
+// Move notification observer outside the main component to avoid hook issues
+function useNotificationObserver() {
+    const router = useRouter();
+
+    useEffect(() => {
+        let isMounted = true;
+
+        function redirect(notification: Notifications.Notification) {
+            const url = notification.request.content.data?.url;
+            if (url) {
+                router.push(url);
+            }
+        }
+
+        Notifications.getLastNotificationResponseAsync().then((response) => {
+            if (!isMounted || !response?.notification) {
+                return;
+            }
+            redirect(response?.notification);
+        });
+
+        const subscription =
+            Notifications.addNotificationResponseReceivedListener(
+                (response) => {
+                    redirect(response.notification);
+                }
+            );
+
+        return () => {
+            isMounted = false;
+            subscription.remove();
+        };
+    }, [router]);
+}
+
+
+// Root component that wraps everything with AuthProvider
 const RootLayout = () => {
+    return (
+        <AuthProvider>
+            <AuthenticatedApp />
+        </AuthProvider>
+    );
+};
+
+// Component that handles auth routing and renders the app
+const AuthenticatedApp = () => {
+    const { initialized } = useAuth();
     const today = new Date().toISOString().split("T")[0];
 
-    async function insertMissingDays(db: SQLiteDatabase) {
-        const DATABASE_VERSION = 1;
-        let user_version = await db.getFirstAsync<{ user_version: number }>(
-            "PRAGMA user_version"
-        );
-
-        try {
-            if (user_version?.user_version === 0) {
-                // Set the journal mode to WAL
-                await db.execAsync("PRAGMA journal_mode = WAL;");
-
-                // Create the table if it does not exist
-                await db.execAsync(`
-                    CREATE TABLE IF NOT EXISTS adkarStreaks (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        morning BOOLEAN NOT NULL DEFAULT FALSE,
-                        evening BOOLEAN NOT NULL DEFAULT FALSE,
-                        date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
-                    );
-                `);
-
-                // Update the user_version
-                await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
-            }
-        } catch (error) {
-            console.error("Error inserting missing days:", error);
-        }
-    }
-
+    // Always call all hooks first
     useNotificationObserver();
 
     useEffect(() => {
         const timeout = setTimeout(() => {
             SplashScreen.hideAsync();
         }, 2000);
-
         return () => clearTimeout(timeout);
     }, []);
 
     useEffect(() => {
-        
+        if (!initialized) return;
+
         const updateStreakData = async () => {
             const streakData = await AsyncStorage.getItem("streakData");
             if (
@@ -84,13 +104,40 @@ const RootLayout = () => {
         }
 
         updateStreakData();
-    }, []);
+    }, [initialized, today]);
 
+
+    // Database initialization function
+    async function insertMissingDays(db: SQLiteDatabase) {
+        const DATABASE_VERSION = 1;
+        let user_version = await db.getFirstAsync<{ user_version: number }>(
+            "PRAGMA user_version"
+        );
+
+        try {
+            if (user_version?.user_version === 0) {
+                await db.execAsync("PRAGMA journal_mode = WAL;");
+                await db.execAsync(`
+                    CREATE TABLE IF NOT EXISTS adkarStreaks (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        morning BOOLEAN NOT NULL DEFAULT FALSE,
+                        evening BOOLEAN NOT NULL DEFAULT FALSE,
+                        date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
+                    );
+                `);
+                await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+            }
+        } catch (error) {
+            console.error("Error inserting missing days:", error);
+        }
+    }
+
+    // Always render the Stack - no conditional rendering of the navigator
     return (
         <Suspense
             fallback={
-                <ThemedView>
-                    <ActivityIndicator size="large" />
+                <ThemedView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#2196F3" />
                 </ThemedView>
             }
         >
@@ -100,12 +147,19 @@ const RootLayout = () => {
                 useSuspense
             >
                 <ThemeProvider>
-                    <Stack>
-                        <Stack.Screen name="index" options={{ headerShown: false }} />
-                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack
+                        screenOptions={{
+                            headerShown: false,
+                            animation: 'fade'
+                        }}
+                    >
+                        <Stack.Screen name="auth" />
+                        <Stack.Screen name="index" />
+                        <Stack.Screen name="(tabs)" />
                         <Stack.Screen
                             name="morning-adkar"
                             options={{
+                                headerShown: true,
                                 title: "Morning Adkar",
                                 headerBackTitle: "Home",
                                 headerTintColor: '#2196F3',
@@ -114,6 +168,7 @@ const RootLayout = () => {
                         <Stack.Screen
                             name="evening-adkar"
                             options={{
+                                headerShown: true,
                                 title: "Evening Adkar",
                                 headerBackTitle: "Home",
                                 headerTintColor: '#1976D2',
@@ -222,38 +277,6 @@ async function registerForPushNotificationsAsync() {
     }
 
     return token;
-}
-
-function useNotificationObserver() {
-    useEffect(() => {
-        let isMounted = true;
-
-        function redirect(notification: Notifications.Notification) {
-            const url = notification.request.content.data?.url;
-            if (url) {
-                router.push(url);
-            }
-        }
-
-        Notifications.getLastNotificationResponseAsync().then((response) => {
-            if (!isMounted || !response?.notification) {
-                return;
-            }
-            redirect(response?.notification);
-        });
-
-        const subscription =
-            Notifications.addNotificationResponseReceivedListener(
-                (response) => {
-                    redirect(response.notification);
-                }
-            );
-
-        return () => {
-            isMounted = false;
-            subscription.remove();
-        };
-    }, []);
 }
 
 export default RootLayout;

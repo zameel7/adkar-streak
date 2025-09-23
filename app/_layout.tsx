@@ -1,7 +1,7 @@
 import { Stack, useRouter } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,7 +10,6 @@ import * as Device from "expo-device";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import * as SplashScreen from "expo-splash-screen";
-import AnimatedSplashScreen from "@/components/AnimatedSplashScreen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -63,14 +62,16 @@ const RootLayout = () => {
 const AuthenticatedApp = () => {
     const { initialized } = useAuth();
     const today = new Date().toISOString().split("T")[0];
-    const [isAnimationFinished, setIsAnimationFinished] = useState(false);
 
     // Always call all hooks first
     useNotificationObserver();
 
-    const handleAnimationFinish = () => {
-        setIsAnimationFinished(true);
-    };
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            SplashScreen.hideAsync();
+        }, 2000);
+        return () => clearTimeout(timeout);
+    }, []);
 
     useEffect(() => {
         if (!initialized) return;
@@ -146,9 +147,6 @@ const AuthenticatedApp = () => {
                 useSuspense
             >
                 <ThemeProvider>
-                    {!isAnimationFinished && (
-                        <AnimatedSplashScreen onAnimationFinish={handleAnimationFinish} />
-                    )}
                     <Stack
                         screenOptions={{
                             headerShown: false,

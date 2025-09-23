@@ -9,7 +9,14 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "backgroundColor": "#FFFFFF"
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF",
+      "dark": {
+        "image": "./assets/images/splash-dark.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#242424"
+      }
     },
     "ios": {
       "supportsTablet": true,

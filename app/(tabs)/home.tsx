@@ -205,7 +205,6 @@ const Home = () => {
     function getTimeOfDayInfo() {
         const hours = new Date().getHours();
         const minutes = new Date().getMinutes();
-        const currentTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
         if (hours >= 5 && hours < 12) {
             return {
@@ -301,7 +300,7 @@ const Home = () => {
                             overflow: 'hidden'
                         }}
                         imageStyle={{ borderRadius: 20 }}
-                        defaultSource={require('@/assets/images/icon.png')}
+                        defaultSource={theme === 'dark' ? require('@/assets/images/icon.png') : require('@/assets/images/icon-dark.png')}
                     >
                         <LinearGradient
                             colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.4)']}
@@ -325,7 +324,7 @@ const Home = () => {
                                     </ThemedText>
                                 </View>
                                 <Ionicons
-                                    name={timeInfo.icon}
+                                    name={timeInfo.icon as any}
                                     size={48}
                                     color="rgba(255, 255, 255, 0.9)"
                                 />

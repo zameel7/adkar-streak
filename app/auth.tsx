@@ -71,7 +71,7 @@ export default function AuthScreen() {
             {/* Header */}
             <View style={styles.header}>
               <Image
-                source={require('@/assets/images/icon.png')}
+                source={theme === 'dark' ? require('@/assets/images/icon.png') : require('@/assets/images/icon-dark.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />

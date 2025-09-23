@@ -5,7 +5,7 @@
     "version": "3.0.0",
     "orientation": "portrait",
     "newArchEnabled": true,
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/adaptive-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -39,7 +39,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon.png",
+          "icon": "./assets/images/adaptive-icon.png",
           "color": "#ffffff"
         }
       ],

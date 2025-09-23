@@ -170,9 +170,6 @@ export default function AuthScreen() {
 
               {/* Toggle Sign Up / Sign In */}
               <View style={styles.toggleContainer}>
-                <ThemedText style={styles.toggleText}>
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-                </ThemedText>
                 <TouchableOpacity onPress={() => setIsSignUp(!isSignUp)}>
                   <ThemedText style={styles.toggleLink}>
                     {isSignUp ? 'Already have an account? Login' : 'Don\'t have an account? Sign Up'}

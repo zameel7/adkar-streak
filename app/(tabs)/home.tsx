@@ -57,7 +57,7 @@ const Home = () => {
 
         if (result.length === 0) {
             await db.execAsync(`
-                INSERT INTO adkarStreaks (date) VALUES (date('now'))
+                INSERT OR IGNORE INTO adkarStreaks (date) VALUES (date('now'))
             `);
             return;
         }
@@ -72,7 +72,7 @@ const Home = () => {
         const today = new Date();
 
         const statement = await db.prepareAsync(
-            "INSERT INTO adkarStreaks (date) VALUES ($value)"
+            "INSERT OR IGNORE INTO adkarStreaks (date) VALUES ($value)"
         );
 
         let startDate, endDate;

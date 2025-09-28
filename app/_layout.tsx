@@ -60,8 +60,9 @@ const RootLayout = () => {
 
 // Component that handles auth routing and renders the app
 const AuthenticatedApp = () => {
-    const { initialized } = useAuth();
+    const { initialized, session } = useAuth();
     const today = new Date().toISOString().split("T")[0];
+    const router = useRouter();
 
     // Always call all hooks first
     useNotificationObserver();
@@ -72,6 +73,22 @@ const AuthenticatedApp = () => {
         }, 2000);
         return () => clearTimeout(timeout);
     }, []);
+
+    // Handle navigation based on auth state
+    useEffect(() => {
+        if (!initialized) return;
+
+        // Add a small delay to ensure the Stack navigator is ready
+        const timeout = setTimeout(() => {
+            if (session) {
+                router.replace('/(tabs)/home');
+            } else {
+                router.replace('/auth');
+            }
+        }, 100);
+
+        return () => clearTimeout(timeout);
+    }, [initialized, session, router]);
 
     useEffect(() => {
         if (!initialized) return;

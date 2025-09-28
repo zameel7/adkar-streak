@@ -87,13 +87,6 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
           setSession(session)
           setUser(session ? session.user : null)
           setInitialized(true)
-
-          // Only redirect after a slight delay to ensure state has updated
-          setTimeout(() => {
-            if (mounted) {
-              router.replace(session ? '/(tabs)/home' : '/auth')
-            }
-          }, 100);
         }
       }
     )

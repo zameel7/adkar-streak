@@ -26,7 +26,6 @@
     "expo": "^54.0.10",
     "expo-application": "~7.0.7",
     "expo-blur": "~15.0.7",
-    "expo-build-properties": "~1.0.9",
     "expo-constants": "~18.0.9",
     "expo-dev-client": "~6.0.12",
     "expo-device": "~8.0.8",

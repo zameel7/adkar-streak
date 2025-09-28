@@ -237,18 +237,37 @@ async function schedulePushNotification(): Promise<void> {
     ): Promise<void> => {
         const { hour, minute } = parseTime(time);
 
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title,
-                body,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-                hour,
-                minute,
-                repeats: true,
-            },
-        });
+        if (Platform.OS === 'android') {
+            // Use daily trigger for Android
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title,
+                    body,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DAILY,
+                    hour,
+                    minute,
+                    repeats: true,
+                },
+            });
+        } else {
+            // Use calendar trigger for iOS
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title,
+                    body,
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
+                    dateComponents: {
+                        hour,
+                        minute,
+                    },
+                    repeats: true,
+                },
+            });
+        }
     };
 
     // Schedule morning notification

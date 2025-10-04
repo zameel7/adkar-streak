@@ -21,6 +21,7 @@ const AdkarCard = ({
     height,
     setIndex,
     onAdkarCompleted,
+    onStreakUpdated,
 }: {
     item: Adkar;
     index: number;
@@ -28,6 +29,7 @@ const AdkarCard = ({
     height: number;
     setIndex: (index: number) => void;
     onAdkarCompleted?: () => void;
+    onStreakUpdated?: () => void;
 }) => {
     const { theme } = useContext(ThemeContext);
     const db = useSQLiteContext();
@@ -78,20 +80,41 @@ const AdkarCard = ({
     }, [index, type]);
 
     const checkAndMarkStreak = async () => {
-        const streakData = await AsyncStorage.getItem("streakData");
-        if (streakData) {
-            const data = JSON.parse(streakData);
+        if (!db) {
+            console.error("Database not available");
+            return;
+        }
+        
+        try {
+            const streakData = await AsyncStorage.getItem("streakData");
+            if (streakData) {
+                const data = JSON.parse(streakData);
 
-            if (Object.keys(data.morning).length === 24) {
-                await db.execAsync(`
-                    UPDATE adkarStreaks SET morning = true WHERE date = CURRENT_DATE
-                `);
+                let streakUpdated = false;
+
+                // Check if morning adkar is completed (all 24 items)
+                if (Object.keys(data.morning).length === 24) {
+                    await db.execAsync(`
+                        UPDATE adkarStreaks SET morning = true WHERE date = CURRENT_DATE
+                    `);
+                    streakUpdated = true;
+                }
+
+                // Check if evening adkar is completed (all 24 items)
+                if (Object.keys(data.evening).length === 24) {
+                    await db.execAsync(`
+                        UPDATE adkarStreaks SET evening = true WHERE date = CURRENT_DATE
+                    `);
+                    streakUpdated = true;
+                }
+
+                // Notify parent component that streak was updated (for Supabase sync)
+                if (streakUpdated && onStreakUpdated) {
+                    onStreakUpdated();
+                }
             }
-            if (Object.keys(data.evening).length === 24) {
-                await db.execAsync(`
-                    UPDATE adkarStreaks SET evening = true WHERE date = CURRENT_DATE
-                `);
-            }
+        } catch (error) {
+            console.error('Error marking streak in database:', error);
         }
     };
 

@@ -8,7 +8,10 @@ import { ImageBackground, RefreshControl, ScrollView, TouchableOpacity, View } f
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
+import { useAuth } from "@/context/AuthContext";
+import { SyncProvider } from "@/context/SyncContext";
 import ThemeContext from "@/context/ThemeContext";
+import { supabase } from "@/lib/supabase";
 import { useSQLiteContext } from "expo-sqlite";
 
 function adkarTime() {
@@ -36,6 +39,7 @@ const Home = () => {
 
     const db = useSQLiteContext();
     const { theme } = useContext(ThemeContext);
+    const { user } = useAuth();
     const insets = useSafeAreaInsets();
 
     const time = adkarTime();
@@ -49,147 +53,421 @@ const Home = () => {
         isToday: boolean
     }>>([]);
 
-    async function insertMissingDays() {
-        const result = await db.getAllAsync(
-            "SELECT * FROM adkarStreaks WHERE date = CURRENT_DATE"
-        );
+    // Use ref to prevent concurrent database operations
+    const isLoadingRef = React.useRef(false);
+    const [dbReady, setDbReady] = useState(false);
 
-        if (result.length === 0) {
+    // Function to download data from Supabase and merge with local data
+    const downloadAndMergeSupabaseData = async () => {
+        if (!user || !db) return;
+
+        try {
+            console.log("📥 Downloading data from Supabase...");
+            
+            // Get all records from Supabase for this user
+            const { data: supabaseRecords, error } = await supabase
+                .from('adkar_streaks')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('date', { ascending: false });
+
+            if (error) {
+                console.error('Error fetching Supabase data:', error);
+                return;
+            }
+
+            if (!supabaseRecords || supabaseRecords.length === 0) {
+                console.log("No Supabase data to download");
+                return;
+            }
+
+            console.log(`Found ${supabaseRecords.length} records in Supabase`);
+
+            // Get all local records
+            const localRecords = await db.getAllAsync<{
+                id: number;
+                date: string;
+                morning: boolean;
+                evening: boolean;
+            }>(`
+                SELECT id, date, morning, evening 
+                FROM adkarStreaks 
+                ORDER BY date DESC
+            `);
+
+            // Create a map of local records for quick lookup
+            const localMap = new Map<string, { morning: boolean; evening: boolean }>();
+            localRecords.forEach(record => {
+                localMap.set(record.date, { morning: record.morning, evening: record.evening });
+            });
+
+            // Merge Supabase data with local data
+            for (const supabaseRecord of supabaseRecords) {
+                const localData = localMap.get(supabaseRecord.date);
+                
+                if (localData) {
+                    // Record exists locally - merge the data (keep the most complete version)
+                    const mergedMorning = localData.morning || supabaseRecord.morning;
+                    const mergedEvening = localData.evening || supabaseRecord.evening;
+                    
+                    // Only update if there's a difference
+                    if (mergedMorning !== localData.morning || mergedEvening !== localData.evening) {
+                        await db.execAsync(`
+                            UPDATE adkarStreaks 
+                            SET morning = ${mergedMorning ? 1 : 0}, evening = ${mergedEvening ? 1 : 0}
+                            WHERE date = '${supabaseRecord.date}'
+                        `);
+                        console.log(`✅ Merged data for ${supabaseRecord.date}`);
+                    }
+                } else {
+                    // Record doesn't exist locally - insert it
+                    await db.execAsync(`
+                        INSERT INTO adkarStreaks (date, morning, evening)
+                        VALUES ('${supabaseRecord.date}', ${supabaseRecord.morning ? 1 : 0}, ${supabaseRecord.evening ? 1 : 0})
+                    `);
+                    console.log(`✅ Downloaded new record for ${supabaseRecord.date}`);
+                }
+            }
+
+            console.log("✅ Supabase data download and merge completed");
+            
+            // Reload the UI with merged data
+            await loadAllData();
+            
+        } catch (error) {
+            console.error("Error downloading Supabase data:", error);
+        }
+    };
+
+    // Function to sync local data to Supabase
+    const syncLocalDataToSupabase = async () => {
+        if (!user || !db) return;
+
+        try {
+            console.log("🔄 Syncing local data to Supabase...");
+            
+            // Get all local records
+            const localRecords = await db.getAllAsync<{
+                id: number;
+                date: string;
+                morning: boolean;
+                evening: boolean;
+            }>(`
+                SELECT id, date, morning, evening 
+                FROM adkarStreaks 
+                WHERE morning = true OR evening = true
+                ORDER BY date DESC
+            `);
+
+            if (!localRecords || localRecords.length === 0) {
+                console.log("No local data to sync");
+                return;
+            }
+
+            // Sync each record to Supabase
+            for (const record of localRecords) {
+                try {
+                    // Check if record already exists in Supabase
+                    const { data: existingRecord, error: fetchError } = await supabase
+                        .from('adkar_streaks')
+                        .select('*')
+                        .eq('user_id', user.id)
+                        .eq('date', record.date)
+                        .single();
+
+                    if (fetchError && fetchError.code !== 'PGRST116') {
+                        console.error(`Error fetching record for ${record.date}:`, fetchError);
+                        continue;
+                    }
+
+                    if (existingRecord) {
+                        // Update existing record if local data is more complete
+                        const needsUpdate = 
+                            (record.morning && !existingRecord.morning) ||
+                            (record.evening && !existingRecord.evening);
+
+                        if (needsUpdate) {
+                            const { error: updateError } = await supabase
+                                .from('adkar_streaks')
+                                .update({
+                                    morning: record.morning || existingRecord.morning,
+                                    evening: record.evening || existingRecord.evening,
+                                })
+                                .eq('user_id', user.id)
+                                .eq('date', record.date);
+
+                            if (updateError) {
+                                console.error(`Error updating record for ${record.date}:`, updateError);
+                            } else {
+                                console.log(`✅ Updated Supabase record for ${record.date}`);
+                            }
+                        }
+                    } else {
+                        // Create new record
+                        const { error: insertError } = await supabase
+                            .from('adkar_streaks')
+                            .insert({
+                                user_id: user.id,
+                                date: record.date,
+                                morning: record.morning,
+                                evening: record.evening,
+                            });
+
+                        if (insertError) {
+                            console.error(`Error creating record for ${record.date}:`, insertError);
+                        } else {
+                            console.log(`✅ Created Supabase record for ${record.date}`);
+                        }
+                    }
+                } catch (recordError) {
+                    console.error(`Error syncing record for ${record.date}:`, recordError);
+                }
+            }
+
+            console.log("✅ Local data sync completed");
+        } catch (error) {
+            console.error("Error syncing local data to Supabase:", error);
+        }
+    };
+
+    // Wait for database to be fully initialized
+    useEffect(() => {
+        let retryCount = 0;
+        const maxRetries = 5;
+        let hasLoggedInfo = false;
+        
+        const initDb = async () => {
+            // Wait for database to be ready (increased delay for reliability)
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            if (!db) {
+                console.log("Database still not available after wait");
+                return;
+            }
+            
+            // Actually test the database connection
+            try {
+                await db.getFirstAsync("SELECT 1");
+                // Add a small additional delay to ensure stability
+                await new Promise(resolve => setTimeout(resolve, 200));
+                console.log("✅ Database connection established and verified");
+                setDbReady(true);
+            } catch (error) {
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    if (!hasLoggedInfo) {
+                        console.log("ℹ️  Database initializing... (Hot reload may cause temporary connection issues)");
+                        hasLoggedInfo = true;
+                    }
+                    // Retry after a short delay
+                    setTimeout(() => {
+                        initDb();
+                    }, 500);
+                } else {
+                    console.error("Database connection failed after max retries");
+                }
+            }
+        };
+        
+        initDb();
+    }, [db]);
+
+    // Download from Supabase and sync local data when user logs in
+    useEffect(() => {
+        if (user && dbReady) {
+            // Small delay to ensure everything is ready
+            const syncTimer = setTimeout(async () => {
+                // First download and merge data from Supabase
+                await downloadAndMergeSupabaseData();
+                // Then sync any local changes back to Supabase
+                await syncLocalDataToSupabase();
+            }, 2000);
+
+            return () => clearTimeout(syncTimer);
+        }
+    }, [user, dbReady]);
+
+    // Combined function to load all data in a single operation with retry logic
+    async function loadAllData(retryCount = 0): Promise<boolean> {
+        const maxRetries = 5;
+        
+        if (!db || !dbReady) {
+            console.log("Database not ready, skipping data load");
+            return false;
+        }
+        
+        try {
+            // Re-verify connection before using (important for hot reload scenarios)
+            await db.getFirstAsync("SELECT 1");
+            
+            // Small delay to ensure connection stability
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // First, ensure today's entry exists
             await db.execAsync(`
                 INSERT OR IGNORE INTO adkarStreaks (date) VALUES (date('now'))
             `);
-            return;
-        }
 
-        const lastRow = result[0] as Row;
-        if (!lastRow || !lastRow.date) {
-            console.error("Invalid data format in adkarStreaks table.");
-            return;
-        }
-
-        const lastDate = new Date(lastRow.date);
-        const today = new Date();
-
-        const statement = await db.prepareAsync(
-            "INSERT OR IGNORE INTO adkarStreaks (date) VALUES ($value)"
-        );
-
-        let startDate, endDate;
-        if (lastDate < today) {
-            startDate = lastDate;
-            endDate = today;
-        } else {
-            startDate = today;
-            endDate = lastDate;
-        }
-
-        const diff = Math.abs(endDate.getDate() - startDate.getDate());
-        for (let i = 1; i < diff; i++) {
-            const dateToInsert = new Date(startDate);
-            dateToInsert.setDate(startDate.getDate() - i);
-
-            await statement.executeAsync({
-                $value: dateToInsert.toISOString().slice(0, 10),
-            });
-            console.log(
-                `Inserted missing day: ${dateToInsert
-                    .toISOString()
-                    .slice(0, 10)}`
+            // Fetch all data in a single query
+            const allRecords = await db.getAllAsync<Row>(
+                `SELECT id, date, morning, evening 
+                 FROM adkarStreaks 
+                 ORDER BY date DESC
+                 LIMIT 100`
             );
-        }
-    }
 
-    async function getStreak() {
-        await insertMissingDays();
+            if (!allRecords || allRecords.length === 0) {
+                // No records yet, this is normal on first run
+                return false;
+            }
 
-        const result = await db.getFirstAsync<{
-            morning: boolean;
-            evening: boolean;
-        }>(
-            "SELECT morning, evening FROM adkarStreaks WHERE date = CURRENT_DATE"
-        );
+            const today = new Date().toISOString().slice(0, 10);
+            
+            // Process today's data
+            const todayRecord = allRecords.find(r => r.date === today);
+            if (todayRecord) {
+                setMorningStreak(todayRecord.morning);
+                setEveningStreak(todayRecord.evening);
+            }
 
-        if (result) {
-            setMorningStreak(result.morning);
-            setEveningStreak(result.evening);
-        }
-    }
-
-    async function calculateStreak() {
-        const records = await db.getAllAsync(
-            "SELECT id, date, morning, evening FROM adkarStreaks ORDER BY date ASC"
-        );
-        const today = new Date().toISOString().slice(0, 10);
-
-        let currentStreak = 0;
-
-        for (let i = 0; i < records.length; i++) {
-            const { date, morning, evening } = records[i] as Row;
-
-            if (morning && evening) {
-                currentStreak++;
-            } else {
-                if (date !== today) {
-                    currentStreak = 0; // Reset streak if activities are not completed for the day
+            // Calculate streak
+            let currentStreak = 0;
+            const sortedRecords = [...allRecords].reverse(); // Sort ascending by date
+            
+            for (const record of sortedRecords) {
+                if (record.morning && record.evening) {
+                    currentStreak++;
+                } else {
+                    if (record.date !== today) {
+                        currentStreak = 0;
+                    }
                 }
             }
-        }
+            setStreak(currentStreak);
 
-        setStreak(currentStreak);
-    }
-
-    async function getLast7DaysData() {
-        const today = new Date();
-        const last7Days = [];
-
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateString = date.toISOString().slice(0, 10);
-
+            // Build last 7 days data
+            const last7Days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            const dayName = dayNames[date.getDay()];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateString = date.toISOString().slice(0, 10);
+                const dayName = dayNames[date.getDay()];
 
-            // Get data from database
-            const result = await db.getFirstAsync<{
-                morning: boolean;
-                evening: boolean;
-            }>(
-                "SELECT morning, evening FROM adkarStreaks WHERE date = ?",
-                [dateString]
-            );
-
-            last7Days.push({
-                date: dateString,
-                dayName,
-                morning: result?.morning || false,
-                evening: result?.evening || false,
-                isToday: i === 0
-            });
+                const record = allRecords.find(r => r.date === dateString);
+                
+                last7Days.push({
+                    date: dateString,
+                    dayName,
+                    morning: record?.morning || false,
+                    evening: record?.evening || false,
+                    isToday: i === 0
+                });
+            }
+            
+            setWeekData(last7Days);
+            
+            // Log success to confirm data loaded (helps during development)
+            if (retryCount > 0) {
+                console.log(`✅ Data loaded successfully after ${retryCount} retry(ies)`);
+            }
+            
+            return true;
+            
+        } catch (error) {
+            if (retryCount < maxRetries) {
+                // Silently retry without logging errors (normal during hot reloads)
+                // Exponential backoff: wait longer each retry
+                const delay = 200 * (retryCount + 1);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                return loadAllData(retryCount + 1);
+            } else {
+                // Only log error if all retries failed
+                console.error("Failed to load data after all retries. This is normal during development hot reloads.");
+                return false;
+            }
         }
-
-        setWeekData(last7Days);
     }
 
     useEffect(() => {
-        AsyncStorage.getItem("name").then((name) => {
-            if (name) {
-                setName(name);
+        const initializeData = async () => {
+            // Wait for database to be ready
+            if (!dbReady) {
+                return;
             }
-        });
 
-        getStreak();
-        calculateStreak();
-        getLast7DaysData();
-    }, []);
+            // Prevent concurrent loads
+            if (isLoadingRef.current) {
+                console.log("Data load already in progress, skipping...");
+                return;
+            }
+
+            // Small delay after dbReady to ensure full stability
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            isLoadingRef.current = true;
+            try {
+                const storedName = await AsyncStorage.getItem("name");
+                if (storedName) {
+                    setName(storedName);
+                }
+
+                // Load all data in a single operation
+                await loadAllData();
+            } catch (error) {
+                // Errors are handled in loadAllData with retries
+            } finally {
+                isLoadingRef.current = false;
+            }
+        };
+
+        initializeData();
+    }, [dbReady]);
 
     // Refresh data when screen comes into focus
     useFocusEffect(
         React.useCallback(() => {
-            getStreak();
-            calculateStreak();
-            getLast7DaysData();
-        }, [])
+            let isActive = true;
+            
+            const refreshData = async () => {
+                // Wait for database to be ready
+                if (!dbReady) {
+                    return;
+                }
+
+                // Prevent concurrent loads
+                if (isLoadingRef.current) {
+                    console.log("Data load already in progress, skipping focus effect...");
+                    return;
+                }
+
+                // Small delay to avoid race conditions when switching tabs
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                if (!isActive) return;
+
+                isLoadingRef.current = true;
+                try {
+                    // Load all data in a single operation
+                    if (isActive) await loadAllData();
+                } catch (error) {
+                    // Errors are handled in loadAllData with retries
+                } finally {
+                    if (isActive) {
+                        isLoadingRef.current = false;
+                    }
+                }
+            };
+            
+            refreshData();
+            
+            return () => {
+                isActive = false;
+                // Reset the loading flag when component unmounts or loses focus
+                isLoadingRef.current = false;
+            };
+        }, [dbReady])
     );
 
     function getDayNightIcon() {
@@ -237,22 +515,55 @@ const Home = () => {
     }
 
     const onRefresh = async () => {
+        // Wait for database to be ready
+        if (!dbReady) {
+            console.log("Database not ready, skipping refresh...");
+            setRefreshing(false);
+            return;
+        }
+
+        // Prevent concurrent loads
+        if (isLoadingRef.current) {
+            console.log("Data load already in progress, skipping refresh...");
+            setRefreshing(false);
+            return;
+        }
+
         setRefreshing(true);
+        isLoadingRef.current = true;
 
-        // Manually reload data
-        await getStreak();
-        await calculateStreak();
-        await getLast7DaysData();
+        try {
+            // If user is logged in, sync with Supabase first
+            if (user) {
+                await downloadAndMergeSupabaseData();
+                await syncLocalDataToSupabase();
+            } else {
+                // Just reload local data if not logged in
+                await loadAllData();
+            }
+        } catch (error) {
+            // Errors are handled in the sync functions
+        } finally {
+            isLoadingRef.current = false;
+            setTimeout(() => setRefreshing(false), 1000);
+        }
+    };
 
-        setTimeout(() => setRefreshing(false), 1000);
+    // Function to trigger Supabase sync (called from AdkarCard)
+    const handleStreakUpdated = async () => {
+        if (user) {
+            console.log("🔄 Streak updated, syncing to Supabase...");
+            await syncLocalDataToSupabase();
+        }
     };
 
     return (
-        <SafeAreaProvider>
-            <LinearGradient
-                colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#ffffff', '#f8f9fa']}
-                style={{ flex: 1 }}
-            >
+        <SyncProvider onSync={handleStreakUpdated}>
+            <SafeAreaProvider>
+                <LinearGradient
+                    colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#ffffff', '#f8f9fa']}
+                    style={{ flex: 1 }}
+                >
                 <ScrollView
                     style={{ flex: 1 }}
                     contentContainerStyle={{
@@ -791,6 +1102,7 @@ const Home = () => {
                 </ScrollView>
             </LinearGradient>
         </SafeAreaProvider>
+        </SyncProvider>
     );
 };
 

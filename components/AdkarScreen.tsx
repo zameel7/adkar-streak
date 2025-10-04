@@ -15,18 +15,29 @@ import AdkarCard from "@/components/AdkarCard";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
+import { useSync } from "@/context/SyncContext";
 import ThemeContext from "@/context/ThemeContext";
 import { Adkar, useAdkarLogic } from "@/hooks/useAdkarLogic";
 
 interface AdkarScreenProps {
     adkarData: any;
     type: 'morning' | 'evening';
+    onStreakUpdated?: () => void;
 }
 
-const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type }) => {
+const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpdated }) => {
     const width = Dimensions.get("window").width;
     const { theme: colorScheme } = useContext(ThemeContext);
     const colors = Colors[colorScheme as keyof typeof Colors];
+    
+    // Use sync context if available, otherwise use the prop
+    let syncFunction = onStreakUpdated;
+    try {
+        const { triggerSync } = useSync();
+        syncFunction = triggerSync;
+    } catch {
+        // Sync context not available, use prop
+    }
 
     const {
         adkars,
@@ -54,6 +65,7 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type }) => {
                 height={height}
                 setIndex={setIndex}
                 onAdkarCompleted={handleAdkarCompleted}
+                onStreakUpdated={syncFunction}
                 key={`${itemIndex}-${refreshTrigger}`}
             />
         );

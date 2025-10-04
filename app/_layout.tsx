@@ -133,9 +133,14 @@ const AuthenticatedApp = () => {
         const DATABASE_VERSION = 1;
         
         try {
-            // Set WAL mode first for better concurrency
+            // Set WAL mode first for better concurrency and reduce locks
             await db.execAsync("PRAGMA journal_mode = WAL;");
-            await db.execAsync("PRAGMA busy_timeout = 5000;"); // Wait up to 5 seconds if database is locked
+            // Increase timeout to 10 seconds for better reliability
+            await db.execAsync("PRAGMA busy_timeout = 10000;");
+            // Optimize for mobile - reduce lock duration while maintaining integrity
+            await db.execAsync("PRAGMA synchronous = NORMAL;");
+            // Keep temporary data in memory to reduce file locks
+            await db.execAsync("PRAGMA temp_store = MEMORY;");
             
             let user_version = await db.getFirstAsync<{ user_version: number }>(
                 "PRAGMA user_version"

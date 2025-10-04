@@ -50,6 +50,12 @@ CREATE POLICY "Users can update their own streaks"
   TO authenticated
   USING (auth.uid() = user_id);
 
+CREATE POLICY "Users can delete their own streaks"
+  ON public.adkar_streaks
+  FOR DELETE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
 -- RLS Policies for user_preferences
 CREATE POLICY "Users can view their own preferences"
   ON public.user_preferences
@@ -66,6 +72,12 @@ CREATE POLICY "Users can insert their own preferences"
 CREATE POLICY "Users can update their own preferences"
   ON public.user_preferences
   FOR UPDATE
+  TO authenticated
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own preferences"
+  ON public.user_preferences
+  FOR DELETE
   TO authenticated
   USING (auth.uid() = user_id);
 

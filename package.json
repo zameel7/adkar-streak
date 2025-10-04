@@ -69,5 +69,9 @@
     "typescript": "~5.9.2",
     "webpack": "^5.101.3"
   },
+  "overrides": {
+    "ajv": "^8.17.1",
+    "json-schema-traverse": "^1.0.0"
+  },
   "private": true
 }

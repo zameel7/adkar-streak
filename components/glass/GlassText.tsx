@@ -16,15 +16,15 @@ export const GlassText: React.FC<GlassTextProps> = ({
   const getVariantStyles = () => {
     switch (variant) {
       case 'title':
-        return { fontSize: 30, fontWeight: 'bold', lineHeight: 36 };
+        return { fontSize: 30, fontWeight: 'bold' as const, lineHeight: 36 };
       case 'subtitle':
-        return { fontSize: 20, fontWeight: '600' };
+        return { fontSize: 20, fontWeight: '600' as const };
       case 'caption':
-        return { fontSize: 14, fontWeight: '500' };
+        return { fontSize: 14, fontWeight: '500' as const };
       case 'link':
-        return { fontSize: 16, fontWeight: '500', textDecorationLine: 'underline' as const };
+        return { fontSize: 16, fontWeight: '500' as const, textDecorationLine: 'underline' as const };
       default:
-        return { fontSize: 16, fontWeight: 'normal' };
+        return { fontSize: 16, fontWeight: 'normal' as const };
     }
   };
 

@@ -1,6 +1,6 @@
+import { useThemeColor } from '@/hooks/useThemeColor';
 import React from 'react';
 import { GlassText, GlassTextProps } from './glass/GlassText';
-import { useThemeColor } from '@/hooks/useThemeColor';
 
 export type ThemedTextProps = Omit<GlassTextProps, 'variant' | 'color'> & {
   lightColor?: string;
@@ -36,7 +36,7 @@ export function ThemedText({
   return (
     <GlassText
       variant={getVariant()}
-      color={getGlassColor()}
+      color={getGlassColor() as 'primary' | 'secondary' | 'white' | 'black' | 'muted' | undefined}
       style={[
         { color: themeColor },
         type === 'defaultSemiBold' && { fontWeight: '600' },

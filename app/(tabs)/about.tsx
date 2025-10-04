@@ -1,19 +1,11 @@
-import React, { useContext } from "react";
-import { Linking, ScrollView, View, TouchableOpacity } from "react-native";
-import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import * as Application from "expo-application";
-import { ExternalLink } from "@/components/ExternalLink";
-import {
-  GlassCard,
-  GlassButton,
-  GlassText,
-  GlassView
-} from "@/components/glass";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import ThemeContext from "@/context/ThemeContext";
+import { Ionicons } from "@expo/vector-icons";
+import * as Application from "expo-application";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useContext } from "react";
+import { Linking, ScrollView, TouchableOpacity, View } from "react-native";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
 const About = () => {
   const { theme } = useContext(ThemeContext);

@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import React, { useContext } from "react";
 import {
     Dimensions,
@@ -6,17 +7,16 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-import Carousel from "react-native-reanimated-carousel";
-import { Ionicons } from "@expo/vector-icons";
 import ProgressBar from "react-native-progress/Bar";
+import Carousel from "react-native-reanimated-carousel";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
 import AdkarCard from "@/components/AdkarCard";
-import ThemeContext from "@/context/ThemeContext";
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 import { Colors } from "@/constants/Colors";
-import { useAdkarLogic, Adkar } from "@/hooks/useAdkarLogic";
+import ThemeContext from "@/context/ThemeContext";
+import { Adkar, useAdkarLogic } from "@/hooks/useAdkarLogic";
 
 interface AdkarScreenProps {
     adkarData: any;
@@ -147,9 +147,6 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type }) => {
                                 scrollAnimationDuration={300}
                                 onSnapToItem={handleSnapToItem}
                                 style={{ alignSelf: "center" }}
-                                panGestureHandlerProps={{
-                                    activeOffsetX: [-20, 20],
-                                }}
                             />
                         </ThemedView>
                     </ThemedView>

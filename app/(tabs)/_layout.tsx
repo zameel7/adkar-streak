@@ -1,6 +1,6 @@
+import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import React, { useContext } from "react";
-import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";

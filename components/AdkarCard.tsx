@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
-import { View, TouchableOpacity } from "react-native";
-import { ThemedText } from "./ThemedText";
+import ThemeContext from "@/context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
-import { LinearGradient } from "expo-linear-gradient";
-import ThemeContext from "@/context/ThemeContext";
+import React, { useContext, useEffect, useState } from "react";
+import { TouchableOpacity, View } from "react-native";
+import { ThemedText } from "./ThemedText";
 
 type Adkar = {
     title: string;

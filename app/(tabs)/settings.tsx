@@ -1,15 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
-import { Alert, Share, View, ScrollView, TouchableOpacity, TextInput } from "react-native";
+import { ThemedText } from "@/components/ThemedText";
+import { useAuth } from "@/context/AuthContext";
+import ThemeContext from "@/context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import { Alert, ScrollView, Share, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import ThemeContext from "@/context/ThemeContext";
-import { useAuth } from "@/context/AuthContext";
 
 const Settings = () => {
   const [name, setName] = useState<string>("");

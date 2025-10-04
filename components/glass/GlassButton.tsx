@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
-import { GlassView } from './GlassView';
 import { GlassText } from './GlassText';
+import { GlassView } from './GlassView';
 
 export interface GlassButtonProps extends TouchableOpacityProps {
   title: string;

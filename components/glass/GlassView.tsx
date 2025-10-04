@@ -1,6 +1,6 @@
+import { BlurView } from 'expo-blur';
 import React from 'react';
 import { View, ViewProps } from 'react-native';
-import { BlurView } from 'expo-blur';
 
 export interface GlassViewProps extends ViewProps {
   intensity?: number;

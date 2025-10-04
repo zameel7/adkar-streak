@@ -1,5 +1,5 @@
 import { PropsWithChildren, ReactElement, useCallback, useContext, useState } from 'react';
-import { RefreshControl, StyleSheet, useColorScheme } from 'react-native';
+import { RefreshControl, StyleSheet } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
@@ -8,9 +8,9 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
-import { ThemedText } from './ThemedText';
-import HijriNow from 'hijri-now';
 import ThemeContext from '@/context/ThemeContext';
+import HijriNow from 'hijri-now';
+import { ThemedText } from './ThemedText';
 
 
 const HEADER_HEIGHT = 250;

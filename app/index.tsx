@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { router } from 'expo-router';
-import { ActivityIndicator } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
 import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
 import { useAuth } from '@/context/AuthContext';
+import { router } from 'expo-router';
+import { useEffect } from 'react';
+import { ActivityIndicator } from 'react-native';
 
 export default function Index() {
   const { session, initialized } = useAuth();

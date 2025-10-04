@@ -1,7 +1,7 @@
 import React from 'react';
 import { TextInput, TextInputProps, View } from 'react-native';
-import { GlassView } from './GlassView';
 import { GlassText } from './GlassText';
+import { GlassView } from './GlassView';
 
 export interface GlassInputProps extends TextInputProps {
   label?: string;

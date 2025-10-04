@@ -1,16 +1,15 @@
-import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { StyleSheet, View, ScrollView, RefreshControl, TouchableOpacity, ImageBackground } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useContext, useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import React, { useContext, useEffect, useState } from "react";
+import { ImageBackground, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { useSQLiteContext } from "expo-sqlite";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
 import ThemeContext from "@/context/ThemeContext";
+import { useSQLiteContext } from "expo-sqlite";
 
 function adkarTime() {
     const hours = new Date().getHours();

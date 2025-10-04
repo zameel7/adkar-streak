@@ -1,15 +1,15 @@
+import { ThemedView } from "@/components/ThemedView";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
-import "react-native-reanimated";
+import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import React, { Suspense, useEffect, useState } from "react";
 import { ActivityIndicator, Platform } from "react-native";
-import { ThemedView } from "@/components/ThemedView";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import { ThemeProvider } from "@/context/ThemeContext";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
-import * as SplashScreen from "expo-splash-screen";
+import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
 

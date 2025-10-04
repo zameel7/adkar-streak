@@ -1,7 +1,6 @@
-import React, { useState, useEffect, createContext, PropsWithChildren } from 'react'
 import { Session, User } from '@supabase/supabase-js'
+import React, { createContext, PropsWithChildren, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { router } from 'expo-router'
 
 type AuthProps = {
   user: User | null

@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useEffect, useRef, useState } from 'react';
+import { Dimensions } from 'react-native';
 
 export type Adkar = {
     title: string;

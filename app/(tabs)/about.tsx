@@ -17,7 +17,7 @@ import ThemeContext from "@/context/ThemeContext";
 
 const About = () => {
   const { theme } = useContext(ThemeContext);
-  const appVersion = Application.nativeApplicationVersion || "3.0.0";
+  const appVersion = Application.nativeApplicationVersion || "3.0.1";
   const insets = useSafeAreaInsets();
 
 

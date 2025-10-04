@@ -1,7 +1,7 @@
-import { Stack, useRouter } from "expo-router";
+import { Stack, useRouter, useSegments } from "expo-router";
 import "react-native-reanimated";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { ActivityIndicator, Platform } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -22,8 +22,8 @@ function useNotificationObserver() {
 
         function redirect(notification: Notifications.Notification) {
             const url = notification.request.content.data?.url;
-            if (url) {
-                router.push(url);
+            if (url && typeof url === 'string') {
+                router.push(url as any);
             }
         }
 
@@ -63,32 +63,35 @@ const AuthenticatedApp = () => {
     const { initialized, session } = useAuth();
     const today = new Date().toISOString().split("T")[0];
     const router = useRouter();
+    const segments = useSegments();
+    const [isMounted, setIsMounted] = useState(false);
 
     // Always call all hooks first
     useNotificationObserver();
 
+    // Track when the component is mounted
     useEffect(() => {
         const timeout = setTimeout(() => {
+            setIsMounted(true);
             SplashScreen.hideAsync();
-        }, 2000);
+        }, 500); // Give time for Stack to mount
         return () => clearTimeout(timeout);
     }, []);
 
-    // Handle navigation based on auth state
+    // Handle navigation based on auth state changes (after mount)
     useEffect(() => {
-        if (!initialized) return;
+        if (!initialized || !isMounted) return;
 
-        // Add a small delay to ensure the Stack navigator is ready
-        const timeout = setTimeout(() => {
-            if (session) {
-                router.replace('/(tabs)/home');
-            } else {
-                router.replace('/auth');
-            }
-        }, 100);
-
-        return () => clearTimeout(timeout);
-    }, [initialized, session, router]);
+        const inAuthGroup = segments[0] === 'auth';
+        
+        if (session && inAuthGroup) {
+            // User is logged in but on auth screen, redirect to home
+            router.replace('/(tabs)/home');
+        } else if (!session && !inAuthGroup) {
+            // User is logged out but not on auth screen, redirect to auth
+            router.replace('/auth');
+        }
+    }, [initialized, session, isMounted, segments, router]);
 
     useEffect(() => {
         if (!initialized) return;
@@ -112,7 +115,8 @@ const AuthenticatedApp = () => {
             Notifications.getNotificationChannelsAsync();
             Notifications.setNotificationHandler({
                 handleNotification: async () => ({
-                    shouldShowAlert: true,
+                    shouldShowBanner: true,
+                    shouldShowList: true,
                     shouldPlaySound: false,
                     shouldSetBadge: false,
                 }),
@@ -127,13 +131,17 @@ const AuthenticatedApp = () => {
     // Database initialization function
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
-        let user_version = await db.getFirstAsync<{ user_version: number }>(
-            "PRAGMA user_version"
-        );
-
+        
         try {
+            // Set WAL mode first for better concurrency
+            await db.execAsync("PRAGMA journal_mode = WAL;");
+            await db.execAsync("PRAGMA busy_timeout = 5000;"); // Wait up to 5 seconds if database is locked
+            
+            let user_version = await db.getFirstAsync<{ user_version: number }>(
+                "PRAGMA user_version"
+            );
+
             if (user_version?.user_version === 0) {
-                await db.execAsync("PRAGMA journal_mode = WAL;");
                 await db.execAsync(`
                     CREATE TABLE IF NOT EXISTS adkarStreaks (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -145,7 +153,9 @@ const AuthenticatedApp = () => {
                 await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
             }
         } catch (error) {
-            console.error("Error inserting missing days:", error);
+            console.error("Error initializing database:", error);
+            // Re-throw to let SQLiteProvider handle it
+            throw error;
         }
     }
 
@@ -245,11 +255,10 @@ async function schedulePushNotification(): Promise<void> {
                     body,
                 },
                 trigger: {
-                    type: Notifications.SchedulableTriggerInputTypes.DAILY,
                     hour,
                     minute,
                     repeats: true,
-                },
+                } as any,
             });
         } else {
             // Use calendar trigger for iOS
@@ -259,13 +268,10 @@ async function schedulePushNotification(): Promise<void> {
                     body,
                 },
                 trigger: {
-                    type: Notifications.SchedulableTriggerInputTypes.CALENDAR,
-                    dateComponents: {
-                        hour,
-                        minute,
-                    },
+                    hour,
+                    minute,
                     repeats: true,
-                },
+                } as any,
             });
         }
     };

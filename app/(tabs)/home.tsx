@@ -277,10 +277,15 @@ const Home = () => {
         if (user && dbReady) {
             // Small delay to ensure everything is ready
             const syncTimer = setTimeout(async () => {
-                // First download and merge data from Supabase
-                await downloadAndMergeSupabaseData();
-                // Then sync any local changes back to Supabase
-                await syncLocalDataToSupabase();
+                try {
+                    // First download and merge data from Supabase
+                    await downloadAndMergeSupabaseData();
+                    // Then sync any local changes back to Supabase
+                    await syncLocalDataToSupabase();
+                } catch (error) {
+                    // Network unavailable or Supabase unreachable — continue offline
+                    console.warn("Supabase sync skipped (offline or unreachable):", error);
+                }
             }, 2000);
 
             return () => clearTimeout(syncTimer);
@@ -533,16 +538,23 @@ const Home = () => {
         isLoadingRef.current = true;
 
         try {
-            // If user is logged in, sync with Supabase first
+            // If user is logged in, try to sync with Supabase first
             if (user) {
-                await downloadAndMergeSupabaseData();
-                await syncLocalDataToSupabase();
+                try {
+                    await downloadAndMergeSupabaseData();
+                    await syncLocalDataToSupabase();
+                } catch (syncError) {
+                    // Sync failed (offline) — fall back to local data
+                    console.warn("Refresh sync skipped (offline or unreachable):", syncError);
+                    await loadAllData();
+                }
             } else {
                 // Just reload local data if not logged in
                 await loadAllData();
             }
         } catch (error) {
-            // Errors are handled in the sync functions
+            // Fallback error handler
+            console.warn("Refresh failed:", error);
         } finally {
             isLoadingRef.current = false;
             setTimeout(() => setRefreshing(false), 1000);
@@ -552,8 +564,13 @@ const Home = () => {
     // Function to trigger Supabase sync (called from AdkarCard)
     const handleStreakUpdated = async () => {
         if (user) {
-            console.log("🔄 Streak updated, syncing to Supabase...");
-            await syncLocalDataToSupabase();
+            try {
+                console.log("🔄 Streak updated, syncing to Supabase...");
+                await syncLocalDataToSupabase();
+            } catch (error) {
+                // Sync failed (offline) — streak is saved locally, will sync next time
+                console.warn("Streak sync skipped (offline or unreachable):", error);
+            }
         }
     };
 

@@ -10,7 +10,7 @@
 
 <div align="center">
 
-![GitHub](https://img.shields.io/badge/Version-1.4.0-blue)
+![GitHub](https://img.shields.io/badge/Version-3.1.0-blue)
 ![GitHub](https://img.shields.io/badge/Platform-Android-lightgrey)
 ![GitHub](https://img.shields.io/badge/Status-Active-brightgreen)
 

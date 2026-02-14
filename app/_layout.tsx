@@ -109,20 +109,36 @@ const AuthenticatedApp = () => {
             }
         };
 
-        registerForPushNotificationsAsync();
+        (async () => {
+            try {
+                const status = await registerForPushNotificationsAsync();
+                if (status !== "granted") return;
 
-        if (Platform.OS === "android") {
-            Notifications.getNotificationChannelsAsync();
-            Notifications.setNotificationHandler({
-                handleNotification: async () => ({
-                    shouldShowBanner: true,
-                    shouldShowList: true,
-                    shouldPlaySound: false,
-                    shouldSetBadge: false,
-                }),
-            });
-            schedulePushNotification();
-        }
+                if (Platform.OS === "android") {
+                    Notifications.getNotificationChannelsAsync();
+                    Notifications.setNotificationHandler({
+                        handleNotification: async () => ({
+                            shouldShowBanner: true,
+                            shouldShowList: true,
+                            shouldPlaySound: false,
+                            shouldSetBadge: false,
+                        }),
+                    });
+                } else {
+                    Notifications.setNotificationHandler({
+                        handleNotification: async () => ({
+                            shouldShowBanner: true,
+                            shouldShowList: true,
+                            shouldPlaySound: false,
+                            shouldSetBadge: false,
+                        }),
+                    });
+                }
+                await schedulePushNotification();
+            } catch (error) {
+                console.error("Notification setup error:", error);
+            }
+        })();
 
         updateStreakData();
     }, [initialized, today]);
@@ -300,9 +316,9 @@ async function schedulePushNotification(): Promise<void> {
     );
 }
 
-async function registerForPushNotificationsAsync() {
-    let token;
+type PermissionStatus = "granted" | "denied" | "undetermined";
 
+async function registerForPushNotificationsAsync(): Promise<PermissionStatus> {
     if (Platform.OS === "android") {
         await Notifications.setNotificationChannelAsync("default", {
             name: "default",
@@ -315,16 +331,16 @@ async function registerForPushNotificationsAsync() {
     if (Device.isDevice) {
         const { status: existingStatus } =
             await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
+        let finalStatus: PermissionStatus = existingStatus;
         if (existingStatus !== "granted") {
             const { status } = await Notifications.requestPermissionsAsync();
             finalStatus = status;
         }
-    } else {
-        alert("Must use physical device for Push Notifications");
+        return finalStatus;
     }
 
-    return token;
+    alert("Must use physical device for Push Notifications");
+    return "denied";
 }
 
 export default RootLayout;

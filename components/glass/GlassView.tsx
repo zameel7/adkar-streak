@@ -5,7 +5,7 @@ import { View, ViewProps } from 'react-native';
 export interface GlassViewProps extends ViewProps {
   intensity?: number;
   tint?: 'light' | 'dark' | 'default';
-  children: React.ReactNode;
+  children?: React.ReactNode;
   glassStyle?: 'light' | 'medium' | 'strong';
 }
 

@@ -7,7 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, ScrollView, Share, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, ScrollView, Share, TextInput, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Settings = () => {
@@ -75,7 +75,7 @@ const Settings = () => {
           text: "Sign Out",
           style: "destructive",
           onPress: async () => {
-            await signOut!();
+            await signOut?.();
           }
         }
       ]
@@ -411,7 +411,7 @@ const Settings = () => {
               value={morningTime}
               mode="time"
               is24Hour={true}
-              display="default"
+              display={Platform.OS === 'android' ? 'spinner' : 'default'}
               onChange={(event, selectedDate) => {
                 setShowMorningPicker(false);
                 if (selectedDate) setMorningTime(selectedDate);
@@ -424,7 +424,7 @@ const Settings = () => {
               value={eveningTime}
               mode="time"
               is24Hour={true}
-              display="default"
+              display={Platform.OS === 'android' ? 'spinner' : 'default'}
               onChange={(event, selectedDate) => {
                 setShowEveningPicker(false);
                 if (selectedDate) setEveningTime(selectedDate);

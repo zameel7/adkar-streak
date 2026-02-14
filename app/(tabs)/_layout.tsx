@@ -1,6 +1,7 @@
 import { BlurView } from "expo-blur";
 import { Tabs } from "expo-router";
 import React, { useContext } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { TabBarIcon } from "@/components/navigation/TabBarIcon";
@@ -28,19 +29,26 @@ const TabLayout = () => {
           paddingBottom: insets.bottom > 0 ? insets.bottom : 20,
           paddingTop: 8,
         },
-        tabBarBackground: () => (
-          <BlurView
-            intensity={80}
-            tint={theme === 'dark' ? 'dark' : 'light'}
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              bottom: 0,
-              right: 0,
-            }}
-          />
-        ),
+        tabBarBackground: () =>
+          Platform.OS === 'ios' ? (
+            <BlurView
+              intensity={80}
+              tint={theme === 'dark' ? 'dark' : 'light'}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : (
+            <View
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  backgroundColor:
+                    theme === 'dark'
+                      ? 'rgba(26, 26, 46, 0.95)'
+                      : 'rgba(255, 255, 255, 0.95)',
+                },
+              ]}
+            />
+          ),
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '600',

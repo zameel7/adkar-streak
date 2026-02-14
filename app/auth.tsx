@@ -37,9 +37,10 @@ export default function AuthScreen() {
       return
     }
 
-    const { error } = isSignUp
-      ? await signUp!(email, password)
-      : await signIn!(email, password)
+    const result = isSignUp
+      ? await signUp?.(email, password)
+      : await signIn?.(email, password)
+    const { error } = result ?? { error: { message: 'Auth not ready. Please try again.' } }
 
     if (error) {
       Alert.alert('Authentication Error', error.message)

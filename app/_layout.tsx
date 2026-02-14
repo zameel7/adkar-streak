@@ -27,12 +27,16 @@ function useNotificationObserver() {
             }
         }
 
-        Notifications.getLastNotificationResponseAsync().then((response) => {
-            if (!isMounted || !response?.notification) {
-                return;
-            }
-            redirect(response?.notification);
-        });
+        Notifications.getLastNotificationResponseAsync()
+            .then((response) => {
+                if (!isMounted || !response?.notification) {
+                    return;
+                }
+                redirect(response.notification);
+            })
+            .catch((error) => {
+                console.warn("getLastNotificationResponse failed:", error);
+            });
 
         const subscription =
             Notifications.addNotificationResponseReceivedListener(

@@ -7,11 +7,82 @@ import * as Notifications from "expo-notifications";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import React, { Suspense, useEffect, useState } from "react";
-import { ActivityIndicator, Platform } from "react-native";
+import React, { Component, Suspense, useEffect, useState } from "react";
+import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
+
+// Root Error Boundary: catches uncaught JS errors and shows a recoverable screen instead of crashing
+type ErrorBoundaryState = { hasError: boolean; error: Error | null };
+
+class RootErrorBoundary extends Component<
+    { children: React.ReactNode },
+    ErrorBoundaryState
+> {
+    state: ErrorBoundaryState = { hasError: false, error: null };
+
+    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+        return { hasError: true, error };
+    }
+
+    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+        console.error("RootErrorBoundary caught an error:", error, errorInfo);
+    }
+
+    render() {
+        if (this.state.hasError && this.state.error) {
+            return (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorTitle}>Something went wrong</Text>
+                    <Text style={styles.errorMessage}>
+                        We encountered an unexpected error. Please try again.
+                    </Text>
+                    <TouchableOpacity
+                        style={styles.errorButton}
+                        onPress={() => this.setState({ hasError: false, error: null })}
+                    >
+                        <Text style={styles.errorButtonText}>Try again</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+        return this.props.children;
+    }
+}
+
+const styles = StyleSheet.create({
+    errorContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+        backgroundColor: "#fff",
+    },
+    errorTitle: {
+        fontSize: 20,
+        fontWeight: "600",
+        marginBottom: 12,
+        color: "#000",
+    },
+    errorMessage: {
+        fontSize: 16,
+        textAlign: "center",
+        marginBottom: 24,
+        color: "#333",
+    },
+    errorButton: {
+        backgroundColor: "#2196F3",
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 8,
+    },
+    errorButtonText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+    },
+});
 
 // Move notification observer outside the main component to avoid hook issues
 function useNotificationObserver() {
@@ -179,8 +250,7 @@ const AuthenticatedApp = () => {
             }
         } catch (error) {
             console.error("Error initializing database:", error);
-            // Re-throw to let SQLiteProvider handle it
-            throw error;
+            // Do not re-throw: allow the app to render so it doesn't crash (e.g. on Android production)
         }
     }
 
@@ -196,7 +266,6 @@ const AuthenticatedApp = () => {
             <SQLiteProvider
                 databaseName="adkar.db"
                 onInit={insertMissingDays}
-                useSuspense
             >
                 <ThemeProvider>
                     <Stack
@@ -347,4 +416,10 @@ async function registerForPushNotificationsAsync(): Promise<PermissionStatus> {
     return "denied";
 }
 
-export default RootLayout;
+export default function AppWithErrorBoundary() {
+    return (
+        <RootErrorBoundary>
+            <RootLayout />
+        </RootErrorBoundary>
+    );
+}

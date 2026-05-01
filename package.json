@@ -69,11 +69,5 @@
     "typescript": "~5.9.2",
     "webpack": "^5.101.3"
   },
-  "overrides": {
-    "@eslint/eslintrc": {
-      "ajv": "^6.12.6"
-    },
-    "json-schema-traverse": "^1.0.0"
-  },
   "private": true
 }

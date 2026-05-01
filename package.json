@@ -69,5 +69,9 @@
     "typescript": "~5.9.2",
     "webpack": "^5.101.3"
   },
-  "private": true
+  "private": true,
+  "engines": {
+    "node": "24.3.0",
+    "npm": "10.9.8"
+  }
 }

@@ -2,11 +2,14 @@ import { ThemedText } from '@/components/ThemedText'
 import { useAuth } from '@/context/AuthContext'
 import ThemeContext from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { CommonActions, useNavigation } from '@react-navigation/native'
 import { LinearGradient } from 'expo-linear-gradient'
-import React, { useContext, useState } from 'react'
+import { Redirect, router } from 'expo-router'
+import React, { useContext, useEffect, useState } from 'react'
 import {
   Alert,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StatusBar,
@@ -23,8 +26,28 @@ export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  const { signIn, signUp, loading } = useAuth()
+  const { signIn, signUp, loading, session } = useAuth()
   const { theme } = useContext(ThemeContext)
+  const navigation = useNavigation()
+
+  // /auth is only meant to be opened on demand from Settings → Cloud Sync.
+  // Two cases where we must bounce the user back to home:
+  //   1. They are already signed in (stale persisted nav state).
+  //   2. They reached /auth as the cold-start route (no underlying screen) —
+  //      this can happen if persisted nav state from a previous build still
+  //      points to /auth, leaving the Stack with no (tabs) underneath.
+  useEffect(() => {
+    const shouldBounce = session || !router.canGoBack()
+    if (shouldBounce) {
+      navigation.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' as never }] })
+      )
+    }
+  }, [session, navigation])
+
+  if (session) {
+    return <Redirect href="/(tabs)/home" />
+  }
 
   const handleAuthentication = async () => {
     if (!email || !password) {
@@ -37,19 +60,42 @@ export default function AuthScreen() {
       return
     }
 
-    const result = isSignUp
-      ? await signUp?.(email, password)
-      : await signIn?.(email, password)
-    const { error } = result ?? { error: { message: 'Auth not ready. Please try again.' } }
+    try {
+      const result = isSignUp
+        ? await signUp?.(email, password)
+        : await signIn?.(email, password)
+      const { error } = result ?? { error: { message: 'Auth not ready. Please try again.' } }
 
-    if (error) {
-      Alert.alert('Authentication Error', error.message)
-    } else if (isSignUp) {
-      Alert.alert(
-        'Sign Up Successful',
-        'Please check your email to verify your account before signing in.'
+      if (error) {
+        Alert.alert('Authentication Error', error.message ?? String(error))
+        return
+      }
+
+      if (isSignUp) {
+        Alert.alert(
+          'Sign Up Successful',
+          'Please check your email to verify your account before signing in.'
+        )
+        setIsSignUp(false)
+        return
+      }
+
+      Keyboard.dismiss()
+      navigation.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' as never }] })
       )
-      setIsSignUp(false)
+    } catch (e: any) {
+      Alert.alert('Authentication Error', e?.message ?? 'Unexpected error. Please try again.')
+    }
+  }
+
+  const goBackOrHome = () => {
+    if (router.canGoBack()) {
+      router.back()
+    } else {
+      navigation.dispatch(
+        CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' as never }] })
+      )
     }
   }
 
@@ -177,12 +223,21 @@ export default function AuthScreen() {
                   </ThemedText>
                 </TouchableOpacity>
               </View>
+
+              {/* Skip / continue without an account */}
+              <View style={styles.skipContainer}>
+                <TouchableOpacity onPress={goBackOrHome}>
+                  <ThemedText style={styles.skipLink}>
+                    Skip for now — use the app offline
+                  </ThemedText>
+                </TouchableOpacity>
+              </View>
             </View>
 
             {/* Islamic Quote */}
             <View style={styles.quote}>
               <ThemedText style={styles.quoteText}>
-                "Remember Allah often and He will remember you"
+                &ldquo;Remember Allah often and He will remember you&rdquo;
               </ThemedText>
               <ThemedText style={styles.quoteAuthor}>
                 - Hadith
@@ -289,6 +344,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2196F3',
     // fontWeight: 'bold',
+  },
+  skipContainer: {
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  skipLink: {
+    fontSize: 15,
+    opacity: 0.7,
   },
   quote: {
     alignItems: 'center',

@@ -53,6 +53,35 @@
 
 > For iOS development, please switch to the `ios` branch as LinearGradient is not supported in iOS.
 
+### Cloud sync (optional)
+
+The app works fully offline. Cloud sync (powered by Supabase) is an optional feature users can enable from **Settings → Cloud Sync**.
+
+For local development, copy your Supabase credentials into `.env.local` (gitignored):
+
+```env
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+```
+
+For EAS production builds, register the same values as project secrets so they're injected at build time:
+
+```bash
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_URL --value <url>
+eas secret:create --scope project --name EXPO_PUBLIC_SUPABASE_ANON_KEY --value <key>
+```
+
+If either secret is missing the app still launches normally — the Cloud Sync section just stays in its signed-out state and surfaces a friendly "Cloud sync isn't configured" notice.
+
+### Versioning
+
+`eas.json` is configured with `"appVersionSource": "remote"`, so the Android `versionCode` is managed by EAS on the server (not in `app.json`). Production builds use `autoIncrement: true`. Manage the value with:
+
+```bash
+eas build:version:get -p android
+eas build:version:set -p android
+```
+
 In the output, you'll find options to open the app in a
 
 -   [Development build](https://docs.expo.dev/develop/development-builds/introduction/)

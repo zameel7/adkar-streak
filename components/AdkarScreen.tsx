@@ -31,13 +31,8 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
     const colors = Colors[colorScheme as keyof typeof Colors];
     
     // Use sync context if available, otherwise use the prop
-    let syncFunction = onStreakUpdated;
-    try {
-        const { triggerSync } = useSync();
-        syncFunction = triggerSync;
-    } catch {
-        // Sync context not available, use prop
-    }
+    const sync = useSync();
+    const syncFunction = sync?.triggerSync ?? onStreakUpdated;
 
     const {
         adkars,

@@ -1,5 +1,4 @@
 import { ThemedText } from "@/components/ThemedText";
-import { useAuth } from "@/context/AuthContext";
 import ThemeContext from "@/context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,18 +6,16 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, Platform, ScrollView, Share, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, ScrollView, Share, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Settings = () => {
-  const [name, setName] = useState<string>("");
   const [translation, setTranslation] = useState<boolean>(true);
   const [morningTime, setMorningTime] = useState<Date>(new Date());
   const [eveningTime, setEveningTime] = useState<Date>(new Date());
   const [showMorningPicker, setShowMorningPicker] = useState<boolean>(false);
   const [showEveningPicker, setShowEveningPicker] = useState<boolean>(false);
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const { signOut, user } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
 
@@ -27,16 +24,6 @@ const Settings = () => {
       await AsyncStorage.setItem(key, value);
     } catch (e: any) {
       Alert.alert("Error", e.message);
-    }
-  };
-
-  const handleSubmitName = async () => {
-    if (name.trim()) {
-      await storeData("name", name.trim());
-      Alert.alert("Success", "Name has been saved! Pull down to refresh.");
-      router.push("/home");
-    } else {
-      Alert.alert("Please enter your name");
     }
   };
 
@@ -62,32 +49,9 @@ const Settings = () => {
     });
   };
 
-  const handleLogout = () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await signOut?.();
-          }
-        }
-      ]
-    );
-  };
-
   useEffect(() => {
     const getDetails = async () => {
       try {
-        const storedName = await AsyncStorage.getItem('name');
-        if (storedName) setName(storedName);
-
         const translations = await AsyncStorage.getItem('translations');
         if (translations) setTranslation(JSON.parse(translations));
 
@@ -152,67 +116,6 @@ const Settings = () => {
           }}>
             Settings
           </ThemedText>
-        </View>
-
-        {/* Profile Section */}
-        <View style={{
-          marginBottom: 32,
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="person" size={24} color="#2196F3" style={{ marginRight: 12 }} />
-            <ThemedText style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: theme === 'dark' ? '#ffffff' : '#333'
-            }}>
-              Profile
-            </ThemedText>
-          </View>
-
-          <View style={{ marginBottom: 16 }}>
-            <ThemedText style={{
-              fontSize: 16,
-              color: theme === 'dark' ? 'rgba(255, 255, 255, 0.9)' : '#666',
-              marginBottom: 8
-            }}>
-              What should we call you?
-            </ThemedText>
-            <TextInput
-              style={{
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-                paddingHorizontal: 16,
-                paddingVertical: 12,
-                fontSize: 16,
-                color: theme === 'dark' ? '#ffffff' : '#333'
-              }}
-              placeholder={name || "Your Name"}
-              placeholderTextColor={theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : '#999'}
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-
-          <TouchableOpacity
-            onPress={handleSubmitName}
-            style={{
-              backgroundColor: '#2196F3',
-              borderRadius: 12,
-              paddingVertical: 16,
-              alignItems: 'center'
-            }}
-          >
-            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
-              Save Name
-            </ThemedText>
-          </TouchableOpacity>
         </View>
 
         {/* Appearance Section */}
@@ -431,76 +334,6 @@ const Settings = () => {
               }}
             />
           )}
-        </View>
-
-        {/* Account Section */}
-        <View style={{
-          marginBottom: 32,
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="person-circle" size={24} color="#2196F3" style={{ marginRight: 12 }} />
-            <ThemedText style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: theme === 'dark' ? '#ffffff' : '#333'
-            }}>
-              Account
-            </ThemedText>
-          </View>
-
-          {/* Email Display */}
-          <View style={{
-            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-            paddingHorizontal: 16,
-            paddingVertical: 16,
-            marginBottom: 16
-          }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="mail" size={20} color="#2196F3" style={{ marginRight: 12 }} />
-              <View style={{ flex: 1 }}>
-                <ThemedText style={{
-                  fontSize: 14,
-                  color: theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : '#666',
-                  marginBottom: 4
-                }}>
-                  Email Address
-                </ThemedText>
-                <ThemedText style={{
-                  fontSize: 16,
-                  color: theme === 'dark' ? '#ffffff' : '#333',
-                  fontWeight: '600'
-                }}>
-                  {user?.email || 'No email found'}
-                </ThemedText>
-              </View>
-            </View>
-          </View>
-
-          {/* Logout Button */}
-          <TouchableOpacity
-            onPress={handleLogout}
-            style={{
-              backgroundColor: '#f44336',
-              borderRadius: 12,
-              paddingVertical: 16,
-              alignItems: 'center',
-              flexDirection: 'row',
-              justifyContent: 'center'
-            }}
-          >
-            <Ionicons name="log-out-outline" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
-              Sign Out
-            </ThemedText>
-          </TouchableOpacity>
         </View>
 
         {/* Share Section */}

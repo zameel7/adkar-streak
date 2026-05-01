@@ -1,6 +1,11 @@
 import { Session, User } from '@supabase/supabase-js'
 import React, { createContext, PropsWithChildren, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
+
+const SUPABASE_NOT_CONFIGURED_ERROR = {
+  name: 'SupabaseNotConfigured',
+  message: 'Cloud sync isn\'t configured for this build. The app will keep working offline.',
+}
 
 type AuthProps = {
   user: User | null
@@ -32,7 +37,13 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     let mounted = true;
 
-    // Get initial session
+    if (!isSupabaseConfigured) {
+      setInitialized(true)
+      return () => {
+        mounted = false
+      }
+    }
+
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
@@ -96,29 +107,41 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     }
   }, [])
 
-  // Sign in with email and password
+  const withTimeout = async <T,>(p: Promise<T>, ms = 15000): Promise<T> => {
+    return await Promise.race([
+      p,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`Request timed out after ${ms / 1000}s. Check your internet connection or Supabase URL.`)), ms)
+      ),
+    ])
+  }
+
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: SUPABASE_NOT_CONFIGURED_ERROR }
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    setLoading(false)
-    return { error }
+    try {
+      const { error } = await withTimeout(supabase.auth.signInWithPassword({ email, password }))
+      return { error }
+    } catch (e: any) {
+      return { error: e }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Sign up with email and password
   const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured) return { error: SUPABASE_NOT_CONFIGURED_ERROR }
     setLoading(true)
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-    setLoading(false)
-    return { error }
+    try {
+      const { error } = await withTimeout(supabase.auth.signUp({ email, password }))
+      return { error }
+    } catch (e: any) {
+      return { error: e }
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Sign out the user
   const signOut = async () => {
     setLoading(true)
     await supabase.auth.signOut()

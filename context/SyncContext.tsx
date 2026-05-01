@@ -6,12 +6,8 @@ type SyncContextType = {
 
 const SyncContext = createContext<SyncContextType | undefined>(undefined);
 
-export const useSync = () => {
-  const context = useContext(SyncContext);
-  if (!context) {
-    throw new Error('useSync must be used within a SyncProvider');
-  }
-  return context;
+export const useSync = (): SyncContextType | undefined => {
+  return useContext(SyncContext);
 };
 
 export const SyncProvider: React.FC<{ children: React.ReactNode; onSync: () => void }> = ({ 

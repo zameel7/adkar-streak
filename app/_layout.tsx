@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { router, Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import React, { Component, Suspense, useEffect, useState } from "react";
@@ -12,6 +12,10 @@ import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View }
 import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
+
+export const unstable_settings = {
+    initialRouteName: '(tabs)',
+};
 
 // Root Error Boundary: catches uncaught JS errors and shows a recoverable screen instead of crashing
 type ErrorBoundaryState = { hasError: boolean; error: Error | null };
@@ -135,38 +139,35 @@ const RootLayout = () => {
 
 // Component that handles auth routing and renders the app
 const AuthenticatedApp = () => {
-    const { initialized, session } = useAuth();
+    const { initialized } = useAuth();
     const today = new Date().toISOString().split("T")[0];
-    const router = useRouter();
-    const segments = useSegments();
     const [isMounted, setIsMounted] = useState(false);
 
     // Always call all hooks first
     useNotificationObserver();
 
-    // Track when the component is mounted
+    // Track when the component is mounted, then check onboarding state and
+    // route first-time users to the onboarding flow.
     useEffect(() => {
-        const timeout = setTimeout(() => {
+        let cancelled = false;
+        const timeout = setTimeout(async () => {
+            if (cancelled) return;
+            try {
+                const done = await AsyncStorage.getItem('onboardingComplete');
+                if (!done) {
+                    router.replace('/onboarding' as any);
+                }
+            } catch (e) {
+                console.warn('Failed to read onboarding state:', e);
+            }
             setIsMounted(true);
             SplashScreen.hideAsync();
         }, 500); // Give time for Stack to mount
-        return () => clearTimeout(timeout);
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, []);
-
-    // Handle navigation based on auth state changes (after mount)
-    useEffect(() => {
-        if (!initialized || !isMounted) return;
-
-        const inAuthGroup = segments[0] === 'auth';
-        
-        if (session && inAuthGroup) {
-            // User is logged in but on auth screen, redirect to home
-            router.replace('/(tabs)/home');
-        } else if (!session && !inAuthGroup) {
-            // User is logged out but not on auth screen, redirect to auth
-            router.replace('/auth');
-        }
-    }, [initialized, session, isMounted, segments, router]);
 
     useEffect(() => {
         if (!initialized) return;
@@ -222,22 +223,24 @@ const AuthenticatedApp = () => {
     // Database initialization function
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
-        
+
         try {
-            // Set WAL mode first for better concurrency and reduce locks
-            await db.execAsync("PRAGMA journal_mode = WAL;");
-            // Increase timeout to 10 seconds for better reliability
-            await db.execAsync("PRAGMA busy_timeout = 10000;");
-            // Optimize for mobile - reduce lock duration while maintaining integrity
-            await db.execAsync("PRAGMA synchronous = NORMAL;");
-            // Keep temporary data in memory to reduce file locks
-            await db.execAsync("PRAGMA temp_store = MEMORY;");
-            
-            let user_version = await db.getFirstAsync<{ user_version: number }>(
+            // Run all pragmas in a single batch — under New Architecture on
+            // Android, splitting them across multiple execAsync calls before
+            // the connection has fully settled can race and surface as
+            // "database connection error".
+            await db.execAsync(
+                `PRAGMA journal_mode = WAL;
+                 PRAGMA busy_timeout = 10000;
+                 PRAGMA synchronous = NORMAL;
+                 PRAGMA temp_store = MEMORY;`
+            );
+
+            const userVersion = await db.getFirstAsync<{ user_version: number }>(
                 "PRAGMA user_version"
             );
 
-            if (user_version?.user_version === 0) {
+            if (userVersion?.user_version === 0) {
                 await db.execAsync(`
                     CREATE TABLE IF NOT EXISTS adkarStreaks (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -245,8 +248,8 @@ const AuthenticatedApp = () => {
                         evening BOOLEAN NOT NULL DEFAULT FALSE,
                         date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
                     );
+                    PRAGMA user_version = ${DATABASE_VERSION};
                 `);
-                await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
             }
         } catch (error) {
             console.error("Error initializing database:", error);
@@ -274,8 +277,8 @@ const AuthenticatedApp = () => {
                             animation: 'fade'
                         }}
                     >
+                        <Stack.Screen name="onboarding" />
                         <Stack.Screen name="auth" />
-                        <Stack.Screen name="index" />
                         <Stack.Screen name="(tabs)" />
                         <Stack.Screen
                             name="morning-adkar"
@@ -341,33 +344,17 @@ async function schedulePushNotification(): Promise<void> {
     ): Promise<void> => {
         const { hour, minute } = parseTime(time);
 
-        if (Platform.OS === 'android') {
-            // Use daily trigger for Android
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title,
-                    body,
-                },
-                trigger: {
-                    hour,
-                    minute,
-                    repeats: true,
-                } as any,
-            });
-        } else {
-            // Use calendar trigger for iOS
-            await Notifications.scheduleNotificationAsync({
-                content: {
-                    title,
-                    body,
-                },
-                trigger: {
-                    hour,
-                    minute,
-                    repeats: true,
-                } as any,
-            });
-        }
+        await Notifications.scheduleNotificationAsync({
+            content: {
+                title,
+                body,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DAILY,
+                hour,
+                minute,
+            } as any,
+        });
     };
 
     // Schedule morning notification

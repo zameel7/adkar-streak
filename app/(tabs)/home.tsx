@@ -45,13 +45,13 @@ const Home = () => {
     const time = adkarTime();
     const timeInfo = getTimeOfDayInfo();
 
-    const [weekData, setWeekData] = useState<Array<{
+    const [weekData, setWeekData] = useState<{
         date: string,
         dayName: string,
         morning: boolean,
         evening: boolean,
         isToday: boolean
-    }>>([]);
+    }[]>([]);
 
     // Use ref to prevent concurrent database operations
     const isLoadingRef = React.useRef(false);
@@ -1096,7 +1096,7 @@ const Home = () => {
                                 color: theme === 'dark' ? '#ffffff' : '#333',
                                 fontWeight: '300'
                             }}>
-                                "Remember Allah in times of ease and He will remember you in times of difficulty."
+                                &ldquo;Remember Allah in times of ease and He will remember you in times of difficulty.&rdquo;
                             </ThemedText>
 
                             <ThemedText style={{

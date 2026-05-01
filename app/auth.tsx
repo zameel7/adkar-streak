@@ -30,22 +30,21 @@ export default function AuthScreen() {
   const { theme } = useContext(ThemeContext)
   const navigation = useNavigation()
 
-  // /auth is only meant to be opened on demand from Settings → Cloud Sync.
-  // Two cases where we must bounce the user back to home:
-  //   1. They are already signed in (stale persisted nav state).
-  //   2. They reached /auth as the cold-start route (no underlying screen) —
-  //      this can happen if persisted nav state from a previous build still
-  //      points to /auth, leaving the Stack with no (tabs) underneath.
+  // /auth is only meant to be opened on demand from Profile → Sign in. If the
+  // user is already signed in OR landed here as a cold-start route (stale nav
+  // state from an older build with the auth gate), bounce them to home before
+  // the screen ever renders.
+  const isColdStart = !router.canGoBack()
+
   useEffect(() => {
-    const shouldBounce = session || !router.canGoBack()
-    if (shouldBounce) {
+    if (session || isColdStart) {
       navigation.dispatch(
         CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' as never }] })
       )
     }
-  }, [session, navigation])
+  }, [session, isColdStart, navigation])
 
-  if (session) {
+  if (session || isColdStart) {
     return <Redirect href="/(tabs)/home" />
   }
 

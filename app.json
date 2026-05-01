@@ -46,7 +46,8 @@
       "expo-font",
       "expo-sqlite",
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-dev-client"
     ],
     "experiments": {
       "typedRoutes": true

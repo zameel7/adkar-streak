@@ -7,13 +7,11 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "node": "24.3.0",
-      "npm": "10.9.8"
+      "node": "24.3.0"
     },
     "preview": {
       "distribution": "internal",
       "node": "24.3.0",
-      "npm": "10.9.8",
       "android": {
         "buildType": "apk"
       }
@@ -21,7 +19,6 @@
     "production": {
       "autoIncrement": true,
       "node": "24.3.0",
-      "npm": "10.9.8",
       "android": {
         "image": "latest"
       }

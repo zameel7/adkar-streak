@@ -37,9 +37,6 @@
     "expo-system-ui": "~6.0.9",
     "expo-web-browser": "~15.0.11",
     "hijri-now": "^1.5.1",
-    "metro": "^0.83.1",
-    "metro-config": "^0.83.2",
-    "metro-resolver": "^0.83.2",
     "nativewind": "^2.0.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -72,6 +69,6 @@
   "private": true,
   "engines": {
     "node": "24.3.0",
-    "npm": "10.9.8"
+    "npm": "11.4.2"
   }
 }

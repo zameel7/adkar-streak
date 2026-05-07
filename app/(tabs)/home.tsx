@@ -599,551 +599,284 @@ const Home = () => {
         }
     };
 
+    const isDark = theme === 'dark';
+    const surface = isDark ? '#0e0e12' : '#ffffff';
+    const text = isDark ? '#ffffff' : '#111111';
+    const muted = isDark ? '#9aa0a6' : '#6b7280';
+    const subtle = isDark ? '#1a1a20' : '#f4f4f7';
+    const hairline = isDark ? '#26262d' : '#ececef';
+    const accent = '#2196F3';
+
+    const statusMessage =
+        time === 'morning' && !morningStreak ? '🌅 Complete your morning adkar' :
+        time === 'evening' && !eveningStreak ? '🌙 Complete your evening adkar' :
+        time === 'morning' ? '✅ Morning adkar completed!' :
+        time === 'evening' ? '✅ Evening adkar completed!' :
+        '✨ السلام عليكم ورحمة الله';
+
     return (
         <SyncProvider onSync={handleStreakUpdated}>
             <SafeAreaProvider>
-                <LinearGradient
-                    colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#ffffff', '#f8f9fa']}
-                    style={{ flex: 1 }}
-                >
-                <ScrollView
-                    style={{ flex: 1 }}
-                    contentContainerStyle={{
-                        padding: 16,
-                        paddingTop: insets.top + 20,
-                        paddingBottom: 100 + insets.bottom
-                    }}
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            tintColor="#ffffff"
-                        />
-                    }
-                >
-                    {/* Personalized Welcome Header */}
-                    <View style={{
-                        marginBottom: 24
-                    }}>
-                        <ThemedText style={{
-                            fontSize: 28,
-                            fontWeight: 'bold',
-                            color: theme === 'dark' ? '#ffffff' : '#333',
-                            marginBottom: 8
-                        }}>
-                            Hey there {name}!
-                        </ThemedText>
-                        <ThemedText style={{
-                            fontSize: 16,
-                            color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
-                        }}>
-                            Ready for your spiritual journey today?
-                        </ThemedText>
-                    </View>
-
-                    {/* Beautiful Time of Day Header */}
-                    <ImageBackground
-                        source={timeInfo.image}
-                        style={{
-                            borderRadius: 20,
-                            marginBottom: 32,
-                            minHeight: 180,
-                            overflow: 'hidden'
+                <View style={{ flex: 1, backgroundColor: surface }}>
+                    <ScrollView
+                        style={{ flex: 1 }}
+                        contentContainerStyle={{
+                            paddingHorizontal: 20,
+                            paddingTop: insets.top + 16,
+                            paddingBottom: 100 + insets.bottom,
                         }}
-                        imageStyle={{ borderRadius: 20 }}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl
+                                refreshing={refreshing}
+                                onRefresh={onRefresh}
+                                tintColor={isDark ? '#ffffff' : '#000000'}
+                            />
+                        }
                     >
-                        <LinearGradient
-                            colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.4)']}
+                        {/* Greeting */}
+                        <View style={{ marginBottom: 28 }}>
+                            <ThemedText style={{ fontSize: 14, color: muted, marginBottom: 6, fontWeight: '500' }}>
+                                Assalamu alaikum
+                            </ThemedText>
+                            <ThemedText style={{ fontSize: 32, fontWeight: '700', color: text, letterSpacing: -0.5 }}>
+                                {name}
+                            </ThemedText>
+                        </View>
+
+                        {/* Time-of-day hero */}
+                        <ImageBackground
+                            source={timeInfo.image}
                             style={{
-                                flex: 1,
-                                padding: 24,
-                                justifyContent: 'space-between'
+                                borderRadius: 24,
+                                marginBottom: 28,
+                                minHeight: 168,
+                                overflow: 'hidden',
                             }}
+                            imageStyle={{ borderRadius: 24 }}
                         >
-                            {/* Top Section */}
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                <View>
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 16, marginBottom: 4 }}>
-                                        Now
-                                    </ThemedText>
-                                    <ThemedText style={{ color: '#ffffff', fontSize: 32, fontWeight: 'bold', marginBottom: 8 }}>
-                                        {timeInfo.period}
-                                    </ThemedText>
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: 14 }}>
-                                        {timeInfo.timeLeft}
-                                    </ThemedText>
+                            <LinearGradient
+                                colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.55)']}
+                                style={{ flex: 1, padding: 22, justifyContent: 'space-between' }}
+                            >
+                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <View>
+                                        <ThemedText style={{ color: 'rgba(255,255,255,0.75)', fontSize: 13, marginBottom: 2, fontWeight: '600', textTransform: 'uppercase', letterSpacing: 1 }}>
+                                            {timeInfo.timeLeft}
+                                        </ThemedText>
+                                        <ThemedText style={{ color: '#ffffff', fontSize: 34, fontWeight: '700', letterSpacing: -0.5 }}>
+                                            {timeInfo.period}
+                                        </ThemedText>
+                                    </View>
+                                    <Ionicons name={timeInfo.icon as any} size={40} color="rgba(255,255,255,0.9)" />
                                 </View>
-                                <Ionicons
-                                    name={timeInfo.icon as any}
-                                    size={48}
-                                    color="rgba(255, 255, 255, 0.9)"
-                                />
-                            </View>
-
-                            {/* Bottom Section - Status Message */}
-                            <View style={{ marginTop: 20 }}>
-                                {time === "morning" && !morningStreak ? (
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
-                                        🌅 Complete your morning adkar
-                                    </ThemedText>
-                                ) : time === "evening" && !eveningStreak ? (
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
-                                        🌙 Complete your evening adkar
-                                    </ThemedText>
-                                ) : time === "morning" ? (
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
-                                        ✅ Morning adkar completed!
-                                    </ThemedText>
-                                ) : time === "evening" ? (
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
-                                        ✅ Evening adkar completed!
-                                    </ThemedText>
-                                ) : (
-                                    <ThemedText style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: 16, fontWeight: '500' }}>
-                                        ✨ السلام عليكم ورحمة الله
-                                    </ThemedText>
-                                )}
-                            </View>
-                        </LinearGradient>
-                    </ImageBackground>
-
-                    {/* Streak Counter */}
-                    <View style={{
-                        marginBottom: 40,
-                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: 20,
-                        padding: 24,
-                        borderWidth: 1,
-                        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-                    }}>
-                        {/* Current Streak */}
-                        <View style={{
-                            alignItems: 'center',
-                            marginBottom: 24
-                        }}>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                                <Ionicons name="flame" size={28} color="#2196F3" style={{ marginRight: 8 }} />
-                                <ThemedText style={{
-                                    fontSize: 24,
-                                    fontWeight: 'bold',
-                                    color: theme === 'dark' ? '#ffffff' : '#333'
-                                }}>
-                                    {streak} Day Streak
+                                <ThemedText style={{ color: 'rgba(255,255,255,0.95)', fontSize: 15, fontWeight: '500' }}>
+                                    {statusMessage}
                                 </ThemedText>
+                            </LinearGradient>
+                        </ImageBackground>
+
+                        {/* Streak block */}
+                        <View style={{ marginBottom: 28 }}>
+                            <ThemedText style={{ fontSize: 12, color: muted, fontWeight: '700', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 12 }}>
+                                Streak
+                            </ThemedText>
+
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 22 }}>
+                                <View style={{
+                                    width: 56,
+                                    height: 56,
+                                    borderRadius: 28,
+                                    backgroundColor: accent + '1F',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    marginRight: 16,
+                                }}>
+                                    <Ionicons name="flame" size={28} color={accent} />
+                                </View>
+                                <View style={{ flex: 1 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                                        <ThemedText style={{ fontSize: 42, fontWeight: '700', color: text, letterSpacing: -1, lineHeight: 46 }}>
+                                            {streak}
+                                        </ThemedText>
+                                        <ThemedText style={{ fontSize: 16, color: muted, fontWeight: '500', marginLeft: 6 }}>
+                                            {streak === 1 ? 'day' : 'days'}
+                                        </ThemedText>
+                                    </View>
+                                    <ThemedText style={{ fontSize: 13, color: muted, marginTop: 2 }}>
+                                        {streak > 0 ? 'Keep it going' : 'Complete both adkar to start'}
+                                    </ThemedText>
+                                </View>
                             </View>
-                            <ThemedText style={{
-                                fontSize: 14,
-                                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666',
-                                textAlign: 'center'
-                            }}>
-                                {streak > 0 ? "Keep it up! 🔥" : "Complete both adkar to start your streak"}
-                            </ThemedText>
-                        </View>
 
-                        <View style={{
-                            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-                            borderRadius: 16,
-                            padding: 20,
-                            borderWidth: 1,
-                            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-                        }}>
-                            <ThemedText style={{
-                                fontSize: 16,
-                                fontWeight: 'bold',
-                                color: theme === 'dark' ? '#ffffff' : '#333',
-                                textAlign: 'center',
-                                marginBottom: 16
-                            }}>
-                                This Week
-                            </ThemedText>
-
+                            {/* Week strip */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                                {weekData.map((day, index) => (
-                                    <View key={day.date} style={{ alignItems: 'center', flex: 1 }}>
-                                        {/* Day name */}
-                                        <ThemedText style={{
-                                            fontSize: 12,
-                                            color: day.isToday ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'),
-                                            fontWeight: day.isToday ? 'bold' : 'normal',
-                                            marginBottom: 8
-                                        }}>
-                                            {day.dayName}
-                                        </ThemedText>
-
-                                        {/* Day circle */}
-                                        <View style={{
-                                            width: 36,
-                                            height: 36,
-                                            borderRadius: 18,
-                                            borderWidth: 2,
-                                            borderColor: day.isToday ? '#2196F3' : (day.morning && day.evening ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')),
-                                            backgroundColor: day.morning && day.evening ? '#2196F3' : 'transparent',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            marginBottom: 6
-                                        }}>
-                                            {day.morning && day.evening ? (
-                                                <Ionicons name="checkmark" size={18} color="#ffffff" />
-                                            ) : day.morning || day.evening ? (
-                                                <View style={{
-                                                    width: 8,
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                    backgroundColor: '#1976D2'
-                                                }} />
-                                            ) : day.isToday ? (
-                                                <View style={{
-                                                    width: 8,
-                                                    height: 8,
-                                                    borderRadius: 4,
-                                                    backgroundColor: '#2196F3'
-                                                }} />
-                                            ) : null}
-                                        </View>
-
-                                        {/* Progress dots for morning/evening */}
-                                        <View style={{ flexDirection: 'row', gap: 4 }}>
+                                {weekData.map((day) => {
+                                    const complete = !!day.morning && !!day.evening;
+                                    const partial = !complete && (!!day.morning || !!day.evening);
+                                    return (
+                                        <View key={day.date} style={{ alignItems: 'center', flex: 1 }}>
+                                            <ThemedText style={{
+                                                fontSize: 11,
+                                                color: day.isToday ? accent : muted,
+                                                fontWeight: day.isToday ? '700' : '500',
+                                                marginBottom: 8,
+                                                letterSpacing: 0.5,
+                                            }}>
+                                                {day.dayName.toUpperCase()}
+                                            </ThemedText>
                                             <View style={{
-                                                width: 6,
-                                                height: 6,
-                                                borderRadius: 3,
-                                                backgroundColor: day.morning ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
-                                            }} />
-                                            <View style={{
-                                                width: 6,
-                                                height: 6,
-                                                borderRadius: 3,
-                                                backgroundColor: day.evening ? '#1976D2' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.3)' : '#e0e0e0')
-                                            }} />
+                                                width: 32,
+                                                height: 32,
+                                                borderRadius: 16,
+                                                borderWidth: complete ? 0 : 1.5,
+                                                borderColor: day.isToday ? accent : hairline,
+                                                backgroundColor: complete ? accent : 'transparent',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                marginBottom: 6,
+                                            }}>
+                                                {complete ? (
+                                                    <Ionicons name="checkmark" size={16} color="#ffffff" />
+                                                ) : partial ? (
+                                                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: accent }} />
+                                                ) : null}
+                                            </View>
+                                            <View style={{ flexDirection: 'row', gap: 3 }}>
+                                                <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: day.morning ? accent : hairline }} />
+                                                <View style={{ width: 5, height: 5, borderRadius: 2.5, backgroundColor: day.evening ? '#1976D2' : hairline }} />
+                                            </View>
                                         </View>
-                                    </View>
-                                ))}
-                            </View>
-
-                            {/* Legend */}
-                            <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16, gap: 16 }}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#2196F3', marginRight: 4 }} />
-                                    <ThemedText style={{
-                                        fontSize: 12,
-                                        color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
-                                    }}>Morning</ThemedText>
-                                </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#1976D2', marginRight: 4 }} />
-                                    <ThemedText style={{
-                                        fontSize: 12,
-                                        color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
-                                    }}>Evening</ThemedText>
-                                </View>
+                                    );
+                                })}
                             </View>
                         </View>
-                    </View>
 
-                    {/* Enhanced Action Buttons */}
-                    <View style={{ marginBottom: 32 }}>
-                        <View style={{ flexDirection: 'row', gap: 16, paddingHorizontal: 4 }}>
-                            <TouchableOpacity
-                                onPress={() => router.push("/morning-adkar")}
-                                style={{
-                                    borderRadius: 24,
-                                    flex: 1,
-                                    height: 180,
-                                    overflow: 'hidden',
-                                    shadowColor: '#42A5F5',
-                                    shadowOffset: { width: 0, height: 12 },
-                                    shadowOpacity: 0.4,
-                                    shadowRadius: 16,
-                                    elevation: 12
-                                }}
-                            >
-                                <LinearGradient
-                                    colors={['#E3F2FD', '#64B5F6', '#42A5F5']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={{
-                                        flex: 1,
-                                        padding: 20,
-                                        position: 'relative',
-                                        justifyContent: 'space-between'
-                                    }}
-                                >
-                                    {/* Glassmorphism overlay */}
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        backdropFilter: 'blur(20px)'
-                                    }} />
-
-                                    {/* Top section with icon */}
-                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
-                                        <View style={{
-                                            backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                                            borderRadius: 16,
-                                            padding: 12,
-                                            marginBottom: 12
-                                        }}>
-                                            <Ionicons name="sunny" size={32} color="#ffffff" />
-                                        </View>
-                                        <ThemedText style={{
-                                            color: '#ffffff',
-                                            fontSize: 18,
-                                            fontWeight: 'bold',
-                                            textShadowColor: 'rgba(0, 0, 0, 0.3)',
-                                            textShadowOffset: { width: 0, height: 1 },
-                                            textShadowRadius: 3
-                                        }}>
-                                            Morning{'\n'}Adkar
-                                        </ThemedText>
-                                    </View>
-
-                                    {/* Bottom section with status */}
-                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
-                                        {morningStreak ? (
-                                            <View style={{
-                                                backgroundColor: 'rgba(33, 150, 243, 0.9)',
-                                                paddingHorizontal: 12,
-                                                paddingVertical: 6,
-                                                borderRadius: 12,
-                                                flexDirection: 'row',
-                                                alignItems: 'center'
-                                            }}>
-                                                <Ionicons name="checkmark-circle" size={16} color="#ffffff" style={{ marginRight: 4 }} />
-                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
-                                                    Completed
-                                                </ThemedText>
-                                            </View>
-                                        ) : (
-                                            <View style={{
-                                                backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                                                paddingHorizontal: 12,
-                                                paddingVertical: 6,
-                                                borderRadius: 12
-                                            }}>
-                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
-                                                    Start now
-                                                </ThemedText>
-                                            </View>
-                                        )}
-                                    </View>
-
-                                    {/* Decorative floating elements */}
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 20,
-                                        right: 20,
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: 4,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.4)'
-                                    }} />
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 40,
-                                        right: 35,
-                                        width: 4,
-                                        height: 4,
-                                        borderRadius: 2,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
-                                    }} />
-                                    <View style={{
-                                        position: 'absolute',
-                                        bottom: 20,
-                                        right: 20,
-                                        width: 12,
-                                        height: 12,
-                                        borderRadius: 6,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                                    }} />
-                                </LinearGradient>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => router.push("/evening-adkar")}
-                                style={{
-                                    borderRadius: 24,
-                                    flex: 1,
-                                    height: 180,
-                                    overflow: 'hidden',
-                                    shadowColor: '#7B1FA2',
-                                    shadowOffset: { width: 0, height: 12 },
-                                    shadowOpacity: 0.4,
-                                    shadowRadius: 16,
-                                    elevation: 12
-                                }}
-                            >
-                                <LinearGradient
-                                    colors={['#9C27B0', '#4A148C', '#1A1A1A']}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={{
-                                        flex: 1,
-                                        padding: 20,
-                                        position: 'relative',
-                                        justifyContent: 'space-between'
-                                    }}
-                                >
-                                    {/* Glassmorphism overlay */}
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
-                                        backdropFilter: 'blur(20px)'
-                                    }} />
-
-                                    {/* Top section with icon */}
-                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
-                                        <View style={{
-                                            backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                                            borderRadius: 16,
-                                            padding: 12,
-                                            marginBottom: 12
-                                        }}>
-                                            <Ionicons name="moon" size={32} color="#ffffff" />
-                                        </View>
-                                        <ThemedText style={{
-                                            color: '#ffffff',
-                                            fontSize: 18,
-                                            fontWeight: 'bold',
-                                            textShadowColor: 'rgba(0, 0, 0, 0.3)',
-                                            textShadowOffset: { width: 0, height: 1 },
-                                            textShadowRadius: 3
-                                        }}>
-                                            Evening{'\n'}Adkar
-                                        </ThemedText>
-                                    </View>
-
-                                    {/* Bottom section with status */}
-                                    <View style={{ zIndex: 1, alignItems: 'flex-start' }}>
-                                        {eveningStreak ? (
-                                            <View style={{
-                                                backgroundColor: 'rgba(33, 150, 243, 0.9)',
-                                                paddingHorizontal: 12,
-                                                paddingVertical: 6,
-                                                borderRadius: 12,
-                                                flexDirection: 'row',
-                                                alignItems: 'center'
-                                            }}>
-                                                <Ionicons name="checkmark-circle" size={16} color="#ffffff" style={{ marginRight: 4 }} />
-                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
-                                                    Completed
-                                                </ThemedText>
-                                            </View>
-                                        ) : (
-                                            <View style={{
-                                                backgroundColor: 'rgba(255, 255, 255, 0.25)',
-                                                paddingHorizontal: 12,
-                                                paddingVertical: 6,
-                                                borderRadius: 12
-                                            }}>
-                                                <ThemedText style={{ color: '#ffffff', fontSize: 12, fontWeight: '600' }}>
-                                                    Start now
-                                                </ThemedText>
-                                            </View>
-                                        )}
-                                    </View>
-
-                                    {/* Decorative floating elements */}
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 20,
-                                        right: 20,
-                                        width: 6,
-                                        height: 6,
-                                        borderRadius: 3,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.5)'
-                                    }} />
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 35,
-                                        right: 30,
-                                        width: 3,
-                                        height: 3,
-                                        borderRadius: 1.5,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.7)'
-                                    }} />
-                                    <View style={{
-                                        position: 'absolute',
-                                        top: 50,
-                                        right: 40,
-                                        width: 2,
-                                        height: 2,
-                                        borderRadius: 1,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.6)'
-                                    }} />
-                                    <View style={{
-                                        position: 'absolute',
-                                        bottom: 20,
-                                        right: 25,
-                                        width: 10,
-                                        height: 10,
-                                        borderRadius: 5,
-                                        backgroundColor: 'rgba(255, 255, 255, 0.3)'
-                                    }} />
-                                </LinearGradient>
-                            </TouchableOpacity>
+                        {/* Action tiles */}
+                        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+                            <ActionTile
+                                onPress={() => router.push('/morning-adkar')}
+                                icon="sunny"
+                                title="Morning"
+                                subtitle="Adkar"
+                                colors={['#42A5F5', '#1E88E5']}
+                                done={morningStreak}
+                            />
+                            <ActionTile
+                                onPress={() => router.push('/evening-adkar')}
+                                icon="moon"
+                                title="Evening"
+                                subtitle="Adkar"
+                                colors={['#5E35B1', '#311B92']}
+                                done={eveningStreak}
+                            />
                         </View>
-                    </View>
 
-                    {/* Quote Section */}
-                    <View style={{
-                        marginBottom: 32,
-                        backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-                        borderRadius: 20,
-                        padding: 24,
-                        borderWidth: 1,
-                        borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-                    }}>
-                        <View style={{ alignItems: 'center' }}>
-                            <View style={{
-                                width: 40,
-                                height: 2,
-                                backgroundColor: '#2196F3',
-                                marginBottom: 20,
-                                borderRadius: 1
-                            }} />
-
+                        {/* Quote */}
+                        <View style={{
+                            backgroundColor: subtle,
+                            borderRadius: 20,
+                            padding: 24,
+                            marginBottom: 16,
+                        }}>
+                            <Ionicons
+                                name="sparkles"
+                                size={18}
+                                color={accent}
+                                style={{ marginBottom: 12 }}
+                            />
                             <ThemedText style={{
-                                fontSize: 20,
-                                lineHeight: 32,
-                                textAlign: 'center',
-                                marginBottom: 16,
-                                fontStyle: 'italic',
-                                color: theme === 'dark' ? '#ffffff' : '#333',
-                                fontWeight: '300'
+                                fontSize: 17,
+                                lineHeight: 26,
+                                color: text,
+                                fontWeight: '500',
+                                marginBottom: 12,
                             }}>
-                                &ldquo;Remember Allah in times of ease and He will remember you in times of difficulty.&rdquo;
+                                Remember Allah in times of ease and He will remember you in times of difficulty.
                             </ThemedText>
-
-                            <ThemedText style={{
-                                textAlign: 'center',
-                                color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666',
-                                fontSize: 16
-                            }}>
-                                - Prophet Muhammed ﷺ
+                            <ThemedText style={{ fontSize: 13, color: muted, fontWeight: '600' }}>
+                                — Prophet Muhammed ﷺ
                             </ThemedText>
-
-                            <View style={{
-                                width: 40,
-                                height: 2,
-                                backgroundColor: '#2196F3',
-                                marginTop: 20,
-                                borderRadius: 1
-                            }} />
                         </View>
-                    </View>
-                </ScrollView>
-            </LinearGradient>
-        </SafeAreaProvider>
+                    </ScrollView>
+                </View>
+            </SafeAreaProvider>
         </SyncProvider>
+    );
+};
+
+type ActionTileProps = {
+    onPress: () => void;
+    icon: 'sunny' | 'moon';
+    title: string;
+    subtitle: string;
+    colors: [string, string];
+    done: boolean;
+};
+
+const ActionTile: React.FC<ActionTileProps> = ({ onPress, icon, title, subtitle, colors, done }) => {
+    // SQLite returns 0/1 for booleans — coerce so JSX conditionals never
+    // try to render a number as a child (which trips the
+    // "Text strings must be rendered within a <Text>" error on Android).
+    const isDone = !!done;
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.85}
+            style={{
+                flex: 1,
+                borderRadius: 22,
+                overflow: 'hidden',
+                height: 168,
+            }}
+        >
+            <LinearGradient
+                colors={colors}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{ flex: 1, padding: 18, justifyContent: 'space-between' }}
+            >
+                <View style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: 'rgba(255,255,255,0.22)',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <Ionicons name={icon} size={22} color="#ffffff" />
+                </View>
+                <View>
+                    <ThemedText style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '500' }}>
+                        {subtitle}
+                    </ThemedText>
+                    <ThemedText style={{ color: '#ffffff', fontSize: 22, fontWeight: '700', marginBottom: 12, letterSpacing: -0.3 }}>
+                        {title}
+                    </ThemedText>
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        alignSelf: 'flex-start',
+                        backgroundColor: isDone ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.18)',
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 999,
+                    }}>
+                        {isDone ? (
+                            <Ionicons name="checkmark-circle" size={14} color={colors[1]} style={{ marginRight: 4 }} />
+                        ) : null}
+                        <ThemedText style={{
+                            color: isDone ? colors[1] : '#ffffff',
+                            fontSize: 11,
+                            fontWeight: '700',
+                            letterSpacing: 0.3,
+                        }}>
+                            {isDone ? 'COMPLETED' : 'START'}
+                        </ThemedText>
+                    </View>
+                </View>
+            </LinearGradient>
+        </TouchableOpacity>
     );
 };
 

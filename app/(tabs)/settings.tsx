@@ -4,10 +4,9 @@ import { schedulePushNotification } from "@/lib/notifications";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, Modal, Platform, ScrollView, Share, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, Platform, ScrollView, Share, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Settings = () => {
@@ -82,331 +81,227 @@ const Settings = () => {
     getDetails();
   }, []);
 
+  const isDark = theme === 'dark';
+  const surface = isDark ? '#0e0e12' : '#ffffff';
+  const text = isDark ? '#ffffff' : '#111111';
+  const muted = isDark ? '#9aa0a6' : '#6b7280';
+  const hairline = isDark ? '#26262d' : '#ececef';
+  const accent = '#2196F3';
+
   return (
-    <LinearGradient
-      colors={theme === 'dark' ? ['#1a1a2e', '#16213e'] : ['#ffffff', '#f8f9fa']}
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: surface }}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          padding: 16,
-          paddingTop: insets.top + 20,
-          paddingBottom: 100 + insets.bottom
+          paddingHorizontal: 20,
+          paddingTop: insets.top + 16,
+          paddingBottom: 100 + insets.bottom,
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View style={{
-          marginBottom: 32,
-          alignItems: 'center',
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <Ionicons
-            name="settings"
-            size={40}
-            color="#2196F3"
-            style={{ marginBottom: 12 }}
-          />
-          <ThemedText style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: theme === 'dark' ? '#ffffff' : '#333'
-          }}>
-            Settings
-          </ThemedText>
-        </View>
+        <ThemedText style={{ fontSize: 34, fontWeight: '700', color: text, letterSpacing: -0.5, marginBottom: 32 }}>
+          Settings
+        </ThemedText>
 
-        {/* Appearance Section */}
-        <View style={{
-          marginBottom: 32,
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="color-palette" size={24} color="#2196F3" style={{ marginRight: 12 }} />
-            <ThemedText style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: theme === 'dark' ? '#ffffff' : '#333'
-            }}>
-              Appearance
-            </ThemedText>
-          </View>
-
-          <TouchableOpacity
-            onPress={handleToggleTheme}
-            style={{
-              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name={theme === "dark" ? "moon" : "sunny"} size={24} color="#2196F3" style={{ marginRight: 12 }} />
-              <ThemedText style={{
-                fontSize: 16,
-                color: theme === 'dark' ? '#ffffff' : '#333',
-                fontWeight: '600'
-              }}>
-                {theme === "dark" ? "Dark Mode" : "Light Mode"}
-              </ThemedText>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={theme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : '#999'} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => {
-              AsyncStorage.setItem("translations", JSON.stringify(!translation));
-              setTranslation(!translation);
-            }}
-            style={{
-              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name={translation ? "checkmark-outline" : "close-outline"} size={24} color="#2196F3" style={{ marginRight: 12 }} />
-              <ThemedText style={{
-                fontSize: 16,
-                color: theme === 'dark' ? '#ffffff' : '#333',
-                fontWeight: '600'
-              }}>
-                Show Translations
-              </ThemedText>
-            </View>
+        <SectionLabel muted={muted}>Appearance</SectionLabel>
+        <Row
+          icon={theme === 'dark' ? 'moon' : 'sunny'}
+          label={theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+          textColor={text}
+          accent={accent}
+          onPress={handleToggleTheme}
+          trailing={<Ionicons name="chevron-forward" size={18} color={muted} />}
+          divider hairline={hairline}
+        />
+        <Row
+          icon="language"
+          label="Show Translations"
+          textColor={text}
+          accent={accent}
+          onPress={() => {
+            AsyncStorage.setItem('translations', JSON.stringify(!translation));
+            setTranslation(!translation);
+          }}
+          trailing={
             <View style={{
-              backgroundColor: translation ? '#2196F3' : '#ccc',
-              borderRadius: 12,
-              width: 24,
-              height: 24,
-              alignItems: 'center',
-              justifyContent: 'center'
+              width: 44,
+              height: 26,
+              borderRadius: 13,
+              backgroundColor: translation ? accent : (isDark ? '#3a3a40' : '#d1d5db'),
+              padding: 3,
+              justifyContent: 'center',
             }}>
-              <Ionicons name={translation ? "checkmark" : "close"} size={16} color="#ffffff" />
+              <View style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: '#fff',
+                alignSelf: translation ? 'flex-end' : 'flex-start',
+              }} />
             </View>
-          </TouchableOpacity>
-        </View>
+          }
+          hairline={hairline}
+        />
 
-        {/* Notification Section */}
-        <View style={{
-          marginBottom: 32,
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="notifications" size={24} color="#2196F3" style={{ marginRight: 12 }} />
-            <ThemedText style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: theme === 'dark' ? '#ffffff' : '#333'
-            }}>
-              Notification Time
+        <SectionLabel muted={muted} top>Notifications</SectionLabel>
+        <Row
+          icon="sunny"
+          label="Morning Time"
+          textColor={text}
+          accent={accent}
+          onPress={() => setShowMorningPicker(true)}
+          trailing={
+            <ThemedText style={{ fontSize: 16, color: accent, fontWeight: '600' }}>
+              {morningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </ThemedText>
-          </View>
+          }
+          divider hairline={hairline}
+        />
+        <Row
+          icon="moon"
+          label="Evening Time"
+          textColor={text}
+          accent={accent}
+          onPress={() => setShowEveningPicker(true)}
+          trailing={
+            <ThemedText style={{ fontSize: 16, color: accent, fontWeight: '600' }}>
+              {eveningTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </ThemedText>
+          }
+          hairline={hairline}
+        />
+        <TouchableOpacity
+          onPress={handleSubmitTime}
+          activeOpacity={0.85}
+          style={{
+            marginTop: 16,
+            backgroundColor: accent,
+            borderRadius: 14,
+            paddingVertical: 15,
+            alignItems: 'center',
+          }}
+        >
+          <ThemedText style={{ color: '#ffffff', fontSize: 15, fontWeight: '700', letterSpacing: 0.2 }}>
+            Save Notification Times
+          </ThemedText>
+        </TouchableOpacity>
 
-          {/* Morning Time */}
-          <TouchableOpacity
-            onPress={() => setShowMorningPicker(true)}
-            style={{
-              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 12
+        {/* Time picker hosts (logic unchanged) */}
+        {Platform.OS === 'android' && showMorningPicker && (
+          <DateTimePicker
+            value={morningTime}
+            mode="time"
+            is24Hour={true}
+            display="spinner"
+            onChange={(event, selectedDate) => {
+              setShowMorningPicker(false);
+              if (event.type === 'set' && selectedDate) setMorningTime(selectedDate);
             }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="sunny" size={20} color="#2196F3" style={{ marginRight: 12 }} />
-              <ThemedText style={{
-                fontSize: 16,
-                color: theme === 'dark' ? '#ffffff' : '#333',
-                fontWeight: '600'
-              }}>
-                Morning Time
-              </ThemedText>
-            </View>
-            <ThemedText style={{ fontSize: 16, color: '#2196F3', fontWeight: 'bold' }}>
-              {morningTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </ThemedText>
-          </TouchableOpacity>
-
-          {/* Evening Time */}
-          <TouchableOpacity
-            onPress={() => setShowEveningPicker(true)}
-            style={{
-              backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0',
-              paddingHorizontal: 16,
-              paddingVertical: 16,
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: 16
+          />
+        )}
+        {Platform.OS === 'android' && showEveningPicker && (
+          <DateTimePicker
+            value={eveningTime}
+            mode="time"
+            is24Hour={true}
+            display="spinner"
+            onChange={(event, selectedDate) => {
+              setShowEveningPicker(false);
+              if (event.type === 'set' && selectedDate) setEveningTime(selectedDate);
             }}
-          >
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="moon" size={20} color="#2196F3" style={{ marginRight: 12 }} />
-              <ThemedText style={{
-                fontSize: 16,
-                color: theme === 'dark' ? '#ffffff' : '#333',
-                fontWeight: '600'
-              }}>
-                Evening Time
-              </ThemedText>
-            </View>
-            <ThemedText style={{ fontSize: 16, color: '#2196F3', fontWeight: 'bold' }}>
-              {eveningTime.toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleSubmitTime}
-            style={{
-              backgroundColor: '#2196F3',
-              borderRadius: 12,
-              paddingVertical: 16,
-              alignItems: 'center'
-            }}
-          >
-            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
-              Save Notification Times
-            </ThemedText>
-          </TouchableOpacity>
-
-          {/* Time Pickers */}
-          {/*
-            On Android the picker is a system dialog — render it directly when
-            visible. On iOS the default compact picker renders as a small inline
-            pill, which is what the user was seeing; instead, host a spinner
-            wheel inside a bottom-sheet Modal with a Done button.
-          */}
-          {Platform.OS === 'android' && showMorningPicker && (
-            <DateTimePicker
+          />
+        )}
+        {Platform.OS === 'ios' && (
+          <>
+            <IOSPickerModal
+              visible={showMorningPicker}
               value={morningTime}
-              mode="time"
-              is24Hour={true}
-              display="spinner"
-              onChange={(event, selectedDate) => {
-                setShowMorningPicker(false);
-                if (event.type === 'set' && selectedDate) setMorningTime(selectedDate);
-              }}
+              theme={theme as 'light' | 'dark'}
+              onCancel={() => setShowMorningPicker(false)}
+              onDone={(d) => { setMorningTime(d); setShowMorningPicker(false); }}
             />
-          )}
-          {Platform.OS === 'android' && showEveningPicker && (
-            <DateTimePicker
+            <IOSPickerModal
+              visible={showEveningPicker}
               value={eveningTime}
-              mode="time"
-              is24Hour={true}
-              display="spinner"
-              onChange={(event, selectedDate) => {
-                setShowEveningPicker(false);
-                if (event.type === 'set' && selectedDate) setEveningTime(selectedDate);
-              }}
+              theme={theme as 'light' | 'dark'}
+              onCancel={() => setShowEveningPicker(false)}
+              onDone={(d) => { setEveningTime(d); setShowEveningPicker(false); }}
             />
-          )}
+          </>
+        )}
 
-          {Platform.OS === 'ios' && (
-            <>
-              <IOSPickerModal
-                visible={showMorningPicker}
-                value={morningTime}
-                theme={theme}
-                onCancel={() => setShowMorningPicker(false)}
-                onDone={(d) => {
-                  setMorningTime(d);
-                  setShowMorningPicker(false);
-                }}
-              />
-              <IOSPickerModal
-                visible={showEveningPicker}
-                value={eveningTime}
-                theme={theme}
-                onCancel={() => setShowEveningPicker(false)}
-                onDone={(d) => {
-                  setEveningTime(d);
-                  setShowEveningPicker(false);
-                }}
-              />
-            </>
-          )}
-        </View>
-
-        {/* Share Section */}
-        <View style={{
-          marginBottom: 32,
-          backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.9)',
-          borderRadius: 20,
-          padding: 24,
-          borderWidth: 1,
-          borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 20 }}>
-            <Ionicons name="share-social" size={24} color="#2196F3" style={{ marginRight: 12 }} />
-            <ThemedText style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: theme === 'dark' ? '#ffffff' : '#333'
-            }}>
-              Share App
-            </ThemedText>
-          </View>
-
-          <TouchableOpacity
-            onPress={onShare}
-            style={{
-              backgroundColor: '#2196F3',
-              borderRadius: 12,
-              paddingVertical: 16,
-              alignItems: 'center'
-            }}
-          >
-            <ThemedText style={{ color: '#ffffff', fontSize: 16, fontWeight: 'bold' }}>
-              Share Adkar Champ
-            </ThemedText>
-          </TouchableOpacity>
-        </View>
+        <SectionLabel muted={muted} top>Share</SectionLabel>
+        <Row
+          icon="share-social"
+          label="Share Adkar Champ"
+          textColor={text}
+          accent={accent}
+          onPress={onShare}
+          trailing={<Ionicons name="chevron-forward" size={18} color={muted} />}
+          hairline={hairline}
+        />
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 };
+
+type SectionLabelProps = { children: React.ReactNode; muted: string; top?: boolean };
+const SectionLabel: React.FC<SectionLabelProps> = ({ children, muted, top }) => (
+  <ThemedText style={{
+    fontSize: 12,
+    color: muted,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+    marginTop: top ? 32 : 0,
+    marginBottom: 8,
+  }}>
+    {children}
+  </ThemedText>
+);
+
+type RowProps = {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  textColor: string;
+  accent: string;
+  hairline: string;
+  trailing?: React.ReactNode;
+  onPress?: () => void;
+  divider?: boolean;
+};
+const Row: React.FC<RowProps> = ({ icon, label, textColor, accent, hairline, trailing, onPress, divider }) => (
+  <TouchableOpacity
+    onPress={onPress}
+    activeOpacity={0.6}
+    style={{
+      paddingVertical: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderBottomWidth: divider ? StyleSheet.hairlineWidth : 0,
+      borderBottomColor: hairline,
+    }}
+  >
+    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+      <View style={{
+        width: 32,
+        height: 32,
+        borderRadius: 8,
+        backgroundColor: accent + '1F',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 14,
+      }}>
+        <Ionicons name={icon} size={18} color={accent} />
+      </View>
+      <ThemedText style={{ fontSize: 16, color: textColor, fontWeight: '500' }}>
+        {label}
+      </ThemedText>
+    </View>
+    {trailing}
+  </TouchableOpacity>
+);
 
 type IOSPickerModalProps = {
   visible: boolean;

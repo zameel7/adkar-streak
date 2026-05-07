@@ -34,17 +34,22 @@ const TabLayout = () => {
             <BlurView
               intensity={80}
               tint={theme === 'dark' ? 'dark' : 'light'}
-              style={StyleSheet.absoluteFill}
+              style={[
+                StyleSheet.absoluteFill,
+                {
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  borderTopColor: theme === 'dark' ? '#26262d' : '#ececef',
+                },
+              ]}
             />
           ) : (
             <View
               style={[
                 StyleSheet.absoluteFill,
                 {
-                  backgroundColor:
-                    theme === 'dark'
-                      ? 'rgba(26, 26, 46, 0.95)'
-                      : 'rgba(255, 255, 255, 0.95)',
+                  backgroundColor: theme === 'dark' ? '#0e0e12' : '#ffffff',
+                  borderTopWidth: StyleSheet.hairlineWidth,
+                  borderTopColor: theme === 'dark' ? '#26262d' : '#ececef',
                 },
               ]}
             />

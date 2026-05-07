@@ -279,6 +279,7 @@ const AuthenticatedApp = () => {
                         <Stack.Screen name="onboarding" />
                         <Stack.Screen name="auth" />
                         <Stack.Screen name="(tabs)" />
+                        <Stack.Screen name="pwa" />
                         <Stack.Screen
                             name="morning-adkar"
                             options={{

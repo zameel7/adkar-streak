@@ -1,10 +1,11 @@
 import { ThemedView } from '@/components/ThemedView';
+import { isPWA } from '@/lib/pwa';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Redirect } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 
-type Target = '/(tabs)/home' | '/onboarding';
+type Target = '/(tabs)/home' | '/onboarding' | '/pwa';
 
 export default function Index() {
     const [target, setTarget] = useState<Target | null>(null);
@@ -15,10 +16,14 @@ export default function Index() {
             try {
                 const done = await AsyncStorage.getItem('onboardingComplete');
                 if (cancelled) return;
-                setTarget(done ? '/(tabs)/home' : '/onboarding');
+                if (!done) {
+                    setTarget('/onboarding');
+                    return;
+                }
+                setTarget(isPWA() ? '/pwa' : '/(tabs)/home');
             } catch (e) {
                 console.warn('Failed to read onboarding state:', e);
-                if (!cancelled) setTarget('/(tabs)/home');
+                if (!cancelled) setTarget(isPWA() ? '/pwa' : '/(tabs)/home');
             }
         })();
         return () => {
@@ -34,5 +39,5 @@ export default function Index() {
         );
     }
 
-    return <Redirect href={target} />;
+    return <Redirect href={target as any} />;
 }

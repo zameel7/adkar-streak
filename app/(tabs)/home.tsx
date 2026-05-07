@@ -31,10 +31,30 @@ type Row = {
     date: string;
 };
 
+function pickPrimaryPeriod(): 'morning' | 'evening' {
+    return new Date().getHours() < 12 ? 'morning' : 'evening';
+}
+
+function parseStoredHM(iso: string | null, defH: number, defM: number) {
+    if (!iso) return { hour: defH, minute: defM };
+    const d = new Date(iso);
+    return { hour: d.getHours(), minute: d.getMinutes() };
+}
+
+function fmtHM(hour: number, minute: number) {
+    const h = hour.toString().padStart(2, '0');
+    const m = minute.toString().padStart(2, '0');
+    return `${h}:${m}`;
+}
+
 const Home = () => {
     const [name, setName] = useState<string>("Hero");
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
+    const [morningStarted, setMorningStarted] = useState(false);
+    const [eveningStarted, setEveningStarted] = useState(false);
+    const [morningHM, setMorningHM] = useState('05:30');
+    const [eveningHM, setEveningHM] = useState('16:30');
     const [streak, setStreak] = useState(0);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -255,6 +275,28 @@ const Home = () => {
         return () => { cancelled = true; };
     }, [user]);
 
+    // Load saved notification times so the secondary bento tile can show
+    // "Up next · HH:MM". Defaults match the schedulePushNotification fallback.
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const [m, e] = await Promise.all([
+                    AsyncStorage.getItem('morningTime'),
+                    AsyncStorage.getItem('eveningTime'),
+                ]);
+                if (cancelled) return;
+                const mp = parseStoredHM(m, 5, 30);
+                const ep = parseStoredHM(e, 16, 30);
+                setMorningHM(fmtHM(mp.hour, mp.minute));
+                setEveningHM(fmtHM(ep.hour, ep.minute));
+            } catch {
+                // keep defaults
+            }
+        })();
+        return () => { cancelled = true; };
+    }, []);
+
     // Wait for database to be fully initialized
     useEffect(() => {
         let retryCount = 0;
@@ -359,6 +401,27 @@ const Home = () => {
             if (todayRecord) {
                 setMorningStreak(todayRecord.morning);
                 setEveningStreak(todayRecord.evening);
+            }
+
+            // Read AsyncStorage streakData to detect in-progress (started but
+            // not finished) state for today's morning/evening adkar.
+            try {
+                const sd = await AsyncStorage.getItem('streakData');
+                if (sd) {
+                    const parsed = JSON.parse(sd);
+                    if (parsed?.date === today) {
+                        setMorningStarted(Object.values(parsed.morning ?? {}).some(Boolean));
+                        setEveningStarted(Object.values(parsed.evening ?? {}).some(Boolean));
+                    } else {
+                        setMorningStarted(false);
+                        setEveningStarted(false);
+                    }
+                } else {
+                    setMorningStarted(false);
+                    setEveningStarted(false);
+                }
+            } catch {
+                // ignore — defaults already false
             }
 
             // Calculate streak by walking local calendar dates backward from today.
@@ -752,25 +815,66 @@ const Home = () => {
                             </View>
                         </View>
 
-                        {/* Action tiles */}
-                        <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
-                            <ActionTile
-                                onPress={() => router.push('/morning-adkar')}
-                                icon="sunny"
-                                title="Morning"
-                                subtitle="Adkar"
-                                colors={['#42A5F5', '#1E88E5']}
-                                done={morningStreak}
-                            />
-                            <ActionTile
-                                onPress={() => router.push('/evening-adkar')}
-                                icon="moon"
-                                title="Evening"
-                                subtitle="Adkar"
-                                colors={['#5E35B1', '#311B92']}
-                                done={eveningStreak}
-                            />
-                        </View>
+                        {/* Action tiles — time-aware bento */}
+                        {(() => {
+                            const primary = pickPrimaryPeriod();
+                            const morningState: PeriodState =
+                                morningStreak ? 'done' : morningStarted ? 'in_progress' : 'not_started';
+                            const eveningState: PeriodState =
+                                eveningStreak ? 'done' : eveningStarted ? 'in_progress' : 'not_started';
+
+                            const morningTile = (asPrimary: boolean) =>
+                                asPrimary ? (
+                                    <PrimaryAdkarTile
+                                        key="m-primary"
+                                        period="morning"
+                                        state={morningState}
+                                        onPress={() => router.push('/morning-adkar')}
+                                    />
+                                ) : (
+                                    <SecondaryAdkarTile
+                                        key="m-secondary"
+                                        period="morning"
+                                        state={morningState}
+                                        startsAt={morningHM}
+                                        onPress={() => router.push('/morning-adkar')}
+                                        subtle={subtle}
+                                        text={text}
+                                        muted={muted}
+                                        accent={accent}
+                                    />
+                                );
+
+                            const eveningTile = (asPrimary: boolean) =>
+                                asPrimary ? (
+                                    <PrimaryAdkarTile
+                                        key="e-primary"
+                                        period="evening"
+                                        state={eveningState}
+                                        onPress={() => router.push('/evening-adkar')}
+                                    />
+                                ) : (
+                                    <SecondaryAdkarTile
+                                        key="e-secondary"
+                                        period="evening"
+                                        state={eveningState}
+                                        startsAt={eveningHM}
+                                        onPress={() => router.push('/evening-adkar')}
+                                        subtle={subtle}
+                                        text={text}
+                                        muted={muted}
+                                        accent={accent}
+                                    />
+                                );
+
+                            return (
+                                <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+                                    {primary === 'morning'
+                                        ? [morningTile(true), eveningTile(false)]
+                                        : [eveningTile(true), morningTile(false)]}
+                                </View>
+                            );
+                        })()}
 
                         {/* Quote */}
                         <View style={{
@@ -805,77 +909,192 @@ const Home = () => {
     );
 };
 
-type ActionTileProps = {
-    onPress: () => void;
-    icon: 'sunny' | 'moon';
+type PeriodState = 'not_started' | 'in_progress' | 'done';
+type Period = 'morning' | 'evening';
+
+const PERIOD_META: Record<Period, {
     title: string;
-    subtitle: string;
-    colors: [string, string];
-    done: boolean;
+    badge: keyof typeof Ionicons.glyphMap;   // small icon shown in the badge
+    glyph: keyof typeof Ionicons.glyphMap;   // big translucent watermark
+    bg: string;                              // solid fill behind primary tile
+}> = {
+    morning: {
+        title: 'Morning',
+        badge: 'partly-sunny-outline',
+        glyph: 'partly-sunny',
+        bg: '#0EA5E9',    // sky-500 (light blue)
+    },
+    evening: {
+        title: 'Evening',
+        badge: 'moon-outline',
+        glyph: 'moon',
+        bg: '#5B21B6',    // violet-800 (dark violet)
+    },
 };
 
-const ActionTile: React.FC<ActionTileProps> = ({ onPress, icon, title, subtitle, colors, done }) => {
-    // SQLite returns 0/1 for booleans — coerce so JSX conditionals never
-    // try to render a number as a child (which trips the
-    // "Text strings must be rendered within a <Text>" error on Android).
-    const isDone = !!done;
+function primaryCta(state: PeriodState) {
+    return state === 'done' ? 'Completed today' : state === 'in_progress' ? 'Continue' : 'Start now';
+}
+
+const PrimaryAdkarTile: React.FC<{
+    period: Period;
+    state: PeriodState;
+    onPress: () => void;
+}> = ({ period, state, onPress }) => {
+    const meta = PERIOD_META[period];
+    const cta = primaryCta(state);
+    const isDone = state === 'done';
     return (
         <TouchableOpacity
             onPress={onPress}
-            activeOpacity={0.85}
+            activeOpacity={0.88}
             style={{
-                flex: 1,
+                flex: 1.7,
+                height: 184,
                 borderRadius: 22,
                 overflow: 'hidden',
-                height: 168,
+                backgroundColor: meta.bg,
             }}
         >
-            <LinearGradient
-                colors={colors}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{ flex: 1, padding: 18, justifyContent: 'space-between' }}
-            >
-                <View style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(255,255,255,0.22)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                }}>
-                    <Ionicons name={icon} size={22} color="#ffffff" />
-                </View>
-                <View>
-                    <ThemedText style={{ color: 'rgba(255,255,255,0.85)', fontSize: 13, fontWeight: '500' }}>
-                        {subtitle}
+            {/* Giant translucent glyph as a background watermark, anchored to
+                the bottom-right and cropped by the tile's overflow:hidden. */}
+            <View pointerEvents="none" style={{
+                position: 'absolute',
+                right: -28,
+                bottom: -36,
+                opacity: 0.16,
+            }}>
+                <Ionicons name={meta.glyph} size={200} color="#ffffff" />
+            </View>
+
+            <View style={{ flex: 1, padding: 18, justifyContent: 'space-between' }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <View style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        backgroundColor: 'rgba(255,255,255,0.22)',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                        <Ionicons name={meta.badge} size={22} color="#ffffff" />
+                    </View>
+                    <ThemedText style={{
+                        color: 'rgba(255,255,255,0.85)',
+                        fontSize: 11,
+                        fontWeight: '700',
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                    }}>
+                        Now
                     </ThemedText>
-                    <ThemedText style={{ color: '#ffffff', fontSize: 22, fontWeight: '700', marginBottom: 12, letterSpacing: -0.3 }}>
-                        {title}
+                </View>
+
+                <View>
+                    <ThemedText style={{
+                        color: '#ffffff',
+                        fontSize: 26,
+                        fontWeight: '700',
+                        letterSpacing: -0.5,
+                        marginBottom: 10,
+                    }}>
+                        {meta.title} Adkar
                     </ThemedText>
                     <View style={{
                         flexDirection: 'row',
                         alignItems: 'center',
                         alignSelf: 'flex-start',
-                        backgroundColor: isDone ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.18)',
-                        paddingHorizontal: 10,
-                        paddingVertical: 5,
+                        backgroundColor: isDone ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.22)',
+                        paddingHorizontal: 12,
+                        paddingVertical: 7,
                         borderRadius: 999,
                     }}>
                         {isDone ? (
-                            <Ionicons name="checkmark-circle" size={14} color={colors[1]} style={{ marginRight: 4 }} />
-                        ) : null}
+                            <Ionicons name="checkmark-circle" size={14} color={meta.bg} style={{ marginRight: 5 }} />
+                        ) : (
+                            <Ionicons name="arrow-forward" size={13} color="#ffffff" style={{ marginRight: 5 }} />
+                        )}
                         <ThemedText style={{
-                            color: isDone ? colors[1] : '#ffffff',
-                            fontSize: 11,
+                            color: isDone ? meta.bg : '#ffffff',
+                            fontSize: 12,
                             fontWeight: '700',
                             letterSpacing: 0.3,
                         }}>
-                            {isDone ? 'COMPLETED' : 'START'}
+                            {cta}
                         </ThemedText>
                     </View>
                 </View>
-            </LinearGradient>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
+const SecondaryAdkarTile: React.FC<{
+    period: Period;
+    state: PeriodState;
+    startsAt: string;
+    onPress: () => void;
+    subtle: string;
+    text: string;
+    muted: string;
+    accent: string;
+}> = ({ period, state, startsAt, onPress, subtle, text, muted, accent }) => {
+    const meta = PERIOD_META[period];
+    const caption =
+        state === 'done' ? 'Completed' :
+        state === 'in_progress' ? 'In progress' :
+        `Up next · ${startsAt}`;
+    return (
+        <TouchableOpacity
+            onPress={onPress}
+            activeOpacity={0.7}
+            style={{
+                flex: 1,
+                height: 184,
+                borderRadius: 22,
+                backgroundColor: subtle,
+                padding: 16,
+                justifyContent: 'space-between',
+            }}
+        >
+            <View style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: accent + '1F',
+                alignItems: 'center',
+                justifyContent: 'center',
+            }}>
+                <Ionicons name={meta.badge} size={18} color={accent} />
+            </View>
+
+            <View>
+                <ThemedText style={{
+                    fontSize: 11,
+                    fontWeight: '700',
+                    letterSpacing: 1.2,
+                    textTransform: 'uppercase',
+                    color: muted,
+                    marginBottom: 4,
+                }}>
+                    {meta.title}
+                </ThemedText>
+                <ThemedText style={{
+                    fontSize: 16,
+                    fontWeight: '600',
+                    color: text,
+                    marginBottom: 6,
+                }}>
+                    Adkar
+                </ThemedText>
+                <ThemedText style={{
+                    fontSize: 12,
+                    color: muted,
+                    fontWeight: '500',
+                }}>
+                    {caption}
+                </ThemedText>
+            </View>
         </TouchableOpacity>
     );
 };

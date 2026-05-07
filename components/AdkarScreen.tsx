@@ -1,20 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useContext } from "react";
 import {
-    Dimensions,
-    ScrollView,
     StyleSheet,
     TouchableOpacity,
+    useWindowDimensions,
     View
 } from "react-native";
-import ProgressBar from "react-native-progress/Bar";
 import Carousel from "react-native-reanimated-carousel";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import AdkarCard from "@/components/AdkarCard";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { Colors } from "@/constants/Colors";
 import { useSync } from "@/context/SyncContext";
 import ThemeContext from "@/context/ThemeContext";
 import { Adkar, useAdkarLogic } from "@/hooks/useAdkarLogic";
@@ -26,10 +23,9 @@ interface AdkarScreenProps {
 }
 
 const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpdated }) => {
-    const width = Dimensions.get("window").width;
+    const { width, height: screenHeight } = useWindowDimensions();
     const { theme: colorScheme } = useContext(ThemeContext);
-    const colors = Colors[colorScheme as keyof typeof Colors];
-    
+
     // Use sync context if available, otherwise use the prop
     const sync = useSync();
     const syncFunction = sync?.triggerSync ?? onStreakUpdated;
@@ -41,7 +37,6 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
         height,
         refreshTrigger,
         carouselRef,
-        scrollViewRef,
         handleNext,
         handlePrev,
         handleAdkarCompleted,
@@ -67,120 +62,118 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
         );
     };
 
-    const buttonColor = type === 'morning' ? '#2196F3' : '#1976D2';
+    const isDark = colorScheme === 'dark';
+    const surface = isDark ? '#0e0e12' : '#ffffff';
+    const subtle = isDark ? '#1a1a20' : '#f4f4f7';
+    const hairline = isDark ? '#26262d' : '#ececef';
+    const muted = isDark ? '#9aa0a6' : '#6b7280';
+    // Period accent: light blue for morning, dark violet for evening — matches
+    // the Home bento color story.
+    const accent = type === 'morning' ? '#0EA5E9' : '#5B21B6';
 
     const styles = StyleSheet.create({
-        titleContainer: {
-            padding: 16,
-            flex: 1,
-        },
         arrow: {
-            position: "absolute",
-            top: "50%",
-            width: 48,
-            height: 48,
-            backgroundColor: buttonColor,
-            justifyContent: "center",
-            alignItems: "center",
+            position: 'absolute',
+            top: '50%',
+            marginTop: -22,
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: subtle,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: hairline,
+            justifyContent: 'center',
+            alignItems: 'center',
             zIndex: 2,
-            borderRadius: 24,
-            shadowColor: buttonColor,
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-            elevation: 4,
         },
-        leftArrow: {
-            left: 16,
-        },
-        rightArrow: {
-            right: 16,
-        },
+        leftArrow: { left: 12 },
+        rightArrow: { right: 12 },
         repeatCounter: {
-            position: "absolute",
+            position: 'absolute',
             bottom: 30,
-            alignSelf: "center",
+            alignSelf: 'center',
             left: 0,
             right: 0,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: 'transparent',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        progressTrack: {
+            height: 3,
+            backgroundColor: hairline,
+            width: '100%',
+        },
+        progressFill: {
+            height: 3,
+            backgroundColor: accent,
         },
     });
 
+    const progress = adkars.length > 0 ? Math.min(1, (index + 1) / adkars.length) : 0;
+
     return (
         <SafeAreaProvider>
-            <ThemedView style={{ flex: 1 }}>
-                <ProgressBar
-                    progress={index / adkars.length || 0}
-                    width={Dimensions.get("window").width}
-                    color={colors.primary}
-                    borderColor={colors.border}
-                    height={3}
-                />
+            <ThemedView style={{ flex: 1, backgroundColor: surface }}>
+                {/* Slim progress bar at the top */}
+                <View style={styles.progressTrack}>
+                    <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+                </View>
+
                 <TouchableOpacity
                     style={[styles.arrow, styles.leftArrow]}
                     onPress={handlePrev}
+                    activeOpacity={0.7}
                 >
-                    <Ionicons name="chevron-back" size={24} color="#ffffff" />
+                    <Ionicons name="chevron-back" size={20} color={muted} />
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.arrow, styles.rightArrow]}
                     onPress={handleNext}
+                    activeOpacity={0.7}
                 >
-                    <Ionicons name="chevron-forward" size={24} color="#ffffff" />
+                    <Ionicons name="chevron-forward" size={20} color={muted} />
                 </TouchableOpacity>
-                <ScrollView
-                    contentContainerStyle={{ flexGrow: 1 }}
-                    ref={scrollViewRef}
-                    keyboardShouldPersistTaps="handled"
-                    scrollEnabled={true}
-                    showsVerticalScrollIndicator={false}
-                >
-                    <ThemedView style={styles.titleContainer}>
-                        <ThemedView
-                            style={{
-                                flex: 1,
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                        >
-                            <Carousel
-                                ref={carouselRef}
-                                width={width}
-                                height={height || width * 3}
-                                loop={false}
-                                data={adkars}
-                                renderItem={renderAdkarCard}
-                                scrollAnimationDuration={300}
-                                onSnapToItem={handleSnapToItem}
-                                style={{ alignSelf: "center" }}
-                            />
-                        </ThemedView>
-                    </ThemedView>
-                </ScrollView>
+
+                {/* Carousel sits at full screen height. Each AdkarCard owns its
+                    own vertical ScrollView, so long content scrolls within the
+                    card while the carousel itself only handles horizontal swipes. */}
+                <View style={{ flex: 1 }}>
+                    <Carousel
+                        ref={carouselRef}
+                        width={width}
+                        height={screenHeight - 3}
+                        loop={false}
+                        data={adkars}
+                        renderItem={renderAdkarCard}
+                        scrollAnimationDuration={300}
+                        onSnapToItem={handleSnapToItem}
+                    />
+                </View>
+
+                {/* Floating counter button */}
                 <View style={styles.repeatCounter}>
                     <TouchableOpacity
                         onPress={handleCounterPress}
+                        activeOpacity={0.85}
                         style={{
-                            backgroundColor: buttonColor,
-                            borderRadius: 25,
-                            width: 80,
-                            height: 80,
+                            backgroundColor: accent,
+                            borderRadius: 36,
+                            width: 72,
+                            height: 72,
                             alignItems: 'center',
                             justifyContent: 'center',
-                            shadowColor: buttonColor,
-                            shadowOffset: { width: 0, height: 4 },
+                            shadowColor: accent,
+                            shadowOffset: { width: 0, height: 8 },
                             shadowOpacity: 0.3,
-                            shadowRadius: 8,
-                            elevation: 4
+                            shadowRadius: 16,
+                            elevation: 8,
                         }}
                     >
                         <ThemedText style={{
                             color: '#ffffff',
-                            fontSize: 24,
-                            fontWeight: 'bold',
-                            textAlign: 'center'
+                            fontSize: 26,
+                            fontWeight: '700',
+                            textAlign: 'center',
+                            letterSpacing: -0.5,
                         }}>
                             {counter?.toString()}
                         </ThemedText>

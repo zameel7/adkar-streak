@@ -4,7 +4,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
 import React, { useContext, useEffect, useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+// Use the gesture-handler ScrollView so vertical scrolling cooperates with
+// the carousel's horizontal pan gesture on Android. RN's stock ScrollView
+// loses gesture arbitration to the parent and won't scroll vertically.
+import { ScrollView } from "react-native-gesture-handler";
 import { ThemedText } from "./ThemedText";
 
 type Adkar = {
@@ -38,7 +42,9 @@ const AdkarCard = ({
     const db = useSQLiteContext();
 
     const [read, setRead] = useState(false);
-    const [translation, setTranslation] = useState(false);
+    // Default to true so a fresh install (no AsyncStorage value yet) shows
+    // translations, matching the Settings screen's default-on toggle.
+    const [translation, setTranslation] = useState(true);
 
     const checkRead = async () => {
         try {
@@ -64,10 +70,10 @@ const AdkarCard = ({
         const showTranslation = async () => {
             try {
                 const translationData = await AsyncStorage.getItem("translations");
-                if (translationData) {
-                    const showTranslations = JSON.parse(translationData);
-                    setTranslation(showTranslations);
+                if (translationData !== null) {
+                    setTranslation(JSON.parse(translationData));
                 }
+                // else: keep default (true)
             } catch (error) {
                 console.error('Error checking translation setting', error);
             }
@@ -148,147 +154,127 @@ const AdkarCard = ({
         }
     };
 
+    const isDark = theme === 'dark';
+    const text = isDark ? '#ffffff' : '#111111';
+    const muted = isDark ? '#9aa0a6' : '#6b7280';
+    const subtle = isDark ? '#1a1a20' : '#f4f4f7';
+    const hairline = isDark ? '#26262d' : '#ececef';
+    const accent = '#2196F3';
+
     return (
-        <View style={{
-            margin: 16,
-            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.95)',
-            borderRadius: 20,
-            padding: 24,
-            borderWidth: 1,
-            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : '#e0e0e0'
-        }}>
-            {/* Header */}
-            <View style={{
-                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(33, 150, 243, 0.1)',
-                borderRadius: 16,
-                padding: 20,
-                marginBottom: 20,
-                borderWidth: 1,
-                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(33, 150, 243, 0.3)'
-            }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                    <ThemedText style={{
-                        fontSize: 20,
-                        fontWeight: 'bold',
-                        flex: 1,
-                        paddingRight: 16,
-                        color: theme === 'dark' ? '#ffffff' : '#333'
+        <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{
+                paddingHorizontal: 24,
+                paddingTop: 16,
+                // Leave room for the floating counter button (72px + 30 bottom + breathing).
+                paddingBottom: 140,
+            }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+        >
+            {/* Header: counter eyebrow + check toggle */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <ThemedText style={{
+                    fontSize: 12,
+                    fontWeight: '700',
+                    letterSpacing: 1.2,
+                    textTransform: 'uppercase',
+                    color: muted,
+                }}>
+                    {index + 1} / {total}
+                </ThemedText>
+                <TouchableOpacity onPress={handleMarkRead} hitSlop={10}>
+                    <View style={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: 16,
+                        backgroundColor: read ? accent : 'transparent',
+                        borderWidth: read ? 0 : 1.5,
+                        borderColor: hairline,
+                        alignItems: 'center',
+                        justifyContent: 'center',
                     }}>
-                        {item.title}
-                    </ThemedText>
-
-                    {/* Progress Counter and Check Icon in same row */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                        <View style={{
-                            backgroundColor: '#2196F3',
-                            paddingHorizontal: 12,
-                            paddingVertical: 6,
-                            borderRadius: 20
-                        }}>
-                            <ThemedText style={{
-                                color: '#ffffff',
-                                fontSize: 12,
-                                fontWeight: '600'
-                            }}>
-                                {index + 1} / 24
-                            </ThemedText>
-                        </View>
-
-                        {/* Mini Check Button */}
-                        <TouchableOpacity onPress={handleMarkRead}>
-                            <View style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: 14,
-                                backgroundColor: read ? '#2196F3' : 'transparent',
-                                borderWidth: 1.5,
-                                borderColor: read ? '#2196F3' : (theme === 'dark' ? 'rgba(255, 255, 255, 0.4)' : 'rgba(33, 150, 243, 0.6)'),
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                {read && (
-                                    <Ionicons
-                                        name="checkmark"
-                                        size={16}
-                                        color="#ffffff"
-                                    />
-                                )}
-                            </View>
-                        </TouchableOpacity>
+                        {read ? (
+                            <Ionicons name="checkmark" size={18} color="#ffffff" />
+                        ) : null}
                     </View>
-                </View>
+                </TouchableOpacity>
             </View>
 
-            {/* Content Area */}
-            <View style={{ maxHeight: height }}>
-                {item.adkar.map((adkar, adkarIndex) => (
+            <ThemedText style={{
+                fontSize: 22,
+                fontWeight: '700',
+                color: text,
+                letterSpacing: -0.3,
+                marginBottom: 18,
+            }}>
+                {item.title}
+            </ThemedText>
+
+            {/* Adkar entries */}
+            {item.adkar.map((adkar, adkarIndex) => {
+                const isLast = adkarIndex === item.adkar.length - 1;
+                return (
                     <View
                         key={adkarIndex}
                         style={{
-                            backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(255, 255, 255, 0.8)',
-                            borderRadius: 16,
-                            padding: 20,
-                            marginBottom: 16,
-                            borderWidth: 1,
-                            borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : '#f0f0f0'
+                            paddingBottom: 18,
+                            marginBottom: isLast ? 0 : 18,
+                            borderBottomWidth: isLast ? 0 : StyleSheet.hairlineWidth,
+                            borderBottomColor: hairline,
                         }}
                     >
-                        {/* Arabic Text */}
+                        {/* Arabic */}
                         <ThemedText style={{
-                            fontSize: 22,
-                            lineHeight: 35,
+                            fontSize: 24,
+                            lineHeight: 40,
                             textAlign: 'center',
-                            marginBottom: 16,
                             fontWeight: '500',
                             letterSpacing: 1,
-                            color: theme === 'dark' ? '#ffffff' : '#333'
+                            color: text,
+                            marginBottom: 14,
                         }}>
                             {adkar}
                         </ThemedText>
 
-                        {/* Repeat Instructions */}
+                        {/* Repeat tag */}
                         <View style={{
-                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            borderRadius: 8,
-                            padding: 8,
-                            marginBottom: 12,
-                            borderWidth: 1,
-                            borderColor: 'rgba(33, 150, 243, 0.3)'
+                            alignSelf: 'center',
+                            backgroundColor: subtle,
+                            paddingHorizontal: 12,
+                            paddingVertical: 5,
+                            borderRadius: 999,
+                            marginBottom: translation && item.translation[adkarIndex] ? 14 : 0,
                         }}>
                             <ThemedText style={{
                                 textAlign: 'center',
                                 fontWeight: '600',
-                                fontSize: 12,
-                                color: '#2196F3'
+                                fontSize: 11,
+                                color: muted,
+                                letterSpacing: 0.5,
+                                textTransform: 'uppercase',
                             }}>
-                                Repeat: {item.repeat}
+                                Repeat · {item.repeat}
                             </ThemedText>
                         </View>
 
                         {/* Translation */}
-                        {translation && item.translation[adkarIndex] && (
-                            <View style={{
-                                backgroundColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.03)',
-                                borderRadius: 12,
-                                padding: 16,
-                                borderWidth: 1,
-                                borderColor: theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
+                        {translation && item.translation[adkarIndex] ? (
+                            <ThemedText style={{
+                                fontSize: 15,
+                                lineHeight: 23,
+                                textAlign: 'center',
+                                fontStyle: 'italic',
+                                color: muted,
                             }}>
-                                <ThemedText style={{
-                                    fontSize: 16,
-                                    lineHeight: 24,
-                                    textAlign: 'center',
-                                    fontStyle: 'italic',
-                                    color: theme === 'dark' ? 'rgba(255, 255, 255, 0.8)' : '#666'
-                                }}>
-                                    {item.translation[adkarIndex]}
-                                </ThemedText>
-                            </View>
-                        )}
+                                {item.translation[adkarIndex]}
+                            </ThemedText>
+                        ) : null}
                     </View>
-                ))}
-            </View>
-        </View>
+                );
+            })}
+        </ScrollView>
     );
 };
 

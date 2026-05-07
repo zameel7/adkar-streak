@@ -5,7 +5,7 @@ import { localDateString } from "@/lib/date";
 import { registerForPushNotificationsAsync, schedulePushNotification } from "@/lib/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
-import { router, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
 import React, { Component, Suspense, useEffect } from "react";
@@ -13,10 +13,6 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "rea
 import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
-
-export const unstable_settings = {
-    initialRouteName: '(tabs)',
-};
 
 // Root Error Boundary: catches uncaught JS errors and shows a recoverable screen instead of crashing
 type ErrorBoundaryState = { hasError: boolean; error: Error | null };
@@ -146,26 +142,11 @@ const AuthenticatedApp = () => {
     // Always call all hooks first
     useNotificationObserver();
 
-    // Read onboarding state on mount. If first-run, redirect to /onboarding
-    // before hiding the splash so the user never sees (tabs) flash.
+    // Hide the splash on mount. Routing decisions (onboarded vs first-run) are
+    // handled by app/index.tsx via Redirect, so we don't duplicate that logic
+    // here.
     useEffect(() => {
-        let cancelled = false;
-        (async () => {
-            try {
-                const done = await AsyncStorage.getItem('onboardingComplete');
-                if (cancelled) return;
-                if (!done) {
-                    router.replace('/onboarding' as any);
-                }
-            } catch (e) {
-                console.warn('Failed to read onboarding state:', e);
-            }
-            if (cancelled) return;
-            SplashScreen.hideAsync();
-        })();
-        return () => {
-            cancelled = true;
-        };
+        SplashScreen.hideAsync();
     }, []);
 
     useEffect(() => {
@@ -211,32 +192,62 @@ const AuthenticatedApp = () => {
     async function insertMissingDays(db: SQLiteDatabase) {
         const DATABASE_VERSION = 1;
 
+        // Run a single execAsync with retries. On Android + New Architecture,
+        // the very first call into the native DB can sporadically reject with
+        // a NullPointerException if the native handle hasn't fully settled.
+        // Retrying with a short backoff is sufficient to recover.
+        const execWithRetry = async (sql: string, label: string) => {
+            const maxAttempts = 5;
+            let lastErr: unknown;
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                try {
+                    await db.execAsync(sql);
+                    return;
+                } catch (err) {
+                    lastErr = err;
+                    const msg = String((err as Error)?.message ?? err);
+                    const isTransient =
+                        msg.includes("NullPointerException") ||
+                        msg.includes("has been rejected") ||
+                        msg.includes("database connection");
+                    if (!isTransient || attempt === maxAttempts) break;
+                    await new Promise((r) => setTimeout(r, 150 * attempt));
+                }
+            }
+            throw lastErr;
+        };
+
         try {
-            // Run all pragmas in a single batch — under New Architecture on
-            // Android, splitting them across multiple execAsync calls before
-            // the connection has fully settled can race and surface as
-            // "database connection error".
-            await db.execAsync(
+            await execWithRetry(
                 `PRAGMA journal_mode = WAL;
                  PRAGMA busy_timeout = 10000;
                  PRAGMA synchronous = NORMAL;
-                 PRAGMA temp_store = MEMORY;`
+                 PRAGMA temp_store = MEMORY;`,
+                "pragmas"
+            );
+
+            // Always ensure the schema exists. Using IF NOT EXISTS makes this
+            // idempotent, so we don't depend on user_version being correct
+            // (in particular when an earlier init failed and left version 0
+            // alongside a partially-created file).
+            await execWithRetry(
+                `CREATE TABLE IF NOT EXISTS adkarStreaks (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    morning BOOLEAN NOT NULL DEFAULT FALSE,
+                    evening BOOLEAN NOT NULL DEFAULT FALSE,
+                    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
+                );`,
+                "schema"
             );
 
             const userVersion = await db.getFirstAsync<{ user_version: number }>(
                 "PRAGMA user_version"
             );
-
-            if (userVersion?.user_version === 0) {
-                await db.execAsync(`
-                    CREATE TABLE IF NOT EXISTS adkarStreaks (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        morning BOOLEAN NOT NULL DEFAULT FALSE,
-                        evening BOOLEAN NOT NULL DEFAULT FALSE,
-                        date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
-                    );
-                    PRAGMA user_version = ${DATABASE_VERSION};
-                `);
+            if ((userVersion?.user_version ?? 0) < DATABASE_VERSION) {
+                await execWithRetry(
+                    `PRAGMA user_version = ${DATABASE_VERSION};`,
+                    "user_version"
+                );
             }
         } catch (error) {
             console.error("Error initializing database:", error);
@@ -264,6 +275,7 @@ const AuthenticatedApp = () => {
                             animation: 'fade'
                         }}
                     >
+                        <Stack.Screen name="index" />
                         <Stack.Screen name="onboarding" />
                         <Stack.Screen name="auth" />
                         <Stack.Screen name="(tabs)" />

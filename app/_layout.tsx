@@ -1,14 +1,15 @@
 import { ThemedView } from "@/components/ThemedView";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { localDateString } from "@/lib/date";
+import { registerForPushNotificationsAsync, schedulePushNotification } from "@/lib/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { router, Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import React, { Component, Suspense, useEffect, useState } from "react";
-import { ActivityIndicator, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { Component, Suspense, useEffect } from "react";
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "react-native-reanimated";
 
 SplashScreen.preventAutoHideAsync();
@@ -140,32 +141,30 @@ const RootLayout = () => {
 // Component that handles auth routing and renders the app
 const AuthenticatedApp = () => {
     const { initialized } = useAuth();
-    const today = new Date().toISOString().split("T")[0];
-    const [isMounted, setIsMounted] = useState(false);
+    const today = localDateString();
 
     // Always call all hooks first
     useNotificationObserver();
 
-    // Track when the component is mounted, then check onboarding state and
-    // route first-time users to the onboarding flow.
+    // Read onboarding state on mount. If first-run, redirect to /onboarding
+    // before hiding the splash so the user never sees (tabs) flash.
     useEffect(() => {
         let cancelled = false;
-        const timeout = setTimeout(async () => {
-            if (cancelled) return;
+        (async () => {
             try {
                 const done = await AsyncStorage.getItem('onboardingComplete');
+                if (cancelled) return;
                 if (!done) {
                     router.replace('/onboarding' as any);
                 }
             } catch (e) {
                 console.warn('Failed to read onboarding state:', e);
             }
-            setIsMounted(true);
+            if (cancelled) return;
             SplashScreen.hideAsync();
-        }, 500); // Give time for Stack to mount
+        })();
         return () => {
             cancelled = true;
-            clearTimeout(timeout);
         };
     }, []);
 
@@ -178,7 +177,7 @@ const AuthenticatedApp = () => {
                 (streakData && JSON.parse(streakData).date !== today) ||
                 !streakData
             ) {
-                AsyncStorage.setItem(
+                await AsyncStorage.setItem(
                     "streakData",
                     JSON.stringify({ date: today, morning: {}, evening: {} })
                 );
@@ -190,26 +189,14 @@ const AuthenticatedApp = () => {
                 const status = await registerForPushNotificationsAsync();
                 if (status !== "granted") return;
 
-                if (Platform.OS === "android") {
-                    Notifications.getNotificationChannelsAsync();
-                    Notifications.setNotificationHandler({
-                        handleNotification: async () => ({
-                            shouldShowBanner: true,
-                            shouldShowList: true,
-                            shouldPlaySound: false,
-                            shouldSetBadge: false,
-                        }),
-                    });
-                } else {
-                    Notifications.setNotificationHandler({
-                        handleNotification: async () => ({
-                            shouldShowBanner: true,
-                            shouldShowList: true,
-                            shouldPlaySound: false,
-                            shouldSetBadge: false,
-                        }),
-                    });
-                }
+                Notifications.setNotificationHandler({
+                    handleNotification: async () => ({
+                        shouldShowBanner: true,
+                        shouldShowList: true,
+                        shouldPlaySound: false,
+                        shouldSetBadge: false,
+                    }),
+                });
                 await schedulePushNotification();
             } catch (error) {
                 console.error("Notification setup error:", error);
@@ -304,104 +291,6 @@ const AuthenticatedApp = () => {
         </Suspense>
     );
 };
-
-// Define a type for the time object
-interface TimeObject {
-    hour: number;
-    minute: number;
-}
-
-// Helper function to parse ISO date string
-const parseTime = (timeString: string | null): TimeObject => {
-    if (timeString) {
-        const date = new Date(timeString);
-        const hour = date.getHours();
-        const minute = date.getMinutes();
-        return { hour, minute };
-    }
-    return { hour: 5, minute: 30 }; // Default values
-};
-
-// Function to schedule notifications
-async function schedulePushNotification(): Promise<void> {
-    try {
-        await Notifications.cancelAllScheduledNotificationsAsync();
-    } catch (error) {
-        console.error("Error cancelling scheduled notifications:", error);
-    }
-
-    // Retrieve stored notification times
-    const morningTime = await AsyncStorage.getItem("morningTime");
-    const eveningTime = await AsyncStorage.getItem("eveningTime");
-
-    // Helper function to schedule a notification
-    const scheduleNotification = async (
-        title: string,
-        body: string,
-        time: string | null,
-        defaultHour: number,
-        defaultMinute: number
-    ): Promise<void> => {
-        const { hour, minute } = parseTime(time);
-
-        await Notifications.scheduleNotificationAsync({
-            content: {
-                title,
-                body,
-            },
-            trigger: {
-                type: Notifications.SchedulableTriggerInputTypes.DAILY,
-                hour,
-                minute,
-            } as any,
-        });
-    };
-
-    // Schedule morning notification
-    await scheduleNotification(
-        "Time for morning Adkar! 🌞",
-        "Jābir (raḍiy Allāhu ʿanhū) relates that after Allah’s Messenger ﷺ would perform Fajr, he used to remain seated in his place of prayer until the sun had fully risen (Muslim).",
-        morningTime,
-        5,
-        30
-    );
-
-    // Schedule evening notification
-    await scheduleNotification(
-        "Time for evening Adkar!",
-        "'Believers, remember Allah often and glorify Him morning and evening' (33:41-42).",
-        eveningTime,
-        16,
-        30
-    );
-}
-
-type PermissionStatus = "granted" | "denied" | "undetermined";
-
-async function registerForPushNotificationsAsync(): Promise<PermissionStatus> {
-    if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-            name: "default",
-            importance: Notifications.AndroidImportance.MAX,
-            vibrationPattern: [0, 250, 250, 250],
-            lightColor: "#FF231F7C",
-        });
-    }
-
-    if (Device.isDevice) {
-        const { status: existingStatus } =
-            await Notifications.getPermissionsAsync();
-        let finalStatus: PermissionStatus = existingStatus;
-        if (existingStatus !== "granted") {
-            const { status } = await Notifications.requestPermissionsAsync();
-            finalStatus = status;
-        }
-        return finalStatus;
-    }
-
-    alert("Must use physical device for Push Notifications");
-    return "denied";
-}
 
 export default function AppWithErrorBoundary() {
     return (

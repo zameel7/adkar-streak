@@ -1,5 +1,6 @@
 import { ThemedText } from "@/components/ThemedText";
 import ThemeContext from "@/context/ThemeContext";
+import { schedulePushNotification } from "@/lib/notifications";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -30,10 +31,12 @@ const Settings = () => {
   const handleSubmitTime = async () => {
     await storeData("morningTime", morningTime.toISOString());
     await storeData("eveningTime", eveningTime.toISOString());
-    Alert.alert(
-      "Success",
-      "Notification time has been saved! Pull down to refresh."
-    );
+    try {
+      await schedulePushNotification();
+    } catch (e) {
+      console.error("Failed to reschedule notifications:", e);
+    }
+    Alert.alert("Success", "Notification times have been saved.");
     router.push("/home");
   };
 

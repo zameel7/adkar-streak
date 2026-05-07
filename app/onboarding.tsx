@@ -144,7 +144,7 @@ export default function OnboardingScreen() {
     } catch (e) {
       console.warn('Failed to save onboarding state:', e);
     }
-    router.replace('/(tabs)/home' as any);
+    router.replace('/home');
   };
 
   const handleNext = () => {

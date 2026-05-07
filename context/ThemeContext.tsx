@@ -7,33 +7,38 @@ const ThemeContext = createContext({theme: 'light', toggleTheme: (newTheme: stri
 export const ThemeProvider = ({children}: {children: React.ReactNode}) => {
   const colorScheme = useColorScheme();
   const [theme, setTheme] = useState('light');
+  const [hydrated, setHydrated] = useState(false);
+  const [hasSavedTheme, setHasSavedTheme] = useState(false);
 
   useEffect(() => {
-    // Load saved theme from storage
     const getTheme = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem('theme');
         if (savedTheme) {
           setTheme(savedTheme);
+          setHasSavedTheme(true);
         }
       } catch (error) {
         console.log('Error loading theme:', error);
+      } finally {
+        setHydrated(true);
       }
     };
     getTheme();
   }, []);
 
   useEffect(() => {
-    // set theme to system selected theme
-    if (colorScheme) {
+    if (hydrated && !hasSavedTheme && colorScheme) {
       setTheme(colorScheme);
     }
-  }, [colorScheme]);
+  }, [hydrated, hasSavedTheme, colorScheme]);
 
   const toggleTheme = (newTheme: string) => {
     setTheme(newTheme);
-    // Save selected theme to storage
-    AsyncStorage.setItem('theme', newTheme);
+    setHasSavedTheme(true);
+    AsyncStorage.setItem('theme', newTheme).catch((e) =>
+      console.log('Error saving theme:', e)
+    );
   };
 
   return (

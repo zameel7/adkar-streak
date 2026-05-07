@@ -57,6 +57,7 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
                 item={item}
                 index={itemIndex}
                 type={type}
+                total={adkars.length}
                 height={height}
                 setIndex={setIndex}
                 onAdkarCompleted={handleAdkarCompleted}

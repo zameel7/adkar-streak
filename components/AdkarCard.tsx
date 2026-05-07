@@ -1,4 +1,5 @@
 import ThemeContext from "@/context/ThemeContext";
+import { localDateString } from "@/lib/date";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
@@ -18,6 +19,7 @@ const AdkarCard = ({
     item,
     index,
     type,
+    total,
     height,
     setIndex,
     onAdkarCompleted,
@@ -26,6 +28,7 @@ const AdkarCard = ({
     item: Adkar;
     index: number;
     type: string;
+    total: number;
     height: number;
     setIndex: (index: number) => void;
     onAdkarCompleted?: () => void;
@@ -91,24 +94,19 @@ const AdkarCard = ({
                 const data = JSON.parse(streakData);
 
                 let streakUpdated = false;
+                const today = localDateString();
+                const done = Object.values(data[type] ?? {}).filter(Boolean).length;
+                const completeFlag = done >= total ? 1 : 0;
+                const column = type === "morning" ? "morning" : "evening";
 
-                // Check if morning adkar is completed (all 24 items)
-                if (Object.keys(data.morning).length === 24) {
-                    await db.execAsync(`
-                        UPDATE adkarStreaks SET morning = true WHERE date = CURRENT_DATE
-                    `);
+                await db.runAsync(
+                    `UPDATE adkarStreaks SET ${column} = ? WHERE date = ?`,
+                    [completeFlag, today]
+                );
+                if (completeFlag === 1) {
                     streakUpdated = true;
                 }
 
-                // Check if evening adkar is completed (all 24 items)
-                if (Object.keys(data.evening).length === 24) {
-                    await db.execAsync(`
-                        UPDATE adkarStreaks SET evening = true WHERE date = CURRENT_DATE
-                    `);
-                    streakUpdated = true;
-                }
-
-                // Notify parent component that streak was updated (for Supabase sync)
                 if (streakUpdated && onStreakUpdated) {
                     onStreakUpdated();
                 }

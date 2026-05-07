@@ -11,6 +11,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { useAuth } from "@/context/AuthContext";
 import { SyncProvider } from "@/context/SyncContext";
 import ThemeContext from "@/context/ThemeContext";
+import { localDateString } from "@/lib/date";
 import { supabase } from "@/lib/supabase";
 import { useSQLiteContext } from "expo-sqlite";
 
@@ -31,7 +32,7 @@ type Row = {
 };
 
 const Home = () => {
-    const [name, setName] = useState("Hero" as string);
+    const [name, setName] = useState<string>("Hero");
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
     const [streak, setStreak] = useState(0);
@@ -112,19 +113,18 @@ const Home = () => {
                     
                     // Only update if there's a difference
                     if (mergedMorning !== localData.morning || mergedEvening !== localData.evening) {
-                        await db.execAsync(`
-                            UPDATE adkarStreaks 
-                            SET morning = ${mergedMorning ? 1 : 0}, evening = ${mergedEvening ? 1 : 0}
-                            WHERE date = '${supabaseRecord.date}'
-                        `);
+                        await db.runAsync(
+                            'UPDATE adkarStreaks SET morning = ?, evening = ? WHERE date = ?',
+                            [mergedMorning ? 1 : 0, mergedEvening ? 1 : 0, supabaseRecord.date]
+                        );
                         console.log(`✅ Merged data for ${supabaseRecord.date}`);
                     }
                 } else {
                     // Record doesn't exist locally - insert it
-                    await db.execAsync(`
-                        INSERT INTO adkarStreaks (date, morning, evening)
-                        VALUES ('${supabaseRecord.date}', ${supabaseRecord.morning ? 1 : 0}, ${supabaseRecord.evening ? 1 : 0})
-                    `);
+                    await db.runAsync(
+                        'INSERT INTO adkarStreaks (date, morning, evening) VALUES (?, ?, ?)',
+                        [supabaseRecord.date, supabaseRecord.morning ? 1 : 0, supabaseRecord.evening ? 1 : 0]
+                    );
                     console.log(`✅ Downloaded new record for ${supabaseRecord.date}`);
                 }
             }
@@ -230,6 +230,31 @@ const Home = () => {
         }
     };
 
+    // Resolve display name: explicit Profile entry → Supabase metadata → email prefix → default
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const storedName = await AsyncStorage.getItem("name");
+                if (cancelled) return;
+                if (storedName) {
+                    setName(storedName);
+                    return;
+                }
+                const meta = user?.user_metadata as { full_name?: string; name?: string } | undefined;
+                const fromMeta = meta?.full_name || meta?.name;
+                if (fromMeta) {
+                    setName(String(fromMeta).split(" ")[0]);
+                } else if (user?.email) {
+                    setName(user.email.split("@")[0]);
+                }
+            } catch (e) {
+                console.warn("Failed to resolve display name:", e);
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [user]);
+
     // Wait for database to be fully initialized
     useEffect(() => {
         let retryCount = 0;
@@ -308,10 +333,11 @@ const Home = () => {
             // Small delay to ensure connection stability
             await new Promise(resolve => setTimeout(resolve, 50));
             
-            // First, ensure today's entry exists
-            await db.execAsync(`
-                INSERT OR IGNORE INTO adkarStreaks (date) VALUES (date('now'))
-            `);
+            // First, ensure today's entry exists (local-time date)
+            await db.runAsync(
+                'INSERT OR IGNORE INTO adkarStreaks (date) VALUES (?)',
+                [localDateString()]
+            );
 
             // Fetch all data in a single query
             const allRecords = await db.getAllAsync<Row>(
@@ -326,8 +352,8 @@ const Home = () => {
                 return false;
             }
 
-            const today = new Date().toISOString().slice(0, 10);
-            
+            const today = localDateString();
+
             // Process today's data
             const todayRecord = allRecords.find(r => r.date === today);
             if (todayRecord) {
@@ -335,29 +361,34 @@ const Home = () => {
                 setEveningStreak(todayRecord.evening);
             }
 
-            // Calculate streak
+            // Calculate streak by walking local calendar dates backward from today.
+            // Break at the first missing or incomplete day; today is allowed to be partial.
+            const recordsByDate = new Map(allRecords.map(r => [r.date, r]));
             let currentStreak = 0;
-            const sortedRecords = [...allRecords].reverse(); // Sort ascending by date
-            
-            for (const record of sortedRecords) {
-                if (record.morning && record.evening) {
+            for (let i = 0; i < 365; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = localDateString(d);
+                const rec = recordsByDate.get(dateStr);
+                const complete = rec && rec.morning && rec.evening;
+                if (complete) {
                     currentStreak++;
+                } else if (dateStr === today) {
+                    continue;
                 } else {
-                    if (record.date !== today) {
-                        currentStreak = 0;
-                    }
+                    break;
                 }
             }
             setStreak(currentStreak);
 
-            // Build last 7 days data
+            // Build last 7 days data (all in local time)
             const last7Days = [];
             const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            
+
             for (let i = 6; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateString = date.toISOString().slice(0, 10);
+                const dateString = localDateString(date);
                 const dayName = dayNames[date.getDay()];
 
                 const record = allRecords.find(r => r.date === dateString);
@@ -413,11 +444,6 @@ const Home = () => {
 
             isLoadingRef.current = true;
             try {
-                const storedName = await AsyncStorage.getItem("name");
-                if (storedName) {
-                    setName(storedName);
-                }
-
                 // Load all data in a single operation
                 await loadAllData();
             } catch (error) {
@@ -486,35 +512,34 @@ const Home = () => {
 
     function getTimeOfDayInfo() {
         const hours = new Date().getHours();
-        const minutes = new Date().getMinutes();
 
         if (hours >= 5 && hours < 12) {
             return {
                 period: "Morning",
                 timeLeft: "Ends 12:00",
-                imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop",
-                icon: "sunny"
+                image: require('@/assets/images/time-morning.jpg'),
+                icon: "sunny",
             };
         } else if (hours >= 12 && hours < 18) {
             return {
                 period: "Afternoon",
                 timeLeft: "Ends 18:00",
-                imageUrl: "https://images.unsplash.com/photo-1504567961542-e45effe4e2a5?w=800&h=400&fit=crop",
-                icon: "sunny"
+                image: require('@/assets/images/time-morning.jpg'),
+                icon: "sunny",
             };
         } else if (hours >= 18 && hours < 22) {
             return {
                 period: "Evening",
                 timeLeft: "Ends 22:00",
-                imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop&sat=-20&hue=240",
-                icon: "moon"
+                image: require('@/assets/images/time-night.jpg'),
+                icon: "moon",
             };
         } else {
             return {
                 period: "Night",
                 timeLeft: "Ends 05:00",
-                imageUrl: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&h=400&fit=crop",
-                icon: "moon"
+                image: require('@/assets/images/time-night.jpg'),
+                icon: "moon",
             };
         }
     }
@@ -619,7 +644,7 @@ const Home = () => {
 
                     {/* Beautiful Time of Day Header */}
                     <ImageBackground
-                        source={{ uri: timeInfo.imageUrl }}
+                        source={timeInfo.image}
                         style={{
                             borderRadius: 20,
                             marginBottom: 32,
@@ -627,7 +652,6 @@ const Home = () => {
                             overflow: 'hidden'
                         }}
                         imageStyle={{ borderRadius: 20 }}
-                        defaultSource={theme === 'dark' ? require('@/assets/images/icon.png') : require('@/assets/images/icon-dark.png')}
                     >
                         <LinearGradient
                             colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.4)']}

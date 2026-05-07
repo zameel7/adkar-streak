@@ -3,6 +3,7 @@ import './Layout.css'
 
 interface LayoutProps {
   children: React.ReactNode
+  pwa?: boolean
 }
 
 const NAV_ITEMS = [
@@ -12,8 +13,14 @@ const NAV_ITEMS = [
   { to: '/privacy', label: 'Privacy' },
 ]
 
-export default function Layout({ children }: LayoutProps) {
+const PWA_NAV_ITEMS = [
+  { to: '/morning', label: 'Morning' },
+  { to: '/evening', label: 'Evening' },
+]
+
+export default function Layout({ children, pwa = false }: LayoutProps) {
   const location = useLocation()
+  const navItems = pwa ? PWA_NAV_ITEMS : NAV_ITEMS
 
   return (
     <div className="layout">
@@ -24,7 +31,7 @@ export default function Layout({ children }: LayoutProps) {
             <span className="logo-text">Adkar Champ</span>
           </Link>
           <div className="nav-links">
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -37,24 +44,26 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </nav>
       <main className="main">{children}</main>
-      <footer className="footer">
-        <div className="footer-container">
-          <p>© {new Date().getFullYear()} Adkar Champ · Built for the Ummah</p>
-          <div className="footer-links">
-            <Link to="/privacy">Privacy</Link>
-            <span>·</span>
-            <Link to="/delete-account">Delete Account</Link>
-            <span>·</span>
-            <a
-              href="https://github.com/zameel7/adkar-streak"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
-            </a>
+      {!pwa && (
+        <footer className="footer">
+          <div className="footer-container">
+            <p>© {new Date().getFullYear()} Adkar Champ · Built for the Ummah</p>
+            <div className="footer-links">
+              <Link to="/privacy">Privacy</Link>
+              <span>·</span>
+              <Link to="/delete-account">Delete Account</Link>
+              <span>·</span>
+              <a
+                href="https://github.com/zameel7/adkar-streak"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                GitHub
+              </a>
+            </div>
           </div>
-        </div>
-      </footer>
+        </footer>
+      )}
     </div>
   )
 }

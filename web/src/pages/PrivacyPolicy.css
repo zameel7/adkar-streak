@@ -1,65 +1,97 @@
 .privacy-policy {
-  padding: 4rem 2rem;
+  padding: clamp(56px, 8vw, 96px) 24px;
   background: var(--bg);
 }
 
-.content-container {
-  max-width: 800px;
+.privacy-policy .content-container {
+  max-width: 720px;
   margin: 0 auto;
 }
 
 .privacy-policy h1 {
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 4.5vw, 2.8rem);
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
   color: var(--text);
 }
 
-.last-updated {
-  color: var(--text-light);
-  margin-bottom: 2rem;
+.privacy-policy .last-updated {
+  display: inline-block;
+  margin-bottom: 36px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
-.content {
-  line-height: 1.8;
+.privacy-policy .content {
+  line-height: 1.7;
+  color: var(--text);
+  font-size: 16px;
 }
 
-.content p {
-  margin-bottom: 1.5rem;
+.privacy-policy .content p {
+  margin-bottom: 1.25rem;
   color: var(--text);
 }
 
-.content section {
-  margin-top: 2.5rem;
+.privacy-policy .content section {
+  margin-top: 2.25rem;
+  padding-top: 2.25rem;
+  border-top: 1px solid var(--hairline);
 }
 
-.content h2 {
-  font-size: 1.75rem;
+.privacy-policy .content section:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+  margin-top: 1rem;
+}
+
+.privacy-policy .content h2 {
+  font-size: 1.35rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  letter-spacing: -0.015em;
+  margin-bottom: 0.75rem;
   color: var(--text);
 }
 
-.content a {
-  color: var(--primary);
-  text-decoration: underline;
+.privacy-policy .content ul {
+  margin: 0 0 1.25rem 1.2rem;
+  color: var(--text);
 }
 
-.content a:hover {
-  color: var(--primary-dark);
+.privacy-policy .content li {
+  margin-bottom: 0.45rem;
+  color: var(--text);
 }
 
-@media (max-width: 768px) {
-  .privacy-policy {
-    padding: 3rem 1.5rem;
-  }
-  
-  .privacy-policy h1 {
-    font-size: 2rem;
-  }
-  
-  .content h2 {
-    font-size: 1.5rem;
-  }
+.privacy-policy .content li::marker {
+  color: var(--text-faint);
 }
 
+.privacy-policy .content strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.privacy-policy .content a {
+  color: var(--accent-strong);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(2, 132, 199, 0.35);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.privacy-policy .content a:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .privacy-policy .content {
+    font-size: 15.5px;
+  }
+}

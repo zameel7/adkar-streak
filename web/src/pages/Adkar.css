@@ -1,0 +1,231 @@
+.adkar-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: clamp(48px, 8vw, 88px) 24px clamp(64px, 8vw, 96px);
+}
+
+/* ===== Header ===== */
+.adkar-header {
+  margin-bottom: 56px;
+  --period-accent: var(--accent);
+  --period-tint: var(--accent-tint);
+}
+
+.adkar-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 9px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--hairline);
+  background: var(--bg);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+.adkar-eyebrow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--period-accent);
+  box-shadow: 0 0 0 4px var(--period-tint);
+}
+
+.adkar-title {
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.adkar-subtitle {
+  color: var(--text-muted);
+  font-size: 15.5px;
+  line-height: 1.6;
+  max-width: 56ch;
+}
+
+.adkar-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid var(--hairline);
+}
+
+.adkar-count {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Toggle (checkbox styled as iOS switch) */
+.adkar-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.adkar-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.adkar-toggle-track {
+  width: 38px;
+  height: 22px;
+  border-radius: var(--radius-pill);
+  background: var(--hairline-strong);
+  position: relative;
+  transition: background 0.18s ease;
+  flex-shrink: 0;
+}
+
+.adkar-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+  transition: left 0.18s ease;
+}
+
+.adkar-toggle input:checked + .adkar-toggle-track {
+  background: var(--period-accent);
+}
+
+.adkar-toggle input:checked + .adkar-toggle-track .adkar-toggle-thumb {
+  left: 18px;
+}
+
+.adkar-toggle input:focus-visible + .adkar-toggle-track {
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.25);
+}
+
+.adkar-toggle-label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* ===== List ===== */
+.adkar-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.adkar-item {
+  padding: 32px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.adkar-item:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.adkar-item-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.adkar-item-num {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.adkar-item-repeat {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--period-accent, var(--accent-strong));
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--period-tint, var(--accent-tint));
+}
+
+.adkar-item-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--text);
+  margin-bottom: 18px;
+  line-height: 1.35;
+}
+
+.adkar-block {
+  margin-bottom: 18px;
+}
+
+.adkar-block:last-child {
+  margin-bottom: 0;
+}
+
+.adkar-arabic {
+  font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', 'Geeza Pro', serif;
+  font-size: clamp(1.25rem, 2.4vw, 1.55rem);
+  line-height: 2.2;
+  text-align: right;
+  color: var(--text);
+  margin: 0 0 14px;
+  letter-spacing: 0;
+  /* Slightly bigger on the actual Arabic glyphs */
+  font-feature-settings: 'liga', 'calt';
+}
+
+.adkar-translation {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+.adkar-footnote {
+  margin-top: 56px;
+  padding-top: 28px;
+  border-top: 1px solid var(--hairline);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .adkar-page {
+    padding: 36px 18px 56px;
+  }
+
+  .adkar-item {
+    padding: 26px 0;
+  }
+
+  .adkar-arabic {
+    line-height: 2.05;
+  }
+}

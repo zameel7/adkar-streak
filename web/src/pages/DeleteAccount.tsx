@@ -84,10 +84,14 @@ export default function DeleteAccount() {
     <div className="delete-account">
       <div className="delete-container">
         <div className="delete-header">
-          <div className="warning-icon">⚠️</div>
+          <div className="warning-icon" aria-hidden="true">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4M12 17h.01M10.3 3.86l-8.4 14a2 2 0 001.7 3h16.8a2 2 0 001.7-3l-8.4-14a2 2 0 00-3.4 0z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
           <h1>Delete Account</h1>
           <p className="subtitle">
-            This action will permanently delete your account data including streaks and preferences
+            Permanently remove your account and all associated streak data.
           </p>
         </div>
 

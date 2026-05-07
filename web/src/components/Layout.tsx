@@ -5,51 +5,51 @@ interface LayoutProps {
   children: React.ReactNode
 }
 
+const NAV_ITEMS = [
+  { to: '/', label: 'Home' },
+  { to: '/morning', label: 'Morning' },
+  { to: '/evening', label: 'Evening' },
+  { to: '/privacy', label: 'Privacy' },
+]
+
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
-  
+
   return (
     <div className="layout">
       <nav className="nav">
         <div className="nav-container">
           <Link to="/" className="logo">
-            <img src="/icon.png" alt="Adkar Champ" className="logo-image" />
+            <img src="/icon-192.png" alt="" className="logo-image" />
             <span className="logo-text">Adkar Champ</span>
           </Link>
           <div className="nav-links">
-            <Link 
-              to="/" 
-              className={location.pathname === '/' ? 'active' : ''}
-            >
-              Home
-            </Link>
-            <Link 
-              to="/privacy" 
-              className={location.pathname === '/privacy' ? 'active' : ''}
-            >
-              Privacy
-            </Link>
-            <Link 
-              to="/delete-account" 
-              className={location.pathname === '/delete-account' ? 'active' : ''}
-            >
-              Delete Account
-            </Link>
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={location.pathname === item.to ? 'active' : ''}
+              >
+                {item.label}
+              </Link>
+            ))}
           </div>
         </div>
       </nav>
-      <main className="main">
-        {children}
-      </main>
+      <main className="main">{children}</main>
       <footer className="footer">
         <div className="footer-container">
-          <p>© 2025 Adkar Champ. Built with ❤️ for the Ummah</p>
+          <p>© {new Date().getFullYear()} Adkar Champ · Built for the Ummah</p>
           <div className="footer-links">
-            <Link to="/privacy">Privacy Policy</Link>
-            <span>•</span>
+            <Link to="/privacy">Privacy</Link>
+            <span>·</span>
             <Link to="/delete-account">Delete Account</Link>
-            <span>•</span>
-            <a href="https://github.com/zameel7/adkar-streak" target="_blank" rel="noopener noreferrer">
+            <span>·</span>
+            <a
+              href="https://github.com/zameel7/adkar-streak"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               GitHub
             </a>
           </div>
@@ -58,4 +58,3 @@ export default function Layout({ children }: LayoutProps) {
     </div>
   )
 }
-

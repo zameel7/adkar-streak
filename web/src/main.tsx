@@ -12,3 +12,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
+// Register PWA service worker. Only in production builds — in dev the SW
+// would race against Vite's HMR and serve stale chunks.
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.warn('[pwa] SW registration failed:', err)
+    })
+  })
+}

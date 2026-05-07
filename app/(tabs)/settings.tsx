@@ -7,7 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { Alert, Platform, ScrollView, Share, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, Platform, ScrollView, Share, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Settings = () => {
@@ -312,30 +312,60 @@ const Settings = () => {
           </TouchableOpacity>
 
           {/* Time Pickers */}
-          {showMorningPicker && (
+          {/*
+            On Android the picker is a system dialog — render it directly when
+            visible. On iOS the default compact picker renders as a small inline
+            pill, which is what the user was seeing; instead, host a spinner
+            wheel inside a bottom-sheet Modal with a Done button.
+          */}
+          {Platform.OS === 'android' && showMorningPicker && (
             <DateTimePicker
               value={morningTime}
               mode="time"
               is24Hour={true}
-              display={Platform.OS === 'android' ? 'spinner' : 'default'}
+              display="spinner"
               onChange={(event, selectedDate) => {
                 setShowMorningPicker(false);
-                if (selectedDate) setMorningTime(selectedDate);
+                if (event.type === 'set' && selectedDate) setMorningTime(selectedDate);
               }}
             />
           )}
-
-          {showEveningPicker && (
+          {Platform.OS === 'android' && showEveningPicker && (
             <DateTimePicker
               value={eveningTime}
               mode="time"
               is24Hour={true}
-              display={Platform.OS === 'android' ? 'spinner' : 'default'}
+              display="spinner"
               onChange={(event, selectedDate) => {
                 setShowEveningPicker(false);
-                if (selectedDate) setEveningTime(selectedDate);
+                if (event.type === 'set' && selectedDate) setEveningTime(selectedDate);
               }}
             />
+          )}
+
+          {Platform.OS === 'ios' && (
+            <>
+              <IOSPickerModal
+                visible={showMorningPicker}
+                value={morningTime}
+                theme={theme}
+                onCancel={() => setShowMorningPicker(false)}
+                onDone={(d) => {
+                  setMorningTime(d);
+                  setShowMorningPicker(false);
+                }}
+              />
+              <IOSPickerModal
+                visible={showEveningPicker}
+                value={eveningTime}
+                theme={theme}
+                onCancel={() => setShowEveningPicker(false)}
+                onDone={(d) => {
+                  setEveningTime(d);
+                  setShowEveningPicker(false);
+                }}
+              />
+            </>
           )}
         </View>
 
@@ -375,6 +405,92 @@ const Settings = () => {
         </View>
       </ScrollView>
     </LinearGradient>
+  );
+};
+
+type IOSPickerModalProps = {
+  visible: boolean;
+  value: Date;
+  theme: 'light' | 'dark';
+  onDone: (d: Date) => void;
+  onCancel: () => void;
+};
+
+const IOSPickerModal: React.FC<IOSPickerModalProps> = ({
+  visible,
+  value,
+  theme,
+  onDone,
+  onCancel,
+}) => {
+  // Maintain a draft so the wheel can spin without committing until "Done".
+  const [draft, setDraft] = useState<Date>(value);
+  useEffect(() => {
+    if (visible) setDraft(value);
+  }, [visible, value]);
+
+  const isDark = theme === 'dark';
+  const sheetBg = isDark ? '#1f1f23' : '#ffffff';
+  const barBg = isDark ? '#2a2a2e' : '#f2f2f7';
+  const textColor = isDark ? '#ffffff' : '#111';
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onCancel}
+    >
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={onCancel}
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.4)',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <TouchableOpacity activeOpacity={1} onPress={() => {}}>
+          <View style={{ backgroundColor: sheetBg, paddingBottom: 24 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: barBg,
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+              }}
+            >
+              <TouchableOpacity onPress={onCancel}>
+                <ThemedText style={{ color: '#2196F3', fontSize: 16 }}>
+                  Cancel
+                </ThemedText>
+              </TouchableOpacity>
+              <ThemedText style={{ color: textColor, fontSize: 16, fontWeight: '600' }}>
+                Select Time
+              </ThemedText>
+              <TouchableOpacity onPress={() => onDone(draft)}>
+                <ThemedText style={{ color: '#2196F3', fontSize: 16, fontWeight: '700' }}>
+                  Done
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+            <DateTimePicker
+              value={draft}
+              mode="time"
+              is24Hour
+              display="spinner"
+              themeVariant={isDark ? 'dark' : 'light'}
+              onChange={(_event, selectedDate) => {
+                if (selectedDate) setDraft(selectedDate);
+              }}
+              style={{ backgroundColor: sheetBg }}
+            />
+          </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    </Modal>
   );
 };
 

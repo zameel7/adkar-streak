@@ -2,7 +2,11 @@ import { ThemedView } from "@/components/ThemedView";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { localDateString } from "@/lib/date";
-import { registerForPushNotificationsAsync, schedulePushNotification } from "@/lib/notifications";
+import {
+    logScheduledNotifications,
+    registerForPushNotificationsAsync,
+    schedulePushNotification,
+} from "@/lib/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
@@ -167,6 +171,10 @@ const AuthenticatedApp = () => {
 
         (async () => {
             try {
+                // Dump whatever is already queued before we touch anything,
+                // so prod logs show what was scheduled by previous runs.
+                await logScheduledNotifications("app-start (pre-reschedule)");
+
                 const status = await registerForPushNotificationsAsync();
                 if (status !== "granted") return;
 

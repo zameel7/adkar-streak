@@ -4,20 +4,9 @@
     "slug": "adkar-streak",
     "version": "4.0.0",
     "orientation": "portrait",
-    "newArchEnabled": true,
     "icon": "./assets/images/adaptive-icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF",
-      "dark": {
-        "image": "./assets/images/splash-dark.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#242424"
-      }
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.zameel7.adkarstreak"
@@ -41,6 +30,19 @@
         {
           "icon": "./assets/images/adaptive-icon.png",
           "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/adaptive-icon.png",
+          "imageWidth": 320,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFFFFF",
+          "dark": {
+            "image": "./assets/images/adaptive-icon.png",
+            "backgroundColor": "#242424"
+          }
         }
       ],
       "expo-font",

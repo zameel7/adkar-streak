@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://adkar.zameel7.me/sitemap.xml

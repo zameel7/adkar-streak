@@ -7,9 +7,11 @@ import Adkar from './pages/Adkar'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import DeleteAccount from './pages/DeleteAccount'
 import { isPWA } from './lib/pwa'
+import { useRouteMeta } from './lib/seo'
 
 function App() {
   const pwa = isPWA()
+  useRouteMeta()
 
   return (
     <Layout pwa={pwa}>

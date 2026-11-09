@@ -12,6 +12,7 @@ export function ThemedText({
   lightColor,
   darkColor,
   type = 'default',
+  style,
   ...rest
 }: ThemedTextProps) {
   const themeColor = useThemeColor({ light: lightColor, dark: darkColor }, 'text');
@@ -37,11 +38,14 @@ export function ThemedText({
     <GlassText
       variant={getVariant()}
       color={getGlassColor() as 'primary' | 'secondary' | 'white' | 'black' | 'muted' | undefined}
+      {...rest}
+      // Merge (not replace) the caller's style so text without an explicit
+      // color still follows the app theme instead of GlassText's white default.
       style={[
         { color: themeColor },
         type === 'defaultSemiBold' && { fontWeight: '600' },
+        style,
       ]}
-      {...rest}
     />
   );
 }

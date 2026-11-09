@@ -1,9 +1,9 @@
 import ThemeContext from "@/context/ThemeContext";
-import { localDateString } from "@/lib/date";
+import { getTodayProgress, recordCompletionIfDone, setItemRead, type AdkarType } from "@/lib/streak";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSQLiteContext } from "expo-sqlite";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 // Use the gesture-handler ScrollView so vertical scrolling cooperates with
 // the carousel's horizontal pan gesture on Android. RN's stock ScrollView
@@ -31,7 +31,7 @@ const AdkarCard = ({
 }: {
     item: Adkar;
     index: number;
-    type: string;
+    type: AdkarType;
     total: number;
     height: number;
     setIndex: (index: number) => void;
@@ -46,28 +46,17 @@ const AdkarCard = ({
     // translations, matching the Settings screen's default-on toggle.
     const [translation, setTranslation] = useState(true);
 
-    const checkRead = async () => {
+    const checkRead = useCallback(async () => {
         try {
-            const streakData = await AsyncStorage.getItem("streakData");
-            if (streakData) {
-                const data = JSON.parse(streakData);
-                if (data.morning[index] && type === "morning") {
-                    setRead(true);
-                } else if (data.evening[index] && type === "evening") {
-                    setRead(true);
-                } else {
-                    setRead(false);
-                }
-            } else {
-                setRead(false);
-            }
+            const progress = await getTodayProgress();
+            setRead(!!progress[type][index]);
         } catch (error) {
             console.error('Error checking read status', error);
         }
-    };
+    }, [index, type]);
 
     useEffect(() => {
-        const showTranslation = async () => {
+        (async () => {
             try {
                 const translationData = await AsyncStorage.getItem("translations");
                 if (translationData !== null) {
@@ -77,78 +66,25 @@ const AdkarCard = ({
             } catch (error) {
                 console.error('Error checking translation setting', error);
             }
-        };
-
-        showTranslation();
-        checkRead();
+        })();
     }, []);
 
-    // Add effect to re-check read status when index changes
     useEffect(() => {
         checkRead();
-    }, [index, type]);
-
-    const checkAndMarkStreak = async () => {
-        if (!db) {
-            console.error("Database not available");
-            return;
-        }
-        
-        try {
-            const streakData = await AsyncStorage.getItem("streakData");
-            if (streakData) {
-                const data = JSON.parse(streakData);
-
-                let streakUpdated = false;
-                const today = localDateString();
-                const done = Object.values(data[type] ?? {}).filter(Boolean).length;
-                const completeFlag = done >= total ? 1 : 0;
-                const column = type === "morning" ? "morning" : "evening";
-
-                await db.runAsync(
-                    `UPDATE adkarStreaks SET ${column} = ? WHERE date = ?`,
-                    [completeFlag, today]
-                );
-                if (completeFlag === 1) {
-                    streakUpdated = true;
-                }
-
-                if (streakUpdated && onStreakUpdated) {
-                    onStreakUpdated();
-                }
-            }
-        } catch (error) {
-            console.error('Error marking streak in database:', error);
-        }
-    };
+    }, [checkRead]);
 
     const handleMarkRead = async () => {
         try {
-            const streakData = await AsyncStorage.getItem("streakData");
-            if (streakData) {
-                const data = JSON.parse(streakData);
+            const nextRead = !read;
+            const progress = await setItemRead(type, index, nextRead);
+            setRead(nextRead);
 
-                if (type === "evening") {
-                    data.evening = {
-                        ...data.evening,
-                        [index]: !read,
-                    };
-                } else if (type === "morning") {
-                    data.morning = {
-                        ...data.morning,
-                        [index]: !read,
-                    };
-                }
-
-                await AsyncStorage.setItem("streakData", JSON.stringify(data));
-                setRead(!read);
-
-                // Call callback when marked as read
-                if (!read && onAdkarCompleted) {
-                    onAdkarCompleted();
-                }
+            if (nextRead && onAdkarCompleted) {
+                onAdkarCompleted();
             }
-            await checkAndMarkStreak();
+
+            const newlyCompleted = await recordCompletionIfDone(db, type, total, progress);
+            if (newlyCompleted) onStreakUpdated?.();
         } catch (error) {
             console.error('Error in handleMarkRead', error);
         }

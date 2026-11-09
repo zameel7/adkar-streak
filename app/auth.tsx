@@ -4,7 +4,7 @@ import ThemeContext from '@/context/ThemeContext'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { CommonActions, useNavigation } from '@react-navigation/native'
 import { LinearGradient } from 'expo-linear-gradient'
-import { Redirect, router } from 'expo-router'
+import { router } from 'expo-router'
 import React, { useContext, useEffect, useState } from 'react'
 import {
   Alert,
@@ -26,7 +26,7 @@ export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  const { signIn, signUp, loading, session } = useAuth()
+  const { signIn, signUp, resetPassword, loading, session } = useAuth()
   const { theme } = useContext(ThemeContext)
   const navigation = useNavigation()
 
@@ -36,6 +36,8 @@ export default function AuthScreen() {
   // the screen ever renders.
   const isColdStart = !router.canGoBack()
 
+  // Single navigation path out of this screen: once a session exists (sign-in,
+  // or sign-up with confirmation disabled) or on cold start, reset to tabs.
   useEffect(() => {
     if (session || isColdStart) {
       navigation.dispatch(
@@ -45,7 +47,7 @@ export default function AuthScreen() {
   }, [session, isColdStart, navigation])
 
   if (session || isColdStart) {
-    return <Redirect href="/(tabs)/home" />
+    return null
   }
 
   const handleAuthentication = async () => {
@@ -70,7 +72,9 @@ export default function AuthScreen() {
         return
       }
 
-      if (isSignUp) {
+      Keyboard.dismiss()
+
+      if (isSignUp && (result as { needsConfirmation?: boolean })?.needsConfirmation) {
         Alert.alert(
           'Sign Up Successful',
           'Please check your email to verify your account before signing in.'
@@ -78,14 +82,28 @@ export default function AuthScreen() {
         setIsSignUp(false)
         return
       }
-
-      Keyboard.dismiss()
-      navigation.dispatch(
-        CommonActions.reset({ index: 0, routes: [{ name: '(tabs)' as never }] })
-      )
+      // Signed in: the session effect above navigates back to the tabs.
     } catch (e: any) {
       Alert.alert('Authentication Error', e?.message ?? 'Unexpected error. Please try again.')
     }
+  }
+
+  const handleForgotPassword = async () => {
+    const trimmed = email.trim()
+    if (!trimmed) {
+      Alert.alert('Forgot password', 'Enter your email address above, then tap "Forgot password?" again.')
+      return
+    }
+    const result = await resetPassword?.(trimmed)
+    if (result?.error) {
+      Alert.alert('Reset failed', result.error.message ?? String(result.error))
+      return
+    }
+    Keyboard.dismiss()
+    Alert.alert(
+      'Check your email',
+      'If an account exists for ' + trimmed + ', we\'ve sent a link to reset your password.'
+    )
   }
 
   const goBackOrHome = () => {
@@ -117,7 +135,7 @@ export default function AuthScreen() {
             {/* Header */}
             <View style={styles.header}>
               <Image
-                source={theme === 'dark' ? require('@/assets/images/icon.png') : require('@/assets/images/icon-dark.png')}
+                source={theme === 'dark' ? require('@/assets/images/icon-dark.png') : require('@/assets/images/icon.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />
@@ -193,6 +211,17 @@ export default function AuthScreen() {
                   />
                 </TouchableOpacity>
               </View>
+
+              {!isSignUp && (
+                <TouchableOpacity
+                  onPress={handleForgotPassword}
+                  disabled={loading}
+                  style={styles.forgotContainer}
+                  hitSlop={8}
+                >
+                  <ThemedText style={styles.toggleLink}>Forgot password?</ThemedText>
+                </TouchableOpacity>
+              )}
 
               {/* Auth Button */}
               <TouchableOpacity
@@ -333,6 +362,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     alignItems: 'center',
     marginTop: 14,
+  },
+  forgotContainer: {
+    alignSelf: 'flex-end',
+    marginTop: -4,
+    marginBottom: 16,
   },
   toggleText: {
     fontSize: 16,

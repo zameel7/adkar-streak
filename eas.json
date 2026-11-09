@@ -8,21 +8,24 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "node": "24.3.0"
+      "node": "24.3.0",
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
       "node": "24.3.0",
       "android": {
         "buildType": "apk"
-      }
+      },
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true,
       "node": "24.3.0",
       "android": {
         "image": "latest"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {

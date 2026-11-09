@@ -59,6 +59,14 @@
         "projectId": "f3355f43-88d3-4b77-bffd-e16253f92a58"
       }
     },
-    "owner": "zameel7"
+    "owner": "zameel7",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f3355f43-88d3-4b77-bffd-e16253f92a58",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    }
   }
 }

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient } from '@supabase/supabase-js'
+import { AppState, Platform } from 'react-native'
 import 'react-native-url-polyfill/auto'
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? ''
@@ -13,20 +14,34 @@ if (!isSupabaseConfigured) {
   )
 }
 
-const isBrowser = typeof window !== 'undefined'
+// During static web rendering (Node, no window) there is no storage to persist to.
+const canPersist = Platform.OS !== 'web' || typeof window !== 'undefined'
 
 export const supabase = createClient(
   supabaseUrl || 'https://placeholder.supabase.co',
   supabaseAnonKey || 'placeholder-anon-key',
   {
     auth: {
-      storage: isBrowser ? AsyncStorage : undefined,
-      autoRefreshToken: isBrowser,
-      persistSession: isBrowser,
+      storage: canPersist ? AsyncStorage : undefined,
+      autoRefreshToken: canPersist,
+      persistSession: canPersist,
       detectSessionInUrl: false,
     },
   }
 )
+
+// React Native suspends JS timers in the background, so the token refresh
+// timer must be paused/resumed with app state. Without this the access token
+// silently expires and the user appears logged out (Supabase RN guidance).
+if (Platform.OS !== 'web' && isSupabaseConfigured) {
+  AppState.addEventListener('change', (state) => {
+    if (state === 'active') {
+      supabase.auth.startAutoRefresh()
+    } else {
+      supabase.auth.stopAutoRefresh()
+    }
+  })
+}
 
 // Database types for better TypeScript support
 export type Database = {

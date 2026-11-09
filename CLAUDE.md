@@ -30,49 +30,55 @@ Cloud sync needs `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
 RootErrorBoundary
  └ AuthProvider              (Supabase session)
     └ AuthenticatedApp        (notification observer, splash, daily streakData reset, schedule notifications)
-       └ SQLiteProvider "adkar.db"   (onInit: PRAGMAs + CREATE TABLE IF NOT EXISTS, retries transient Android errors)
+       └ SQLiteProvider "adkar.db"   (onInit: PRAGMAs + CREATE TABLE IF NOT EXISTS)
           └ ThemeProvider
-             └ Stack: index, onboarding, auth, (tabs), pwa, morning-adkar, evening-adkar
+             └ AppStack (themed headers + StatusBar): index, onboarding, auth, (tabs), pwa, morning-adkar, evening-adkar
 ```
+
+**Keep `onInit` (`insertMissingDays`) at module scope.** `SQLiteProvider` closes and reopens the database whenever the `onInit` reference changes; an inline function would invalidate the connection screens hold (`NullPointerException` in `prepareAsync`).
 
 ### Routing (`app/`)
 - `index.tsx`: redirect gate. No `onboardingComplete` → `/onboarding`; `isPWA()` → `/pwa`; else `/(tabs)/home`.
-- `(tabs)/`: `home`, `settings`, `profile`, `about`.
+- `(tabs)/`: `home`, `settings`, `profile`, `about`. Tab bar is a floating glass pill (`expo-blur`, Dimezis backend on Android) — screens keep ~100px + inset bottom padding.
 - `morning-adkar.tsx` / `evening-adkar.tsx`: thin wrappers around `components/AdkarScreen.tsx`.
-- `auth.tsx`: email/password sign-in/sign-up. `onboarding.tsx`: first-run flow. `pwa.tsx`: single-page home for installed web app.
+- `auth.tsx`: email/password sign-in/sign-up, forgot password (email links to `web` `/reset-password`; that URL must be in Supabase Auth → Redirect URLs). `onboarding.tsx`: first-run flow. `pwa.tsx`: single-page home for installed web app.
 
 ### Key directories
-- `components/`: `AdkarScreen` (carousel screen), `AdkarCard` (single dhikr + completion logic), `glass/` (Glass* UI kit), `Themed*`.
-- `context/`: `AuthContext` (Supabase auth), `ThemeContext`, `SyncContext` (callback bridge so adkar screens can trigger home's reload/sync).
+- `components/`: `AdkarScreen` (carousel screen), `AdkarCard` (single dhikr + completion logic), `glass/` (`GlassView`/`GlassText`), `Themed*` (`ThemedText` merges caller style over the theme color — don't let `style` replace it).
+- `context/`: `AuthContext` (Supabase auth), `ThemeContext`.
 - `hooks/useAdkarLogic.ts`: loads adkar JSON, carousel nav, repeat counter.
-- `lib/`: `supabase.ts` (client + DB types), `notifications.ts`, `date.ts` (`localDateString()` – always use for date keys), `pwa.ts`.
+- `lib/`: `streak.ts` (today's progress + SQLite completion upsert — single source for streak writes), `sync.ts` (`syncStreaks(db)`: two-way OR-merge with Supabase, bulk upsert), `supabase.ts` (client + DB types + AppState token refresh), `notifications.ts`, `date.ts` (`localDateString()` – always use for date keys), `pwa.ts`, `greeting.ts` (time-of-day greeting + Hijri date for home).
 - `assets/adkars/{morning,evening}.json`: adkar content.
 - `supabase/`: Postgres schema + RLS policies.
-- `web/`: Vite + React 18 landing site (privacy policy, account deletion via Supabase), deployed on Vercel at adkar.zameel7.me. Shares no code with the app.
+- `web/`: Vite + React 18 landing site (privacy policy, account deletion, password reset via Supabase), deployed on Vercel at adkar.zameel7.me. Shares no code with the app.
 
 ### Storage layers
 | Layer | Contents |
 |---|---|
-| AsyncStorage `streakData` | Today's per-dhikr progress: `{ date, morning: {idx: true}, evening: {...} }`. Reset on date change in root layout. |
+| AsyncStorage `streakData` | Today's per-dhikr progress: `{ date, morning: {idx: true}, evening: {...} }`. Stale dates discarded by `getTodayProgress()`. |
 | AsyncStorage (other keys) | `name`, `theme`, `morningTime`, `eveningTime`, `translations`, `onboardingComplete` |
 | SQLite `adkarStreaks` | History: `id`, `morning`, `evening`, `date` (TEXT `YYYY-MM-DD`, UNIQUE) |
 | Supabase `adkar_streaks` | Cloud mirror per user (`user_id`, `date` unique together), RLS-protected |
+| AsyncStorage `syncOwnerUserId` | Account the local history was last synced with. A different account signing in replaces local history with its cloud data instead of uploading it. |
 | Supabase `user_preferences` | Schema exists but not yet synced by the app |
 
 ### Completion / sync flow
-1. `AdkarCard` / `useAdkarLogic` mark `streakData[type][index] = true` in AsyncStorage.
-2. `AdkarCard.checkAndMarkStreak` sets today's `morning`/`evening` in SQLite when all items are done, then calls `onStreakUpdated`.
-3. Via `SyncContext`, `home.tsx` → `handleStreakUpdated` → `loadAllData` (ensures today's row, reads last 100 rows, computes streak/week view).
-4. If signed in, `home.tsx` runs `downloadAndMergeSupabaseData` and `syncLocalDataToSupabase`. Merge rule is OR (completion never un-set).
+1. `AdkarCard` (check toggle) and `useAdkarLogic` (counter) call `setItemRead` → `recordCompletionIfDone` from `lib/streak.ts`. Progress from a previous day is discarded on read.
+2. When a period becomes complete, SQLite is upserted (never downgraded) and `AdkarScreen` calls `syncStreaks(db)`.
+3. `home.tsx` reloads on focus and on app foreground; when signed in it runs `syncStreaks` on login, pull-to-refresh and foreground.
+4. `reconcileToday(db)` (home/pwa load) self-heals: if today's progress is complete but SQLite missed the write, it records it.
+5. `setItemRead` writes are serialized (AsyncStorage read-modify-write is not atomic).
 
 ### Known rough edges
-- `app/(tabs)/home.tsx` (~1100 lines) mixes UI, data loading and Supabase sync logic.
-- Supabase sync does one request per day; could be a bulk upsert on `(user_id, date)`.
+- `app/(tabs)/home.tsx` (~900 lines) mixes UI and data loading.
 - Completion state lives in both AsyncStorage and SQLite.
 
 ## Platform Notes
 - `ios` branch exists for iOS-specific work (LinearGradient requirements); `main` is Android-focused (adaptive icons, notification channels).
 - Builds via EAS (`eas.json`).
+- OTA updates via `expo-updates` (EAS Update). `runtimeVersion` policy `appVersion`, so bump `version` in app.json for native changes. Channels: development / preview / production. Publish: `eas update --channel production --message "..."`.
 
 ## Testing
-- Jest with `jest-expo`; tests in `components/__tests__/` (snapshot tests).
+- Jest with `jest-expo`; `jest.setup.js` mocks AsyncStorage. Tests in `components/__tests__/`.
+- React 19: wrap `react-test-renderer` `create()` in `await act(async () => …)` or `toJSON()` returns null.
+- Expo Go on device: open with `adb shell am start -a android.intent.action.VIEW -d exp://127.0.0.1:8081 -p host.exp.exponent` (the phone may also have the native `com.zameel7.adkarstreak` build installed — don't confuse the two).

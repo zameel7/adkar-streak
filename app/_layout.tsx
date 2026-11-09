@@ -1,6 +1,6 @@
 import { ThemedView } from "@/components/ThemedView";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
+import ThemeContext, { ThemeProvider } from "@/context/ThemeContext";
 import { localDateString } from "@/lib/date";
 import { registerForPushNotificationsAsync, schedulePushNotification } from "@/lib/notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,7 +8,8 @@ import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
-import React, { Component, Suspense, useEffect } from "react";
+import { StatusBar } from "expo-status-bar";
+import React, { Component, Suspense, useContext, useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import "react-native-reanimated";
 
@@ -125,6 +126,109 @@ function useNotificationObserver() {
 }
 
 
+// Database initialization. Must stay at module scope: SQLiteProvider closes and
+// reopens the database whenever the onInit reference changes, which would
+// invalidate the connection held by screens (NullPointerException in prepareAsync).
+async function insertMissingDays(db: SQLiteDatabase) {
+    const DATABASE_VERSION = 1;
+
+    // Run a single execAsync with retries. On Android + New Architecture,
+    // the very first call into the native DB can sporadically reject with
+    // a NullPointerException if the native handle hasn't fully settled.
+    // Retrying with a short backoff is sufficient to recover.
+    const execWithRetry = async (sql: string, label: string) => {
+        const maxAttempts = 5;
+        let lastErr: unknown;
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                await db.execAsync(sql);
+                return;
+            } catch (err) {
+                lastErr = err;
+                const msg = String((err as Error)?.message ?? err);
+                const isTransient =
+                    msg.includes("NullPointerException") ||
+                    msg.includes("has been rejected") ||
+                    msg.includes("database connection");
+                if (!isTransient || attempt === maxAttempts) break;
+                await new Promise((r) => setTimeout(r, 150 * attempt));
+            }
+        }
+        throw lastErr;
+    };
+
+    try {
+        await execWithRetry(
+            `PRAGMA journal_mode = WAL;
+             PRAGMA busy_timeout = 10000;
+             PRAGMA synchronous = NORMAL;
+             PRAGMA temp_store = MEMORY;`,
+            "pragmas"
+        );
+
+        // Always ensure the schema exists. Using IF NOT EXISTS makes this
+        // idempotent, so we don't depend on user_version being correct
+        // (in particular when an earlier init failed and left version 0
+        // alongside a partially-created file).
+        await execWithRetry(
+            `CREATE TABLE IF NOT EXISTS adkarStreaks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                morning BOOLEAN NOT NULL DEFAULT FALSE,
+                evening BOOLEAN NOT NULL DEFAULT FALSE,
+                date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
+            );`,
+            "schema"
+        );
+
+        const userVersion = await db.getFirstAsync<{ user_version: number }>(
+            "PRAGMA user_version"
+        );
+        if ((userVersion?.user_version ?? 0) < DATABASE_VERSION) {
+            await execWithRetry(
+                `PRAGMA user_version = ${DATABASE_VERSION};`,
+                "user_version"
+            );
+        }
+    } catch (error) {
+        console.error("Error initializing database:", error);
+        // Do not re-throw: allow the app to render so it doesn't crash (e.g. on Android production)
+    }
+}
+
+// Root navigator. Lives inside ThemeProvider so headers and the status bar
+// follow the in-app light/dark setting.
+function AppStack() {
+    const { theme } = useContext(ThemeContext);
+    const isDark = theme === "dark";
+    const adkarHeader = {
+        headerShown: true,
+        headerBackTitle: "Home",
+        headerShadowVisible: false,
+        headerStyle: { backgroundColor: isDark ? "#0e0e12" : "#ffffff" },
+        headerTitleStyle: { color: isDark ? "#ffffff" : "#111111", fontWeight: "700" as const },
+    };
+    return (
+        <>
+            <StatusBar style={isDark ? "light" : "dark"} />
+            <Stack screenOptions={{ headerShown: false, animation: "fade" }}>
+                <Stack.Screen name="index" />
+                <Stack.Screen name="onboarding" />
+                <Stack.Screen name="auth" />
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="pwa" />
+                <Stack.Screen
+                    name="morning-adkar"
+                    options={{ ...adkarHeader, title: "Morning Adkar", headerTintColor: "#0EA5E9" }}
+                />
+                <Stack.Screen
+                    name="evening-adkar"
+                    options={{ ...adkarHeader, title: "Evening Adkar", headerTintColor: isDark ? "#A78BFA" : "#5B21B6" }}
+                />
+            </Stack>
+        </>
+    );
+}
+
 // Root component that wraps everything with AuthProvider
 const RootLayout = () => {
     return (
@@ -188,73 +292,6 @@ const AuthenticatedApp = () => {
     }, [initialized, today]);
 
 
-    // Database initialization function
-    async function insertMissingDays(db: SQLiteDatabase) {
-        const DATABASE_VERSION = 1;
-
-        // Run a single execAsync with retries. On Android + New Architecture,
-        // the very first call into the native DB can sporadically reject with
-        // a NullPointerException if the native handle hasn't fully settled.
-        // Retrying with a short backoff is sufficient to recover.
-        const execWithRetry = async (sql: string, label: string) => {
-            const maxAttempts = 5;
-            let lastErr: unknown;
-            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                try {
-                    await db.execAsync(sql);
-                    return;
-                } catch (err) {
-                    lastErr = err;
-                    const msg = String((err as Error)?.message ?? err);
-                    const isTransient =
-                        msg.includes("NullPointerException") ||
-                        msg.includes("has been rejected") ||
-                        msg.includes("database connection");
-                    if (!isTransient || attempt === maxAttempts) break;
-                    await new Promise((r) => setTimeout(r, 150 * attempt));
-                }
-            }
-            throw lastErr;
-        };
-
-        try {
-            await execWithRetry(
-                `PRAGMA journal_mode = WAL;
-                 PRAGMA busy_timeout = 10000;
-                 PRAGMA synchronous = NORMAL;
-                 PRAGMA temp_store = MEMORY;`,
-                "pragmas"
-            );
-
-            // Always ensure the schema exists. Using IF NOT EXISTS makes this
-            // idempotent, so we don't depend on user_version being correct
-            // (in particular when an earlier init failed and left version 0
-            // alongside a partially-created file).
-            await execWithRetry(
-                `CREATE TABLE IF NOT EXISTS adkarStreaks (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    morning BOOLEAN NOT NULL DEFAULT FALSE,
-                    evening BOOLEAN NOT NULL DEFAULT FALSE,
-                    date TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP UNIQUE
-                );`,
-                "schema"
-            );
-
-            const userVersion = await db.getFirstAsync<{ user_version: number }>(
-                "PRAGMA user_version"
-            );
-            if ((userVersion?.user_version ?? 0) < DATABASE_VERSION) {
-                await execWithRetry(
-                    `PRAGMA user_version = ${DATABASE_VERSION};`,
-                    "user_version"
-                );
-            }
-        } catch (error) {
-            console.error("Error initializing database:", error);
-            // Do not re-throw: allow the app to render so it doesn't crash (e.g. on Android production)
-        }
-    }
-
     // Always render the Stack - no conditional rendering of the navigator
     return (
         <Suspense
@@ -269,36 +306,7 @@ const AuthenticatedApp = () => {
                 onInit={insertMissingDays}
             >
                 <ThemeProvider>
-                    <Stack
-                        screenOptions={{
-                            headerShown: false,
-                            animation: 'fade'
-                        }}
-                    >
-                        <Stack.Screen name="index" />
-                        <Stack.Screen name="onboarding" />
-                        <Stack.Screen name="auth" />
-                        <Stack.Screen name="(tabs)" />
-                        <Stack.Screen name="pwa" />
-                        <Stack.Screen
-                            name="morning-adkar"
-                            options={{
-                                headerShown: true,
-                                title: "Morning Adkar",
-                                headerBackTitle: "Home",
-                                headerTintColor: '#2196F3',
-                            }}
-                        />
-                        <Stack.Screen
-                            name="evening-adkar"
-                            options={{
-                                headerShown: true,
-                                title: "Evening Adkar",
-                                headerBackTitle: "Home",
-                                headerTintColor: '#1976D2',
-                            }}
-                        />
-                    </Stack>
+                    <AppStack />
                 </ThemeProvider>
             </SQLiteProvider>
         </Suspense>

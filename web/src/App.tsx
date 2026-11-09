@@ -6,6 +6,7 @@ import PwaHome from './pages/PwaHome'
 import Adkar from './pages/Adkar'
 import PrivacyPolicy from './pages/PrivacyPolicy'
 import DeleteAccount from './pages/DeleteAccount'
+import ResetPassword from './pages/ResetPassword'
 import { isPWA } from './lib/pwa'
 import { useRouteMeta } from './lib/seo'
 
@@ -21,6 +22,7 @@ function App() {
         <Route path="/evening" element={<Adkar type="evening" />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/delete-account" element={<DeleteAccount />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
       {!pwa && <IOSInstallPrompt />}
     </Layout>

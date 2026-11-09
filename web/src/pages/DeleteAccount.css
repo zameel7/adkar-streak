@@ -216,7 +216,19 @@
   border-color: var(--danger-strong);
 }
 
+.btn-primary {
+  background: var(--accent);
+  color: #fff !important;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
 .btn-danger:disabled,
+.btn-primary:disabled,
 .btn-secondary:disabled {
   opacity: 0.55;
   cursor: not-allowed;

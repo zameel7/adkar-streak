@@ -72,7 +72,7 @@ const Illustration: React.FC<{ kind: IllustrationKind }> = ({ kind }) => {
           <View style={[styles.blob, styles.blobBack]} />
           <View style={styles.iconCircle}>
             <Image
-              source={require('@/assets/images/icon-dark.png')}
+              source={require('@/assets/images/icon.png')}
               style={styles.splashIcon}
               resizeMode="contain"
             />

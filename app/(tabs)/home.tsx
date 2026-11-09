@@ -4,15 +4,16 @@ import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import React, { useContext, useEffect, useState } from "react";
-import { ImageBackground, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
+import { AppState, ImageBackground, RefreshControl, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
 import { useAuth } from "@/context/AuthContext";
-import { SyncProvider } from "@/context/SyncContext";
+import { reconcileToday } from "@/lib/streak";
+import { syncStreaks } from "@/lib/sync";
 import ThemeContext from "@/context/ThemeContext";
 import { localDateString } from "@/lib/date";
-import { supabase } from "@/lib/supabase";
+import { hijriDateLabel, timeOfDayGreeting } from "@/lib/greeting";
 import { useSQLiteContext } from "expo-sqlite";
 
 function adkarTime() {
@@ -48,7 +49,8 @@ function fmtHM(hour: number, minute: number) {
 }
 
 const Home = () => {
-    const [name, setName] = useState<string>("Hero");
+    const [name, setName] = useState<string>("");
+    const hijriDate = React.useMemo(() => hijriDateLabel(), []);
     const [morningStreak, setMorningStreak] = useState(false);
     const [eveningStreak, setEveningStreak] = useState(false);
     const [morningStarted, setMorningStarted] = useState(false);
@@ -77,179 +79,6 @@ const Home = () => {
     // Use ref to prevent concurrent database operations
     const isLoadingRef = React.useRef(false);
     const [dbReady, setDbReady] = useState(false);
-
-    // Function to download data from Supabase and merge with local data
-    const downloadAndMergeSupabaseData = async () => {
-        if (!user || !db) return;
-
-        try {
-            console.log("📥 Downloading data from Supabase...");
-            
-            // Get all records from Supabase for this user
-            const { data: supabaseRecords, error } = await supabase
-                .from('adkar_streaks')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('date', { ascending: false });
-
-            if (error) {
-                console.error('Error fetching Supabase data:', error);
-                return;
-            }
-
-            if (!supabaseRecords || supabaseRecords.length === 0) {
-                console.log("No Supabase data to download");
-                return;
-            }
-
-            console.log(`Found ${supabaseRecords.length} records in Supabase`);
-
-            // Get all local records
-            const localRecords = await db.getAllAsync<{
-                id: number;
-                date: string;
-                morning: boolean;
-                evening: boolean;
-            }>(`
-                SELECT id, date, morning, evening 
-                FROM adkarStreaks 
-                ORDER BY date DESC
-            `);
-
-            // Create a map of local records for quick lookup
-            const localMap = new Map<string, { morning: boolean; evening: boolean }>();
-            localRecords.forEach(record => {
-                localMap.set(record.date, { morning: record.morning, evening: record.evening });
-            });
-
-            // Merge Supabase data with local data
-            for (const supabaseRecord of supabaseRecords) {
-                const localData = localMap.get(supabaseRecord.date);
-                
-                if (localData) {
-                    // Record exists locally - merge the data (keep the most complete version)
-                    const mergedMorning = localData.morning || supabaseRecord.morning;
-                    const mergedEvening = localData.evening || supabaseRecord.evening;
-                    
-                    // Only update if there's a difference
-                    if (mergedMorning !== localData.morning || mergedEvening !== localData.evening) {
-                        await db.runAsync(
-                            'UPDATE adkarStreaks SET morning = ?, evening = ? WHERE date = ?',
-                            [mergedMorning ? 1 : 0, mergedEvening ? 1 : 0, supabaseRecord.date]
-                        );
-                        console.log(`✅ Merged data for ${supabaseRecord.date}`);
-                    }
-                } else {
-                    // Record doesn't exist locally - insert it
-                    await db.runAsync(
-                        'INSERT INTO adkarStreaks (date, morning, evening) VALUES (?, ?, ?)',
-                        [supabaseRecord.date, supabaseRecord.morning ? 1 : 0, supabaseRecord.evening ? 1 : 0]
-                    );
-                    console.log(`✅ Downloaded new record for ${supabaseRecord.date}`);
-                }
-            }
-
-            console.log("✅ Supabase data download and merge completed");
-            
-            // Reload the UI with merged data
-            await loadAllData();
-            
-        } catch (error) {
-            console.error("Error downloading Supabase data:", error);
-        }
-    };
-
-    // Function to sync local data to Supabase
-    const syncLocalDataToSupabase = async () => {
-        if (!user || !db) return;
-
-        try {
-            console.log("🔄 Syncing local data to Supabase...");
-            
-            // Get all local records
-            const localRecords = await db.getAllAsync<{
-                id: number;
-                date: string;
-                morning: boolean;
-                evening: boolean;
-            }>(`
-                SELECT id, date, morning, evening 
-                FROM adkarStreaks 
-                WHERE morning = true OR evening = true
-                ORDER BY date DESC
-            `);
-
-            if (!localRecords || localRecords.length === 0) {
-                console.log("No local data to sync");
-                return;
-            }
-
-            // Sync each record to Supabase
-            for (const record of localRecords) {
-                try {
-                    // Check if record already exists in Supabase
-                    const { data: existingRecord, error: fetchError } = await supabase
-                        .from('adkar_streaks')
-                        .select('*')
-                        .eq('user_id', user.id)
-                        .eq('date', record.date)
-                        .single();
-
-                    if (fetchError && fetchError.code !== 'PGRST116') {
-                        console.error(`Error fetching record for ${record.date}:`, fetchError);
-                        continue;
-                    }
-
-                    if (existingRecord) {
-                        // Update existing record if local data is more complete
-                        const needsUpdate = 
-                            (record.morning && !existingRecord.morning) ||
-                            (record.evening && !existingRecord.evening);
-
-                        if (needsUpdate) {
-                            const { error: updateError } = await supabase
-                                .from('adkar_streaks')
-                                .update({
-                                    morning: record.morning || existingRecord.morning,
-                                    evening: record.evening || existingRecord.evening,
-                                })
-                                .eq('user_id', user.id)
-                                .eq('date', record.date);
-
-                            if (updateError) {
-                                console.error(`Error updating record for ${record.date}:`, updateError);
-                            } else {
-                                console.log(`✅ Updated Supabase record for ${record.date}`);
-                            }
-                        }
-                    } else {
-                        // Create new record
-                        const { error: insertError } = await supabase
-                            .from('adkar_streaks')
-                            .insert({
-                                user_id: user.id,
-                                date: record.date,
-                                morning: record.morning,
-                                evening: record.evening,
-                            });
-
-                        if (insertError) {
-                            console.error(`Error creating record for ${record.date}:`, insertError);
-                        } else {
-                            console.log(`✅ Created Supabase record for ${record.date}`);
-                        }
-                    }
-                } catch (recordError) {
-                    console.error(`Error syncing record for ${record.date}:`, recordError);
-                }
-            }
-
-            console.log("✅ Local data sync completed");
-        } catch (error) {
-            console.error("Error syncing local data to Supabase:", error);
-        }
-    };
-
     // Resolve display name: explicit Profile entry → Supabase metadata → email prefix → default
     useEffect(() => {
         let cancelled = false;
@@ -265,8 +94,6 @@ const Home = () => {
                 const fromMeta = meta?.full_name || meta?.name;
                 if (fromMeta) {
                     setName(String(fromMeta).split(" ")[0]);
-                } else if (user?.email) {
-                    setName(user.email.split("@")[0]);
                 }
             } catch (e) {
                 console.warn("Failed to resolve display name:", e);
@@ -345,10 +172,8 @@ const Home = () => {
             // Small delay to ensure everything is ready
             const syncTimer = setTimeout(async () => {
                 try {
-                    // First download and merge data from Supabase
-                    await downloadAndMergeSupabaseData();
-                    // Then sync any local changes back to Supabase
-                    await syncLocalDataToSupabase();
+                    await syncStreaks(db);
+                    await loadAllData();
                 } catch (error) {
                     // Network unavailable or Supabase unreachable — continue offline
                     console.warn("Supabase sync skipped (offline or unreachable):", error);
@@ -380,6 +205,7 @@ const Home = () => {
                 'INSERT OR IGNORE INTO adkarStreaks (date) VALUES (?)',
                 [localDateString()]
             );
+            await reconcileToday(db).catch((e) => console.warn("reconcileToday failed:", e));
 
             // Fetch all data in a single query
             const allRecords = await db.getAllAsync<Row>(
@@ -564,6 +390,27 @@ const Home = () => {
         }, [dbReady])
     );
 
+    // Focus effects don't fire when the app returns from background, so a day
+    // rollover (or sync from another device) wouldn't show until navigation.
+    useEffect(() => {
+        if (!dbReady) return;
+        const sub = AppState.addEventListener('change', async (state) => {
+            if (state !== 'active' || isLoadingRef.current) return;
+            isLoadingRef.current = true;
+            try {
+                if (user) {
+                    await syncStreaks(db).catch((e) =>
+                        console.warn("Foreground sync skipped (offline?):", e)
+                    );
+                }
+                await loadAllData();
+            } finally {
+                isLoadingRef.current = false;
+            }
+        });
+        return () => sub.remove();
+    }, [dbReady, user, db]);
+
     function getDayNightIcon() {
         const hours = new Date().getHours();
         return hours >= 6 && hours < 16
@@ -629,36 +476,19 @@ const Home = () => {
             // If user is logged in, try to sync with Supabase first
             if (user) {
                 try {
-                    await downloadAndMergeSupabaseData();
-                    await syncLocalDataToSupabase();
+                    await syncStreaks(db);
                 } catch (syncError) {
                     // Sync failed (offline) — fall back to local data
                     console.warn("Refresh sync skipped (offline or unreachable):", syncError);
-                    await loadAllData();
                 }
-            } else {
-                // Just reload local data if not logged in
-                await loadAllData();
             }
+            await loadAllData();
         } catch (error) {
             // Fallback error handler
             console.warn("Refresh failed:", error);
         } finally {
             isLoadingRef.current = false;
             setTimeout(() => setRefreshing(false), 1000);
-        }
-    };
-
-    // Function to trigger Supabase sync (called from AdkarCard)
-    const handleStreakUpdated = async () => {
-        if (user) {
-            try {
-                console.log("🔄 Streak updated, syncing to Supabase...");
-                await syncLocalDataToSupabase();
-            } catch (error) {
-                // Sync failed (offline) — streak is saved locally, will sync next time
-                console.warn("Streak sync skipped (offline or unreachable):", error);
-            }
         }
     };
 
@@ -678,7 +508,7 @@ const Home = () => {
         '✨ السلام عليكم ورحمة الله';
 
     return (
-        <SyncProvider onSync={handleStreakUpdated}>
+        <>
             <SafeAreaProvider>
                 <View style={{ flex: 1, backgroundColor: surface }}>
                     <ScrollView
@@ -703,8 +533,13 @@ const Home = () => {
                                 Assalamu alaikum
                             </ThemedText>
                             <ThemedText style={{ fontSize: 32, fontWeight: '700', color: text, letterSpacing: -0.5 }}>
-                                {name}
+                                {name ? `${timeOfDayGreeting()}, ${name}` : timeOfDayGreeting()}
                             </ThemedText>
+                            {!!hijriDate && (
+                                <ThemedText style={{ fontSize: 14, color: muted, marginTop: 6, fontWeight: '500' }}>
+                                    {hijriDate}
+                                </ThemedText>
+                            )}
                         </View>
 
                         {/* Time-of-day hero */}
@@ -905,7 +740,7 @@ const Home = () => {
                     </ScrollView>
                 </View>
             </SafeAreaProvider>
-        </SyncProvider>
+        </>
     );
 };
 

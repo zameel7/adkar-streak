@@ -5,17 +5,19 @@ exports[`renders correctly 1`] = `
   style={
     [
       {
-        "color": "#11181C",
+        "fontSize": 16,
+        "fontWeight": "normal",
       },
       {
-        "fontSize": 16,
-        "lineHeight": 24,
+        "color": "#ffffff",
       },
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      undefined,
+      [
+        {
+          "color": "#11181C",
+        },
+        false,
+        undefined,
+      ],
     ]
   }
 >

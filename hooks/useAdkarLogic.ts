@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { recordCompletionIfDone, setItemRead, type AdkarType } from '@/lib/streak';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions } from 'react-native';
 
@@ -10,8 +11,13 @@ export type Adkar = {
     repeatCount: number;
 };
 
-export const useAdkarLogic = (adkarData: any, type: 'morning' | 'evening') => {
+export const useAdkarLogic = (
+    adkarData: any,
+    type: AdkarType,
+    onStreakUpdated?: () => void
+) => {
     const width = Dimensions.get("window").width;
+    const db = useSQLiteContext();
 
     const [adkars, setAdkars] = useState<Adkar[]>([]);
     const [counter, setCounter] = useState(1);
@@ -102,16 +108,10 @@ export const useAdkarLogic = (adkarData: any, type: 'morning' | 'evening') => {
     const handleCounterPress = async () => {
         if (counter === 1) {
             try {
-                const streakData = await AsyncStorage.getItem("streakData");
-                if (streakData) {
-                    const data = JSON.parse(streakData);
-                    data[type] = {
-                        ...data[type],
-                        [index]: true,
-                    };
-                    await AsyncStorage.setItem("streakData", JSON.stringify(data));
-                    setRefreshTrigger(prev => prev + 1);
-                }
+                const progress = await setItemRead(type, index, true);
+                setRefreshTrigger(prev => prev + 1);
+                const newlyCompleted = await recordCompletionIfDone(db, type, adkars.length, progress);
+                if (newlyCompleted) onStreakUpdated?.();
             } catch (error) {
                 console.error(`Error auto-marking ${type} as read`, error);
             }

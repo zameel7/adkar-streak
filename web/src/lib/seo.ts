@@ -30,6 +30,11 @@ const PAGE_META: Record<string, PageMeta> = {
     description: 'Request deletion of your Adkar Champ account and data.',
     noindex: true,
   },
+  '/reset-password': {
+    title: 'Reset Password — Adkar Champ',
+    description: 'Set a new password for your Adkar Champ account.',
+    noindex: true,
+  },
 }
 
 function setMeta(selector: string, attr: 'content' | 'href', value: string) {

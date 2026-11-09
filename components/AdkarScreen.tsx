@@ -12,7 +12,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import AdkarCard from "@/components/AdkarCard";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { useSync } from "@/context/SyncContext";
+import { syncStreaks } from "@/lib/sync";
+import { useSQLiteContext } from "expo-sqlite";
 import ThemeContext from "@/context/ThemeContext";
 import { Adkar, useAdkarLogic } from "@/hooks/useAdkarLogic";
 
@@ -26,9 +27,12 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
     const { width, height: screenHeight } = useWindowDimensions();
     const { theme: colorScheme } = useContext(ThemeContext);
 
-    // Use sync context if available, otherwise use the prop
-    const sync = useSync();
-    const syncFunction = sync?.triggerSync ?? onStreakUpdated;
+    const db = useSQLiteContext();
+    // After a period is completed, push it to the cloud (no-op when signed out).
+    const syncFunction = React.useCallback(() => {
+        onStreakUpdated?.();
+        syncStreaks(db).catch((e) => console.warn("Streak sync skipped (offline?):", e));
+    }, [db, onStreakUpdated]);
 
     const {
         adkars,
@@ -43,7 +47,7 @@ const AdkarScreen: React.FC<AdkarScreenProps> = ({ adkarData, type, onStreakUpda
         handleCounterPress,
         handleSnapToItem,
         setIndex,
-    } = useAdkarLogic(adkarData, type);
+    } = useAdkarLogic(adkarData, type, syncFunction);
 
     const renderAdkarCard = ({ item }: { item: Adkar }) => {
         const itemIndex = adkars.indexOf(item);

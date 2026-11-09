@@ -7,13 +7,19 @@ const SUPABASE_NOT_CONFIGURED_ERROR = {
   message: 'Cloud sync isn\'t configured for this build. The app will keep working offline.',
 }
 
+// Password-recovery emails link to the web app, which lets the user set a new
+// password (web/src/pages/ResetPassword.tsx). This URL must be listed under
+// Supabase → Auth → URL Configuration → Redirect URLs.
+const RESET_PASSWORD_URL = 'https://adkar.zameel7.me/reset-password'
+
 type AuthProps = {
   user: User | null
   session: Session | null
   initialized?: boolean
   signIn?: (email: string, password: string) => Promise<{ error: any }>
-  signUp?: (email: string, password: string) => Promise<{ error: any }>
+  signUp?: (email: string, password: string) => Promise<{ error: any; needsConfirmation?: boolean }>
   signOut?: () => Promise<void>
+  resetPassword?: (email: string) => Promise<{ error: any }>
   loading?: boolean
 }
 
@@ -133,7 +139,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     if (!isSupabaseConfigured) return { error: SUPABASE_NOT_CONFIGURED_ERROR }
     setLoading(true)
     try {
-      const { error } = await withTimeout(supabase.auth.signUp({ email, password }))
+      const { data, error } = await withTimeout(supabase.auth.signUp({ email, password }))
+      // When email confirmation is disabled in Supabase, signUp returns a session directly.
+      return { error, needsConfirmation: !error && !data.session }
+    } catch (e: any) {
+      return { error: e }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetPassword = async (email: string) => {
+    if (!isSupabaseConfigured) return { error: SUPABASE_NOT_CONFIGURED_ERROR }
+    setLoading(true)
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.resetPasswordForEmail(email, { redirectTo: RESET_PASSWORD_URL })
+      )
       return { error }
     } catch (e: any) {
       return { error: e }
@@ -144,8 +166,17 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
   const signOut = async () => {
     setLoading(true)
-    await supabase.auth.signOut()
-    setLoading(false)
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+    } catch (e) {
+      console.warn('Sign out failed, clearing local session:', e)
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => {})
+      setSession(null)
+      setUser(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const value = {
@@ -155,6 +186,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     signIn,
     signUp,
     signOut,
+    resetPassword,
     loading,
   }
 

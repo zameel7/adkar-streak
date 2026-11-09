@@ -11,6 +11,8 @@ import { ThemedText } from "@/components/ThemedText";
 import { useAuth } from "@/context/AuthContext";
 import ThemeContext from "@/context/ThemeContext";
 import { localDateString } from "@/lib/date";
+import { hijriDateLabel, timeOfDayGreeting } from "@/lib/greeting";
+import { reconcileToday } from "@/lib/streak";
 
 type PeriodState = 'not_started' | 'in_progress' | 'done';
 type Period = 'morning' | 'evening';
@@ -132,7 +134,8 @@ const AdkarTile: React.FC<{
 };
 
 const PwaHome = () => {
-    const [name, setName] = useState<string>("Hero");
+    const [name, setName] = useState<string>("");
+    const hijriDate = React.useMemo(() => hijriDateLabel(), []);
     const [morningDone, setMorningDone] = useState(false);
     const [eveningDone, setEveningDone] = useState(false);
     const [morningStarted, setMorningStarted] = useState(false);
@@ -159,8 +162,6 @@ const PwaHome = () => {
                 const fromMeta = meta?.full_name || meta?.name;
                 if (fromMeta) {
                     setName(String(fromMeta).split(" ")[0]);
-                } else if (user?.email) {
-                    setName(user.email.split("@")[0]);
                 }
             } catch {
                 // keep default
@@ -197,6 +198,7 @@ const PwaHome = () => {
                 'INSERT OR IGNORE INTO adkarStreaks (date) VALUES (?)',
                 [today]
             );
+            await reconcileToday(db).catch(() => {});
             const row = await db.getFirstAsync<{ morning: boolean; evening: boolean }>(
                 'SELECT morning, evening FROM adkarStreaks WHERE date = ?',
                 [today]
@@ -253,8 +255,13 @@ const PwaHome = () => {
                             Assalamu alaikum
                         </ThemedText>
                         <ThemedText style={{ fontSize: 32, fontWeight: '700', color: text, letterSpacing: -0.5 }}>
-                            {name}
+                            {name ? `${timeOfDayGreeting()}, ${name}` : timeOfDayGreeting()}
                         </ThemedText>
+                        {!!hijriDate && (
+                            <ThemedText style={{ fontSize: 14, color: muted, marginTop: 6, fontWeight: '500' }}>
+                                {hijriDate}
+                            </ThemedText>
+                        )}
                     </View>
 
                     <AdkarTile

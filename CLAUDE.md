@@ -82,7 +82,7 @@ RootErrorBoundary
 ## Platform Notes
 - `ios` branch exists for iOS-specific work (LinearGradient requirements); `main` is Android-focused (adaptive icons, notification channels).
 - Builds via EAS (`eas.json`).
-- OTA updates via `expo-updates` (EAS Update). `runtimeVersion` policy `appVersion`, so bump `version` in app.json for native changes. Channels: development / preview / production. Publish: `eas update --channel production --message "..."`.
+- OTA updates via `expo-updates` (EAS Update). `runtimeVersion` policy `appVersion`, so bump `version` in app.json for native changes. Channels: development / preview / production. Publish: `npm run update:prod -- -m "..."` (or `update:preview`); the scripts pass `--environment` so EAS env vars (Supabase keys) are bundled. Only builds ≥ 4.2.0 (59) have expo-updates.
 
 ## Testing
 - Jest with `jest-expo`; `jest.setup.js` mocks AsyncStorage. Tests in `components/__tests__/`.

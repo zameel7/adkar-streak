@@ -5,7 +5,7 @@
     "version": "4.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/adaptive-icon.png",
-    "scheme": "myapp",
+    "scheme": "adkarchamp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
@@ -16,7 +16,29 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.zameel7.adkarstreak"
+      "package": "com.zameel7.adkarstreak",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "adkar.zameel7.me",
+              "pathPrefix": "/morning"
+            },
+            {
+              "scheme": "https",
+              "host": "adkar.zameel7.me",
+              "pathPrefix": "/evening"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",

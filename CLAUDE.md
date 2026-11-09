@@ -41,6 +41,7 @@ RootErrorBoundary
 - `index.tsx`: redirect gate. No `onboardingComplete` → `/onboarding`; `isPWA()` → `/pwa`; else `/(tabs)/home`.
 - `(tabs)/`: `home`, `settings`, `profile`, `about`. Tab bar is a floating glass pill (`expo-blur`, Dimezis backend on Android) — screens keep ~100px + inset bottom padding.
 - `morning-adkar.tsx` / `evening-adkar.tsx`: thin wrappers around `components/AdkarScreen.tsx`.
+- `+native-intent.tsx`: maps incoming links to routes (`/morning` → `/morning-adkar`, `/evening` → `/evening-adkar`; handles `https://adkar.zameel7.me/...`, `adkarchamp://...`, Expo Go `.../--/...`).
 - `auth.tsx`: email/password sign-in/sign-up, forgot password (email links to `web` `/reset-password`; that URL must be in Supabase Auth → Redirect URLs). `onboarding.tsx`: first-run flow. `pwa.tsx`: single-page home for installed web app.
 
 ### Key directories
@@ -72,6 +73,11 @@ RootErrorBoundary
 ### Known rough edges
 - `app/(tabs)/home.tsx` (~900 lines) mixes UI and data loading.
 - Completion state lives in both AsyncStorage and SQLite.
+
+## Deep links
+- Scheme `adkarchamp` (e.g. `adkarchamp://morning`). Expo Go: `exp://127.0.0.1:8081/--/morning`.
+- Android App Links: `intentFilters` (autoVerify) in app.json for `https://adkar.zameel7.me/morning*` and `/evening*`; verified by `web/public/.well-known/assetlinks.json` (Play app-signing + upload key SHA-256). Must be deployed before a build is installed — Android verifies at install.
+- Reminder notifications carry `data.url` (`/morning-adkar`, `/evening-adkar`), handled by `useNotificationObserver` in `app/_layout.tsx`.
 
 ## Platform Notes
 - `ios` branch exists for iOS-specific work (LinearGradient requirements); `main` is Android-focused (adaptive icons, notification channels).

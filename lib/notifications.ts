@@ -37,12 +37,14 @@ export async function schedulePushNotification(): Promise<void> {
         body: string,
         time: string | null,
         defaultHour: number,
-        defaultMinute: number
+        defaultMinute: number,
+        url: string
     ): Promise<void> => {
         const { hour, minute } = parseTime(time, defaultHour, defaultMinute);
 
         await Notifications.scheduleNotificationAsync({
-            content: { title, body },
+            // `url` is handled by useNotificationObserver in app/_layout.tsx.
+            content: { title, body, data: { url } },
             trigger: {
                 type: Notifications.SchedulableTriggerInputTypes.DAILY,
                 hour,
@@ -56,7 +58,8 @@ export async function schedulePushNotification(): Promise<void> {
         "Jābir (raḍiy Allāhu ʿanhū) relates that after Allah’s Messenger ﷺ would perform Fajr, he used to remain seated in his place of prayer until the sun had fully risen (Muslim).",
         morningTime,
         5,
-        30
+        30,
+        "/morning-adkar"
     );
 
     await scheduleNotification(
@@ -64,7 +67,8 @@ export async function schedulePushNotification(): Promise<void> {
         "'Believers, remember Allah often and glorify Him morning and evening' (33:41-42).",
         eveningTime,
         16,
-        30
+        30,
+        "/evening-adkar"
     );
 }
 

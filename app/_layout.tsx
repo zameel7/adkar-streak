@@ -8,6 +8,7 @@ import * as Notifications from "expo-notifications";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SQLiteDatabase, SQLiteProvider } from "expo-sqlite";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { StatusBar } from "expo-status-bar";
 import React, { Component, Suspense, useContext, useEffect } from "react";
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -199,10 +200,25 @@ async function insertMissingDays(db: SQLiteDatabase) {
 // follow the in-app light/dark setting.
 function AppStack() {
     const { theme } = useContext(ThemeContext);
+    const router = useRouter();
     const isDark = theme === "dark";
+    // Opened from a notification or link, the adkar screen may be the only
+    // screen in the stack; fall back to home instead of a dead back button.
+    const backOrHome = (tintColor?: string) => (
+        <TouchableOpacity
+            onPress={() => (router.canGoBack() ? router.back() : router.replace("/(tabs)/home"))}
+            hitSlop={12}
+            style={{ paddingRight: 16 }}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+        >
+            <Ionicons name="arrow-back" size={24} color={tintColor} />
+        </TouchableOpacity>
+    );
     const adkarHeader = {
         headerShown: true,
         headerBackTitle: "Home",
+        headerLeft: ({ tintColor }: { tintColor?: string }) => backOrHome(tintColor),
         headerShadowVisible: false,
         headerStyle: { backgroundColor: isDark ? "#0e0e12" : "#ffffff" },
         headerTitleStyle: { color: isDark ? "#ffffff" : "#111111", fontWeight: "700" as const },

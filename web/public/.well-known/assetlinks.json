@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.zameel7.adkarstreak",
+      "sha256_cert_fingerprints": [
+        "90:4C:23:8A:41:07:EF:F9:EA:7B:86:82:DD:A9:DA:A8:6C:02:0D:16:75:FD:03:E2:9F:38:C3:4A:D9:B4:EF:71"
+      ]
+    }
+  }
+]

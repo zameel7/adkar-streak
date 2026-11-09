@@ -2,7 +2,7 @@
   "expo": {
     "name": "Adkar Champ",
     "slug": "adkar-streak",
-    "version": "4.2.0",
+    "version": "4.3.0",
     "orientation": "portrait",
     "icon": "./assets/images/adaptive-icon.png",
     "scheme": "adkarchamp",
@@ -71,7 +71,16 @@
       "expo-sqlite",
       "expo-web-browser",
       "@react-native-community/datetimepicker",
-      "expo-dev-client"
+      "expo-dev-client",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

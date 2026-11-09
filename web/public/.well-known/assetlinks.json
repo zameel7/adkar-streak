@@ -1,11 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "com.zameel7.adkarstreak",
       "sha256_cert_fingerprints": [
-        "90:4C:23:8A:41:07:EF:F9:EA:7B:86:82:DD:A9:DA:A8:6C:02:0D:16:75:FD:03:E2:9F:38:C3:4A:D9:B4:EF:71"
+        "90:4C:23:8A:41:07:EF:F9:EA:7B:86:82:DD:A9:DA:A8:6C:02:0D:16:75:FD:03:E2:9F:38:C3:4A:D9:B4:EF:71",
+        "F3:CF:5B:11:0A:9A:49:BE:BA:37:80:39:E8:73:51:0E:0B:C2:81:3E:3D:D1:22:0B:73:FC:E1:41:88:43:74:5C"
       ]
     }
   }
